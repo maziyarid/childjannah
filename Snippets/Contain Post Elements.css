@@ -1,0 +1,24 @@
+/* Fix full-width post elements in Jannah Theme */
+.single-post .post-components,
+.single-post .author-box,
+.single-post .share-buttons,
+.single-post .post-share,
+.single-post .post-meta,
+.single-post .related-posts,
+.single-post .comments-area,
+.single-post .entry-footer {
+    max-width: 100%;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+    float: none !important;
+}
+
+/* Ensure these elements stay inside the content container */
+.single-post .container .entry-content + *,
+.single-post .content-wrap > * {
+    max-width: inherit;
+    margin-left: auto;
+    margin-right: auto;
+}
