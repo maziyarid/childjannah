@@ -1,0 +1,153 @@
+Certainly! Here’s the checklist in **Markdown format** that you can copy directly into a Google Sheet or your preferred spreadsheet tool:
+
+```markdown
+# SEO Recovery Checklist for Teznevisan3.com
+
+## Phase 1: Emergency Cleanup (Week 1)
+
+| Task                                      | Status  |
+|-------------------------------------------|---------|
+| Identify and delete spam URLs            | ☐       |
+| Block spam URLs with 410 Gone response   | ☐       |
+| Update `robots.txt` to block spam pages  | ☐       |
+| Resolve 301 redirect chains              | ☐       |
+| Fix broken links (404s)                  | ☐       |
+| Submit clean XML sitemap                 | ☐       |
+| Request Google to re-crawl legitimate pages | ☐     |
+
+## Phase 2: Technical Fixes (Next 2 Weeks)
+
+| Task                                      | Status  |
+|-------------------------------------------|---------|
+| Remove noindex tags from important pages | ☐       |
+| Implement canonical tags (self-referential) | ☐     |
+| Fix 301 redirect chains                  | ☐       |
+| Unblock essential resources in robots.txt | ☐      |
+| Fix 404 errors and redirects             | ☐       |
+
+## Phase 3: Recovery & Growth (Ongoing)
+
+| Task                                      | Status  |
+|-------------------------------------------|---------|
+| Monitor Google Search Console for indexing | ☐      |
+| Start content marketing and blog creation | ☐       |
+| Request indexing for ~100 legitimate pages | ☐      |
+| Submit clean XML sitemap to GSC          | ☐       |
+
+## Phase 4: Build Authority (Weeks 5+)
+
+| Task                                      | Status  |
+|-------------------------------------------|---------|
+| Remove low-quality backlinks             | ☐       |
+| Disavow high spam domains                | ☐       |
+| Outreach for guest blogging              | ☐       |
+
+## Phase 5: Long-Term Growth (Months 3-6)
+
+| Task                                      | Status  |
+|-------------------------------------------|---------|
+| Expand site content                      | ☐       |
+| Publish keyword-optimized blog posts     | ☐       |
+| Build backlinks from high-DA sites       | ☐       |
+
+## Content Optimization (On-Page SEO)
+
+| Task                                      | Status  |
+|-------------------------------------------|---------|
+| Add or fix titles and meta descriptions   | ☐       |
+| Add alt text to all images               | ☐       |
+| Fix truncated content                    | ☐       |
+| Ensure pages are at least 1000 words     | ☐       |
+| Update all service pages for SEO         | ☐       |
+
+## Backlink Cleanup
+
+| Task                                      | Status  |
+|-------------------------------------------|---------|
+| Disavow spammy backlinks (score >50%)     | ☐       |
+| Reach out for high-quality backlinks      | ☐       |
+| Monitor backlink profile                  | ☐       |
+
+## Monitoring & Reporting
+
+| Task                                      | Status  |
+|-------------------------------------------|---------|
+| Track GSC indexing and crawl status      | ☐       |
+| Monitor Google Analytics for traffic     | ☐       |
+| Review ranking progress for target keywords | ☐     |
+
+## Performance
+
+| Task                                      | Status  |
+|-------------------------------------------|---------|
+| Run PageSpeed Insights                    | ☐       |
+| Optimize images (convert to WebP, compress) | ☐     |
+| Minify CSS/JS and remove unused code      | ☐       |
+| Implement caching (WP Rocket or similar)  | ☐       |
+
+## Spam Cleanup (Ongoing)
+
+| Task                                      | Status  |
+|-------------------------------------------|---------|
+| Ensure no spam pages reappear            | ☐       |
+| Continue blocking and redirecting spam URLs | ☐     |
+| Regularly check for new spam activity    | ☐       |
+
+## Weekly SEO Review
+
+| Task                                      | Status  |
+|-------------------------------------------|---------|
+| Review Google Search Console for errors   | ☐       |
+| Update content and blog posts             | ☐       |
+| Optimize underperforming pages           | ☐       |
+```
+
+### How to Use:
+
+1. **Copy the markdown** into any text editor or Google Sheet.
+2. You can **copy-paste** each task as a row into Google Sheets, marking their status using checkboxes (for Google Sheets, use `Insert > Checkbox`).
+3. Track progress by marking each task completed when done.
+
+---
+
+SEO and Technical Recovery Checklist
+
+Spam URL Cleanup: The critical priority is to remove spam URLs. Block these URLs and delete any spam files from your hosting environment.
+
+Robots.txt and .htaccess Updates: Use the changes in .htaccess to block spam patterns and implement 410 Gone responses. Ensure your robots.txt is correctly configured to allow essential resources and block unnecessary ones.
+
+Technical SEO Fixes:
+
+Redirect Chains: Fix 301 redirects that are causing slowdowns or improper routing.
+
+Indexing Issues: Remove noindex tags from pages that should be indexed.
+
+Canonical Tags: Ensure that correct canonical tags are implemented to prevent duplicate content.
+
+Content Fixes:
+
+Add Featured Images: Several posts and pages need to have featured images added. This is an essential SEO element.
+
+Optimize Meta Descriptions: Many pages are missing meta descriptions, which should be added for better SEO performance.
+
+Image Alt Text: Ensure all images have relevant alt text for SEO purposes.
+
+SEO Score: Aim to improve the SEO scores for pages using Yoast or RankMath.
+
+Backlink Cleanup:
+
+Disavow spammy backlinks, particularly from domains with high spam scores.
+
+GSC Monitoring: Keep track of your Google Search Console for crawl errors, indexing statuses, and manual penalties.
+
+Security Measures: Ensure your .htaccess is configured correctly to block malicious bots and prevent potential security threats.
+
+New Tasks Discovered
+
+From analyzing the WordPress export and the current issues with your site, I suggest you begin by addressing the following, specifically related to content and images:
+
+Add Featured Images: 53 posts and pages are missing featured images.
+
+SEO Score Improvements: 110 posts have SEO scores below the optimal range; consider enhancing those with better titles, descriptions, and content length.
+
+Excerpts: Ensure all posts have excerpts; currently, 28 posts lack them.
