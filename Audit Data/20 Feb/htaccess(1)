@@ -1,0 +1,651 @@
+# ============================================================================
+# TEZNEVISAN3.COM - COMPLETE .HTACCESS CONFIGURATION
+# Updated: February 13, 2026 - MANUAL SITEMAP REWRITE ADDED
+# ============================================================================
+
+# ============================================================================
+# SECTION 1: FORCE HTTPS (MUST BE FIRST)
+# ============================================================================
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+</IfModule>
+
+# ============================================================================
+# SECTION 2: MANUAL SITEMAP REWRITE (FIX FOR PERMALINK ISSUE)
+# ============================================================================
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+# Sitemap index - MUST BE BEFORE OTHER RULES
+RewriteRule ^sitemap\.xml$ /index.php?sitemap=1 [L]
+RewriteRule ^sitemap_index\.xml$ /index.php?sitemap=1 [L]
+
+# Individual sitemaps
+RewriteRule ^post-sitemap\.xml$ /index.php?sitemap=post [L]
+RewriteRule ^page-sitemap\.xml$ /index.php?sitemap=page [L]
+RewriteRule ^category-sitemap\.xml$ /index.php?sitemap=category [L]
+RewriteRule ^post_tag-sitemap\.xml$ /index.php?sitemap=post_tag [L]
+RewriteRule ^author-sitemap\.xml$ /index.php?sitemap=author [L]
+
+# Sitemap with pagination
+RewriteRule ^([a-z]+)-sitemap([0-9]+)?\.xml$ /index.php?sitemap=$1&sitemap_n=$2 [L]
+
+# Sitemap XSL stylesheet
+RewriteRule ^main-sitemap\.xsl$ /index.php?xsl=main [L]
+RewriteRule ^sitemap\.xsl$ /index.php?xsl=sitemap [L]
+
+</IfModule>
+
+# ============================================================================
+# SECTION 3: BLOCK SPAM INJECTION ATTACKS (410 GONE)
+# ============================================================================
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Block any URL with ?e= parameter (Japanese spam) - EXCLUDE SITEMAPS
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} (^|&)e= [NC]
+RewriteRule .* - [R=410,L]
+
+# Block spam PHP files
+RewriteCond %{REQUEST_URI} (shop|jp|article|goods|pin)\.php [NC]
+RewriteRule .* - [R=410,L]
+
+# Block Japanese/Chinese product spam patterns
+RewriteCond %{REQUEST_URI} (dynabook|yonex|panasonic) [NC]
+RewriteRule .* - [R=410,L]
+
+# Block encoded Japanese/Chinese characters in URLs
+RewriteCond %{REQUEST_URI} %E3%80%80 [NC,OR]
+RewriteCond %{REQUEST_URI} %E4%B8% [NC,OR]
+RewriteCond %{REQUEST_URI} %E5%8F% [NC,OR]
+RewriteCond %{REQUEST_URI} %E6%97%A [NC,OR]
+RewriteCond %{REQUEST_URI} %E7%89%A [NC,OR]
+RewriteCond %{REQUEST_URI} %E8%A [NC,OR]
+RewriteCond %{REQUEST_URI} %E9%A [NC]
+RewriteRule .* - [R=410,L]
+
+# Block spam keywords in query string
+RewriteCond %{QUERY_STRING} (shop\.php|article\.php|goods\.php|pin\.php) [NC]
+RewriteRule .* - [R=410,L]
+
+</IfModule>
+
+# ============================================================================
+# SECTION 3B: ADDITIONAL SPAM PARAMETER BLOCKING
+# Added: February 14, 2026 - Based on GSC "Crawled - Not Indexed" Analysis
+# Purpose: Convert 403 errors to 410 (Gone) for faster Google deindexing
+# ============================================================================
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Block ?channel= parameter (affiliate spam)
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} (^|&)channel= [NC]
+RewriteRule .* - [R=410,L]
+
+# Block ?from= parameter (referral spam like from=blog.php, from=jp.php)
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} (^|&)from= [NC]
+RewriteRule .* - [R=410,L]
+
+# Block ?route= parameter (e-commerce spam)
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} (^|&)route= [NC]
+RewriteRule .* - [R=410,L]
+
+# Block ?h= parameter (hash tracking spam)
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} (^|&)h= [NC]
+RewriteRule .* - [R=410,L]
+
+# Block ?_gcl_au= parameter (Google Ads conversion spam)
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} (^|&)_gcl_au= [NC]
+RewriteRule .* - [R=410,L]
+
+# Block paginated spam (e.g., /page/5/?_gl=...)
+# Any /page/N/ URL with query parameters gets 410
+RewriteCond %{REQUEST_URI} ^/page/[0-9]+/$ [NC]
+RewriteCond %{QUERY_STRING} !^$ [NC]
+RewriteRule .* - [R=410,L]
+
+# Block exposed theme files (e.g., /public/themes/TeznevisanThemeX/)
+RewriteCond %{REQUEST_URI} ^/public/themes/ [NC]
+RewriteRule .* - [R=410,L]
+
+# Block any remaining spam parameters from old domains
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} (oklmdl|af676169) [NC]
+RewriteRule .* - [R=410,L]
+
+# Block Google Analytics 4 measurement ID parameters (pattern: _ga_XXXXXXXXX)
+# Examples: _ga_7H42SVMQ0V, _ga_ABC123XYZ, etc.
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} _ga_[A-Z0-9]+ [NC]
+RewriteRule .* - [R=410,L]
+
+# Block complex chained parameters (multiple * separators)
+# Pattern: ?_gl=1*something*_gcl_au*...
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} \*[a-z_]+ [NC]
+RewriteRule .* - [R=410,L]
+
+
+</IfModule>
+
+# ============================================================================
+# SECTION 3C: ADDITIONAL WORDPRESS SECURITY HARDENING
+# Added: February 14, 2026 - Secure critical WordPress endpoints
+# ============================================================================
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Block direct access to wp-config.php from anywhere
+<files wp-config.php>
+    Order allow,deny
+    Deny from all
+</files>
+
+# Block access to WordPress version files (prevent version disclosure)
+<FilesMatch "^(readme\.html|license\.txt|wp-config-sample\.php|liesmich\.html)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Block access to debug.log if it exists
+<Files debug.log>
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Limit xmlrpc.php access (blocks brute force attacks)
+<Files xmlrpc.php>
+    Order Deny,Allow
+    Deny from all
+    # If you need xmlrpc (e.g., for Jetpack), add your IP:
+    # Allow from YOUR.IP.ADDRESS.HERE
+</Files>
+
+# Block access to .htaccess and .htpasswd
+<FilesMatch "^\.ht">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Disable directory browsing
+Options -Indexes
+
+# Block PHP execution in specific directories
+<Directory "*/wp-content/uploads/">
+    <FilesMatch "\.php$">
+        Order Deny,Allow
+        Deny from all
+    </FilesMatch>
+</Directory>
+
+<Directory "*/wp-content/cache/">
+    <FilesMatch "\.php$">
+        Order Deny,Allow
+        Deny from all
+    </FilesMatch>
+</Directory>
+
+</IfModule>
+
+# ============================================================================
+# SECTION 3E: BLOCK OLD STATIC HTML FILES & RANDOM QUERY PARAMETERS
+# Added: February 14, 2026 - Remove static files + duplicate content params
+# ============================================================================
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# ──────────────────────────────────────────────────────────────────────────
+# PART 1: BLOCK ALL .HTML FILES (Old static versions are obsolete)
+# ──────────────────────────────────────────────────────────────────────────
+
+# Block any URL ending in .html (except legitimate WordPress generated pages)
+# This catches: /article-writing.html, /thesis-writing.html, etc.
+RewriteCond %{REQUEST_URI} \.html$ [NC]
+RewriteCond %{REQUEST_URI} !^/wp-content/ [NC]
+RewriteCond %{REQUEST_URI} !^/wp-includes/ [NC]
+RewriteRule .* - [R=410,L]
+
+# Also block .htm files (alternative extension)
+RewriteCond %{REQUEST_URI} \.htm$ [NC]
+RewriteCond %{REQUEST_URI} !^/wp-content/ [NC]
+RewriteCond %{REQUEST_URI} !^/wp-includes/ [NC]
+RewriteRule .* - [R=410,L]
+
+
+# ──────────────────────────────────────────────────────────────────────────
+# PART 2: BLOCK RANDOM QUERY PARAMETERS (Duplicate Content Prevention)
+# ──────────────────────────────────────────────────────────────────────────
+
+# Block single uppercase letter parameters: ?A, ?B, ?C ... ?Z
+# Pattern: ?NA, ?ND, ?MA, ?CA, etc.
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{REQUEST_URI} !^/wp-admin [NC]
+RewriteCond %{QUERY_STRING} ^[A-Z]{1,2}$ [NC]
+RewriteRule .* - [R=410,L]
+
+# Block parameters that are ONLY letters (no value)
+# Examples: ?NA, ?ND, ?ABC, ?TEST
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{REQUEST_URI} !^/wp-admin [NC]
+RewriteCond %{QUERY_STRING} ^[A-Z]+$ [NC]
+RewriteRule .* - [R=410,L]
+
+# Block specific discovered patterns
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} ^(NA|ND|MA|CA|NB|NC)$ [NC]
+RewriteRule .* - [R=410,L]
+
+# Alternative: Redirect clean (strip random params and redirect to clean URL)
+# This is BETTER than 410 for homepage - preserves user experience
+# Uncomment these lines if you prefer redirect instead of 410:
+
+# RewriteCond %{QUERY_STRING} ^[A-Z]{1,2}$ [NC]
+# RewriteCond %{REQUEST_URI} ^/$ [NC]
+# RewriteRule ^(.*)$ https://teznevisan3.com/$1? [R=301,L]
+
+
+# ──────────────────────────────────────────────────────────────────────────
+# PART 3: WHITELIST LEGITIMATE WORDPRESS PARAMETERS (Don't Block These)
+# ──────────────────────────────────────────────────────────────────────────
+
+# Allow WordPress preview parameters
+RewriteCond %{QUERY_STRING} (^|&)(p|page_id|preview)= [NC]
+RewriteRule .* - [L]
+
+# Allow WordPress admin parameters
+RewriteCond %{REQUEST_URI} ^/wp-admin [NC]
+RewriteRule .* - [L]
+
+</IfModule>
+
+# ============================================================================
+# SECTION 3D: BLOCK FAKE SHOP & PRODUCT SPAM
+# Added: February 14, 2026 - Block fake e-commerce URLs discovered in GSC
+# ============================================================================
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Block entire /shop/ directory and all variants (you have NO e-commerce)
+RewriteCond %{REQUEST_URI} ^/shop [NC]
+RewriteRule .* - [R=410,L]
+
+# Block /product/ directory (fake product pages)
+RewriteCond %{REQUEST_URI} ^/product/ [NC]
+RewriteRule .* - [R=410,L]
+
+# Block /cart/ and /checkout/ if they appear
+RewriteCond %{REQUEST_URI} ^/(cart|checkout) [NC]
+RewriteRule .* - [R=410,L]
+
+# Block language variant shop spam (en_US/shop, fr_FR/shop, etc.)
+RewriteCond %{REQUEST_URI} ^/[a-z]{2}_[A-Z]{2}/shop [NC]
+RewriteRule .* - [R=410,L]
+
+# Block all /public/themes/ HTML, MD, TXT files (exposed theme files)
+RewriteCond %{REQUEST_URI} ^/public/themes/ [NC]
+RewriteCond %{REQUEST_URI} \.(html|htm|md|txt|php|css|js)$ [NC]
+RewriteRule .* - [R=410,L]
+
+# Block shop sorting/filtering parameters (order_by, direction)
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} order_by=(name|price|product_id|date|rating) [NC]
+RewriteRule .* - [R=410,L]
+
+# Block ?mod= parameter (spam pattern from your GSC data)
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} (^|&)mod= [NC]
+RewriteRule .* - [R=410,L]
+
+# Block ?uri= parameter (contains spam PHP files like itm.php, shared.php)
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} (^|&)uri= [NC]
+RewriteRule .* - [R=410,L]
+
+# Block spam PHP file references in query strings
+RewriteCond %{QUERY_STRING} (itm\.php|shared\.php|goods\.php|item\.php|pin\.php) [NC]
+RewriteRule .* - [R=410,L]
+
+# Block ?MA parameter (found in theme file spam)
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} (^|&)MA [NC]
+RewriteRule .* - [R=410,L]
+
+RewriteCond %{REQUEST_URI} ^/blog/[0-9]+$ [NC]
+RewriteRule .* - [R=410,L]
+
+</IfModule>
+
+
+# ============================================================================
+# RATE LIMITING FOR ADMIN-AJAX (Prevent brute force)
+# ============================================================================
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Block suspicious admin-ajax requests (but allow legitimate ones)
+RewriteCond %{REQUEST_URI} ^/wp-admin/admin-ajax\.php [NC]
+RewriteCond %{HTTP_REFERER} !^https?://.*teznevisan3\.com [NC]
+RewriteCond %{HTTP_USER_AGENT} ^$ [OR]
+RewriteCond %{HTTP_USER_AGENT} (bot|spider|crawler) [NC]
+RewriteRule .* - [F,L]
+
+</IfModule>
+
+# ============================================================================
+# SECTION 3F: BLOCK UNNECESSARY WORDPRESS FEEDS
+# Added: February 14, 2026 - Block spam/duplicate content feeds
+# ============================================================================
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Block /feed/products (you don't have WooCommerce - this is spam/leftover)
+RewriteCond %{REQUEST_URI} ^/feed/products/?$ [NC]
+RewriteRule .* - [R=410,L]
+
+# Block /feed/comments (no SEO value, duplicate content)
+RewriteCond %{REQUEST_URI} ^/feed/comments/?$ [NC]
+RewriteRule .* - [R=410,L]
+
+# Block /comments/feed/ (alternative comment feed URL)
+RewriteCond %{REQUEST_URI} ^/comments/feed/?$ [NC]
+RewriteRule .* - [R=410,L]
+
+# Block individual post/page comment feeds (pattern: /some-post/feed/)
+# But ALLOW main /feed/ (keep for blog subscribers)
+RewriteCond %{REQUEST_URI} ^/.+/feed/?$ [NC]
+RewriteCond %{REQUEST_URI} !^/feed/?$ [NC]
+RewriteRule .* - [R=410,L]
+
+# Block feed format variations for comments
+RewriteCond %{REQUEST_URI} feed/(comments-)?rss2?/?$ [NC]
+RewriteCond %{REQUEST_URI} comments [NC]
+RewriteRule .* - [R=410,L]
+
+# Block category/tag feeds if you don't use them (optional - uncomment if needed)
+# RewriteCond %{REQUEST_URI} ^/category/.*/feed/?$ [NC]
+# RewriteRule .* - [R=410,L]
+# RewriteCond %{REQUEST_URI} ^/tag/.*/feed/?$ [NC]
+# RewriteRule .* - [R=410,L]
+
+</IfModule>
+
+
+# ============================================================================
+# SECTION 4: SECURITY HARDENING
+# ============================================================================
+
+# Disable directory browsing
+Options -Indexes
+
+# Protect sensitive files (ALLOW XML SITEMAPS)
+<FilesMatch "^(\.htaccess|\.htpasswd|wp-config\.php|readme\.html|license\.txt|\.git|\.env|\.user\.ini)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Explicitly allow XML files (sitemaps)
+<FilesMatch "\.xml$">
+    Order allow,deny
+    Allow from all
+    Require all granted
+</FilesMatch>
+
+# Block access to wp-config.php
+<files wp-config.php>
+    Order allow,deny
+    Deny from all
+</files>
+
+# Protect wp-includes folder
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule ^wp-admin/includes/ - [F,L]
+RewriteRule !^wp-includes/ - [S=3]
+RewriteRule ^wp-includes/[^/]+\.php$ - [F,L]
+RewriteRule ^wp-includes/js/tinymce/langs/.+\.php - [F,L]
+RewriteRule ^wp-includes/theme-compat/ - [F,L]
+</IfModule>
+
+# Block PHP execution in uploads directory
+<Directory "/home/*/public_html/wp-content/uploads/">
+    <FilesMatch "\.php$">
+        Order Deny,Allow
+        Deny from all
+    </FilesMatch>
+</Directory>
+
+# Block suspicious query strings (EXCLUDE SITEMAPS)
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{QUERY_STRING} (<|%3C).*script.*(>|%3E) [NC,OR]
+RewriteCond %{QUERY_STRING} GLOBALS(=|[|%[0-9A-Z]{0,2}) [OR]
+RewriteCond %{QUERY_STRING} _REQUEST(=|[|%[0-9A-Z]{0,2}) [OR]
+RewriteCond %{QUERY_STRING} (eval\(|base64_decode|gzinflate|exec\() [NC,OR]
+RewriteCond %{QUERY_STRING} (\.\./|\.\.) [OR]
+RewriteCond %{QUERY_STRING} (\.php|\.html|\.htm|\.txt)= [NC]
+RewriteRule .* - [F,L]
+</IfModule>
+
+# Block bad bots (EXCLUDE SITEMAPS)
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{HTTP_USER_AGENT} ^$ [OR]
+RewriteCond %{HTTP_USER_AGENT} (casper|cmsworldmap|diavol|dotbot|extract|feedfinder|flicky|grab|harvest|httrack|kmccrew|libwww|miner|nikto|nutch|planet|purebot|pycurl|python|scan|skygrid|sucker|turnit|vikspider|winhttp|wget|zmeu) [NC]
+RewriteRule .* - [F,L]
+</IfModule>
+
+# ============================================================================
+# SECTION 5: SECURITY HEADERS
+# ============================================================================
+<IfModule mod_headers.c>
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+Header unset Server
+Header unset X-Powered-By
+
+# Proper content type for XML sitemaps
+<FilesMatch "\.xml$">
+    Header set Content-Type "application/xml; charset=utf-8"
+</FilesMatch>
+</IfModule>
+
+# ============================================================================
+# SECTION 6: LITESPEED CACHE (DO NOT EDIT THIS BLOCK)
+# ============================================================================
+# BEGIN LSCACHE
+## LITESPEED WP CACHE PLUGIN - Do not edit the contents of this block! ##
+<IfModule LiteSpeed>
+RewriteEngine on
+CacheLookup on
+RewriteRule .* - [E=Cache-Control:no-autoflush]
+RewriteRule litespeed/debug/.*\.log$ - [F,L]
+RewriteRule \.litespeed_conf\.dat - [F,L]
+
+### marker ASYNC start ###
+RewriteCond %{REQUEST_URI} /wp-admin/admin-ajax\.php
+RewriteCond %{QUERY_STRING} action=async_litespeed
+RewriteRule .* - [E=noabort:1]
+### marker ASYNC end ###
+
+### marker DROPQS start ###
+CacheKeyModify -qs:fbclid
+CacheKeyModify -qs:gclid
+CacheKeyModify -qs:utm*
+CacheKeyModify -qs:_ga
+CacheKeyModify -qs:_gl
+CacheKeyModify -qs:_bdsid
+CacheKeyModify -qs:_bd_prev_page
+CacheKeyModify -qs:_gac
+CacheKeyModify -qs:_gid
+### marker DROPQS end ###
+
+</IfModule>
+## LITESPEED WP CACHE PLUGIN - Do not edit the contents of this block! ##
+# END LSCACHE
+
+# ============================================================================
+# SECTION 7: BROWSER CACHING & COMPRESSION
+# ============================================================================
+# BEGIN NON_LSCACHE
+## LITESPEED WP CACHE PLUGIN - Do not edit the contents of this block! ##
+### marker BROWSER CACHE start ###
+<IfModule mod_expires.c>
+ExpiresActive on
+ExpiresByType application/pdf A31557600
+ExpiresByType image/x-icon A31557600
+ExpiresByType image/vnd.microsoft.icon A31557600
+ExpiresByType image/svg+xml A31557600
+
+ExpiresByType image/jpg A31557600
+ExpiresByType image/jpeg A31557600
+ExpiresByType image/png A31557600
+ExpiresByType image/gif A31557600
+ExpiresByType image/webp A31557600
+ExpiresByType image/avif A31557600
+
+ExpiresByType video/ogg A31557600
+ExpiresByType audio/ogg A31557600
+ExpiresByType video/mp4 A31557600
+ExpiresByType video/webm A31557600
+
+ExpiresByType text/css A31557600
+ExpiresByType text/javascript A31557600
+ExpiresByType application/javascript A31557600
+ExpiresByType application/x-javascript A31557600
+
+ExpiresByType application/x-font-ttf A31557600
+ExpiresByType application/x-font-woff A31557600
+ExpiresByType application/font-woff A31557600
+ExpiresByType application/font-woff2 A31557600
+ExpiresByType application/vnd.ms-fontobject A31557600
+ExpiresByType font/ttf A31557600
+ExpiresByType font/otf A31557600
+ExpiresByType font/woff A31557600
+ExpiresByType font/woff2 A31557600
+
+</IfModule>
+### marker BROWSER CACHE end ###
+
+## LITESPEED WP CACHE PLUGIN - Do not edit the contents of this block! ##
+# END NON_LSCACHE
+
+# Enable GZIP compression
+<IfModule mod_deflate.c>
+AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript application/json application/xml application/rss+xml
+</IfModule>
+
+# ============================================================================
+# SECTION 8: SEO & TRACKING PARAMETER CLEANUP
+# ============================================================================
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Strip tracking parameters (EXCLUDE SITEMAPS AND ADMIN)
+RewriteCond %{REQUEST_URI} !sitemap [NC]
+RewriteCond %{REQUEST_URI} !^/wp-admin [NC]
+RewriteCond %{REQUEST_URI} !^/wp-content [NC]
+RewriteCond %{REQUEST_URI} !^/wp-includes [NC]
+RewriteCond %{REQUEST_URI} !^/wp-login\.php [NC]
+RewriteCond %{REQUEST_URI} !\.(jpg|jpeg|png|gif|webp|css|js|ico|svg|woff|woff2|ttf|xml)$ [NC]
+RewriteCond %{QUERY_STRING} (^|&)(_gl|_ga|_gac|_gid|fbclid|gclid|_bdsid|_bd_prev_page|msclkid|_hsenc|_hsmi|__hstc|mc_cid|mc_eid|utm_source|utm_medium|utm_campaign|utm_content|utm_term)=([^&]*) [NC]
+RewriteRule ^(.*)$ /$1? [R=301,L]
+
+</IfModule>
+
+# ============================================================================
+# SECTION 9: FIX REDIRECT CHAINS (SEO OPTIMIZATION)
+# ============================================================================
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+# Redirect date-based archives to homepage
+RewriteRule ^(202[0-9]|201[0-9]|203[0-9])/([0-9]{2})/?$ https://teznevisan3.com/ [R=301,L]
+
+# Fix specific problematic redirects
+RewriteRule ^2023/05/?$ https://teznevisan3.com/ [R=301,L]
+RewriteRule ^2024/12/?$ https://teznevisan3.com/ [R=301,L]
+
+</IfModule>
+
+# ============================================================================
+# SECTION 10: WORDPRESS CORE RULES (REQUIRED)
+# ============================================================================
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Sitemap rules already handled in SECTION 2 above
+# Skip to standard WordPress routing
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+
+</IfModule>
+
+# ============================================================================
+# SECTION 11: PHP HANDLER (cPanel Generated)
+# ============================================================================
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the "ea-php81" package as the default "PHP" programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php81 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
+
+# ============================================================================
+# END OF CONFIGURATION
+# Last Updated: February 13, 2026 - MANUAL SITEMAP REWRITE APPLIED
+# ============================================================================
+
+
+# Wordfence WAF
+<IfModule LiteSpeed>
+php_value auto_prepend_file '/home/teznevi1/public_html/wordfence-waf.php'
+</IfModule>
+<IfModule lsapi_module>
+php_value auto_prepend_file '/home/teznevi1/public_html/wordfence-waf.php'
+</IfModule>
+<Files ".user.ini">
+<IfModule mod_authz_core.c>
+	Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+	Order deny,allow
+	Deny from all
+</IfModule>
+</Files>
+
+# END Wordfence WAF
+
+# BEGIN WordPress
+# دستورالعمل‌های (خطوط) بین "BEGIN WordPress" و "END WordPress"
+# به طور پویا تولید شده‌اند، و فقط باید به وسیلهٔ صافی‌های وردرپرس ویرایش شوند.
+# هر تغییری در دستورالعمل‌های بین این نشان‌گرها بازنویشی خواهند شد.
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+
+# END WordPress

@@ -1,0 +1,8 @@
+Link type,Is nofollow,Source URL,Source HTTP status code,Target URL,Target HTTP status code,Target no-crawl reason,Is source canonical,Is source noindex,Is target canonical,Is target noindex,Is link self-referencing
+Canonical,false,https://teznevisan3.com/2023/05/,301,https://teznevisan3.com/2023/05/,301,,true,false,true,false,true
+Canonical,false,https://teznevisan3.com/2024/12/,301,https://teznevisan3.com/2024/12/,301,,true,false,true,false,true
+Canonical,false,https://teznevisan3.com/2025/02/,301,https://teznevisan3.com/2025/02/,301,,true,false,true,false,true
+Canonical,false,https://teznevisan3.com/2024/09/,301,https://teznevisan3.com/2024/09/,301,,true,false,true,false,true
+Canonical,false,https://teznevisan3.com/2023/08/,301,https://teznevisan3.com/2023/08/,301,,true,false,true,false,true
+Canonical,false,https://teznevisan3.com/2025/03/,301,https://teznevisan3.com/2025/03/,301,,true,false,true,false,true
+Canonical,false,https://teznevisan3.com/2024/10/,301,https://teznevisan3.com/2024/10/,301,,true,false,true,false,true

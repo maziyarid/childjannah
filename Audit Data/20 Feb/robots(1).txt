@@ -1,0 +1,303 @@
+# ============================================================================
+# ROBOTS.TXT FOR TEZNEVISAN3.COM
+# Last Updated: February 15, 2026
+# Purpose: Guide crawlers, support AI visibility, block spam
+# Note: Server-level blocking handled by .htaccess (returns 410)
+# ============================================================================
+
+# ============================================================================
+# SECTION 1: AI CRAWLERS - ALLOW FOR AEO/AIO/GEO VISIBILITY
+# ============================================================================
+# OpenAI GPT Crawler
+User-agent: GPTBot
+Allow: /
+
+# Anthropic Claude Crawler
+User-agent: ClaudeBot
+Allow: /
+
+# Google AI/Bard Extended
+User-agent: Google-Extended
+Allow: /
+
+# Common Crawl (used by many AI companies)
+User-agent: CCBot
+Allow: /
+
+# Cohere AI
+User-agent: cohere-ai
+Allow: /
+
+# Perplexity AI
+User-agent: PerplexityBot
+Allow: /
+
+# Meta AI
+User-agent: FacebookBot
+Allow: /
+
+# Apple Intelligence
+User-agent: Applebot
+User-agent: Applebot-Extended
+Allow: /
+
+# Amazon AI
+User-agent: Amazonbot
+Allow: /
+
+# You.com AI Search
+User-agent: YouBot
+Allow: /
+
+# Brave AI Search
+User-agent: Brave-Indexer
+Allow: /
+
+# ============================================================================
+# SECTION 2: MAJOR SEARCH ENGINE BOTS - ALLOW WITH OPTIMIZATIONS
+# ============================================================================
+User-agent: Googlebot
+Allow: /
+Allow: /wp-content/themes/
+Allow: /wp-content/plugins/
+Allow: /wp-content/uploads/
+Crawl-delay: 1
+
+User-agent: Googlebot-Image
+Allow: /
+Allow: /wp-content/uploads/
+
+User-agent: Googlebot-News
+Allow: /
+
+User-agent: Googlebot-Video
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 1
+
+# ============================================================================
+# SECTION 3: AGGRESSIVE SEO CRAWLERS - SLOW DOWN
+# ============================================================================
+User-agent: AhrefsBot
+Crawl-delay: 10
+Allow: /
+
+User-agent: SemrushBot
+Crawl-delay: 10
+Allow: /
+
+User-agent: MajesticSEO
+Crawl-delay: 10
+Allow: /
+
+User-agent: Screaming Frog SEO Spider
+Crawl-delay: 5
+Allow: /
+
+# ============================================================================
+# SECTION 4: BAD BOTS - BLOCK COMPLETELY
+# ============================================================================
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: YandexBot
+Disallow: /
+
+User-agent: seznambot
+Disallow: /
+
+User-agent: BlexBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: SemrushBot-SA
+Disallow: /
+
+User-agent: MegaIndex.ru
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+# ============================================================================
+# SECTION 5: GENERAL RULES FOR ALL OTHER BOTS
+# ============================================================================
+User-agent: *
+
+# Allow homepage and content by default
+Allow: /
+
+# Allow CSS/JS/Media files (critical for rendering)
+Allow: /wp-content/themes/
+Allow: /wp-content/plugins/
+Allow: /wp-content/uploads/
+Allow: *.css
+Allow: *.js
+Allow: *.jpg
+Allow: *.jpeg
+Allow: *.png
+Allow: *.gif
+Allow: *.webp
+Allow: *.svg
+Allow: *.woff
+Allow: *.woff2
+Allow: *.ttf
+Allow: *.eot
+
+# Block WordPress admin and system files
+Disallow: /wp-admin/
+Allow: /wp-admin/admin-ajax.php
+Disallow: /wp-includes/
+Disallow: /wp-login.php
+Disallow: /wp-register.php
+Disallow: /xmlrpc.php
+Disallow: /readme.html
+Disallow: /license.txt
+Disallow: /wp-config.php
+
+# Block WordPress query parameters (duplicate content)
+Disallow: /*?replytocom=
+Disallow: /*?s=
+Disallow: /*?p=
+Disallow: /*?attachment_id=
+Disallow: /search/
+Disallow: /trackback/
+
+# Block tracking parameters (analytics/ads)
+Disallow: /*?_gl=
+Disallow: /*?_ga=
+Disallow: /*?_gac=
+Disallow: /*?_gid=
+Disallow: /*?_gcl_au=
+Disallow: /*?gclid=
+Disallow: /*?fbclid=
+Disallow: /*?msclkid=
+Disallow: /*?_bdsid=
+Disallow: /*?_bd_prev_page=
+Disallow: /*?utm_source=
+Disallow: /*?utm_medium=
+Disallow: /*?utm_campaign=
+Disallow: /*?utm_content=
+Disallow: /*?utm_term=
+
+# Block spam parameters discovered in GSC
+Disallow: /*?e=
+Disallow: /*?channel=
+Disallow: /*?from=
+Disallow: /*?route=
+Disallow: /*?h=
+Disallow: /*?mod=
+Disallow: /*?uri=
+Disallow: /*?MA
+Disallow: /*?NA
+Disallow: /*?ND
+Disallow: /*?CA
+Disallow: /*?NB
+Disallow: /*?NC
+Disallow: /*?oklmdl
+Disallow: /*?af676169
+
+# Block fake shop/e-commerce URLs (you have no WooCommerce)
+Disallow: /shop
+Disallow: /shop/
+Disallow: /product/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /my-account/
+Disallow: /en_US/shop
+Disallow: /fr_FR/shop
+Disallow: /de_DE/shop
+
+# Block shop sorting parameters
+Disallow: /*?order_by=
+Disallow: /*?direction=
+
+# Block spam PHP files
+Disallow: /shop.php
+Disallow: /jp.php
+Disallow: /article.php
+Disallow: /goods.php
+Disallow: /pin.php
+Disallow: /*itm.php
+Disallow: /*shared.php
+Disallow: /*item.php
+
+# Block exposed theme files
+Disallow: /public/themes/
+
+# Block old static HTML files
+Disallow: /article-writing.html
+Disallow: /thesis-writing.html
+Disallow: /dissertation-writing.html
+
+# Block date-based archives
+Disallow: /2019/
+Disallow: /2020/
+Disallow: /2021/
+Disallow: /2022/
+Disallow: /2023/
+Disallow: /2024/
+Disallow: /2025/
+Disallow: /2026/
+
+# Block paginated URLs with parameters
+Disallow: /page/*?
+
+# Block unnecessary WordPress paths
+Disallow: /wp-json/
+Disallow: /cgi-bin/
+Disallow: /author/
+Disallow: /attachment/
+Disallow: /web/
+Disallow: /tag/
+Disallow: /category/*/page/
+
+# Block spam feeds (allow main feed for subscribers)
+Disallow: /feed/comments
+Disallow: /comments/feed/
+Disallow: /feed/products
+
+# Allow main RSS feed (good for subscribers and SEO)
+Allow: /feed/
+Allow: /sitemap_index.xml
+Allow: /sitemap.xml
+Allow: /llms.txt
+
+
+# Set crawl delay for all bots (prevent server overload)
+Crawl-delay: 1
+
+# ============================================================================
+# SECTION 6: SITEMAPS (CRITICAL FOR INDEXING)
+# ============================================================================
+Sitemap: https://teznevisan3.com/sitemap_index.xml
+Sitemap: https://teznevisan3.com/sitemap.xml
+Sitemap: https://teznevisan3.com/llms.txt
+
+# ============================================================================
+# END OF ROBOTS.TXT
+# Note: Server returns 410 (Gone) for spam URLs via .htaccess
+# This file guides crawlers; actual blocking happens at server level
+# AI crawlers explicitly allowed for AEO/AIO/GEO visibility
+# ============================================================================
