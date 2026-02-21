@@ -65,3 +65,5 @@ This repository contains the technical and SEO recovery tasks for **teznevisan3.
 ### Phase 4: **Backlink Management**
 - Disavow harmful or low-quality backlinks
 - Ensure that internal links are correctly structured
+
+Results will be applied to https://teznevisan3.com/ soon
