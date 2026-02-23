@@ -1,9 +1,10 @@
 <?php
 /**
  * Star Rating System (IP-based)
+ * Font Awesome is loaded globally by core-setup.php - no need to load here.
  *
  * @package JannahChild
- * @version 2.4.0
+ * @version 3.1.0
  */
 
 /**
@@ -46,17 +47,13 @@ function tez_rating_check_db() {
 
 // =============================================
 // 2. ENQUEUE ASSETS
+// Font Awesome already loaded by core-setup.php
 // =============================================
 add_action('wp_enqueue_scripts', 'tez_rating_enqueue_assets');
 add_action('admin_enqueue_scripts', 'tez_rating_admin_assets');
 
 function tez_rating_enqueue_assets() {
     if (!is_singular('post')) return;
-    
-    // Load FontAwesome if not present
-    if (!wp_style_is('font-awesome', 'enqueued') && !wp_style_is('fontawesome', 'enqueued')) {
-        wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css', array(), '6.5.1');
-    }
     
     wp_enqueue_script('jquery');
     
@@ -69,10 +66,7 @@ function tez_rating_enqueue_assets() {
 
 function tez_rating_admin_assets($hook) {
     if ('post.php' !== $hook && 'post-new.php' !== $hook) return;
-    
-    if (!wp_style_is('font-awesome', 'enqueued')) {
-        wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css', array(), '6.5.1');
-    }
+    // Font Awesome already loaded by core-setup.php
 }
 
 // =============================================
