@@ -1,194 +1,206 @@
 <?php
 /**
- * Header Template - Jannah Child Theme: Teznevisan
- * Overrides parent theme header.php to provide single, clean header output.
- * Fixes double top menu bug by replacing hook-based header injection.
- *
+ * Header Template Override
+ * Fixes double-menu issue by providing complete HTML structure
+ * 
  * @package JannahChild
  * @version 3.1.0
+ * @since Phase 1.1
  */
-
-if ( ! defined('ABSPATH') ) exit;
-
-// Constants with safe fallbacks
-$_logo          = defined('TEZ_LOGO')          ? home_url(TEZ_LOGO)         : home_url('/wp-content/uploads/logo/teznevisan.svg');
-$_logo_alt      = get_bloginfo('name');
-$_home          = home_url('/');
-$_phone         = defined('TEZ_PHONE')         ? TEZ_PHONE                  : '09331663849';
-$_phone_display = defined('TEZ_PHONE_DISPLAY') ? TEZ_PHONE_DISPLAY          : '۰۹۳۳۱۶۶۳۸۴۹';
-$_inquiry       = home_url('/inquiry');
-?><!DOCTYPE html>
+if (!defined('ABSPATH')) exit;
+?>
+<!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
-<meta charset="<?php bloginfo('charset'); ?>">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<?php wp_head(); ?>
+    <meta charset="<?php bloginfo('charset'); ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+    <meta name="format-detection" content="telephone=no">
+    <?php wp_head(); ?>
 </head>
+
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
-<a href="#tez-main-content" class="tez-skip-link">رفتن به محتوای اصلی</a>
+<!-- Skip Link for Accessibility -->
+<a href="#tez-main-content" class="tez-skip-link">پرش به محتوا</a>
 
-<div class="tez-theme-buttons" id="tez-theme-buttons" role="toolbar" aria-label="انتخاب حالت نمایش">
-    <button type="button" class="tez-mode-btn active" data-theme="light" title="حالت روشن" aria-pressed="true"><i class="fa-solid fa-sun" aria-hidden="true"></i></button>
-    <button type="button" class="tez-mode-btn" data-theme="dark" title="حالت تاریک" aria-pressed="false"><i class="fa-solid fa-moon" aria-hidden="true"></i></button>
-    <button type="button" class="tez-mode-btn" data-theme="sepia" title="حالت کتاب" aria-pressed="false"><i class="fa-solid fa-book-open" aria-hidden="true"></i></button>
-</div>
-
-<div class="tez-a11y-toolbar" id="tez-a11y-toolbar" role="toolbar" aria-label="ابزارهای دسترسی‌پذیری">
-    <button type="button" class="tez-a11y-btn" data-action="increase-font" aria-label="افزایش اندازه متن"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
-    <button type="button" class="tez-a11y-btn" data-action="decrease-font" aria-label="کاهش اندازه متن"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
-    <button type="button" class="tez-a11y-btn" data-action="high-contrast" aria-label="کنتراست بالا"><i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i></button>
-    <button type="button" class="tez-a11y-btn" data-action="reset" aria-label="بازنشانی"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button>
-</div>
-
-<header id="tez-masthead" class="tez-site-header" role="banner">
-    <div class="tez-container">
+<!-- Header -->
+<header class="tez-site-header" id="tez-site-header" role="banner">
+    <div class="tez-header-container">
         <div class="tez-header-inner">
-
-            <div class="tez-site-branding">
-                <a href="<?php echo esc_url($_home); ?>" class="tez-logo-link" rel="home" aria-label="<?php echo esc_attr($_logo_alt); ?>">
-                    <img src="<?php echo esc_url($_logo); ?>"
-                         alt="<?php echo esc_attr($_logo_alt); ?>"
-                         class="tez-logo"
-                         width="220" height="60"
-                         loading="eager">
+            
+            <!-- Logo -->
+            <div class="tez-header-logo">
+                <a href="<?php echo esc_url(home_url('/')); ?>" class="tez-logo-link" rel="home" aria-label="<?php bloginfo('name'); ?>">
+                    <?php if (defined('TEZ_LOGO')): ?>
+                        <img src="<?php echo esc_url(home_url(TEZ_LOGO)); ?>" alt="<?php bloginfo('name'); ?>" class="tez-logo">
+                    <?php else: ?>
+                        <span class="tez-site-name"><?php bloginfo('name'); ?></span>
+                    <?php endif; ?>
                 </a>
             </div>
-
-            <nav class="tez-main-nav" id="tez-main-nav" role="navigation" aria-label="منوی اصلی">
+            
+            <!-- Desktop Navigation -->
+            <nav class="tez-header-nav" id="tez-header-nav" role="navigation" aria-label="منوی اصلی">
                 <?php
-                $walker_args = array(
-                    'container'   => false,
-                    'menu_class'  => 'tez-nav-menu',
-                    'fallback_cb' => false,
+                // Try tez_primary menu first, fallback to primary
+                $menu_args = array(
+                    'theme_location'  => has_nav_menu('tez_primary') ? 'tez_primary' : 'primary',
+                    'container'       => false,
+                    'menu_class'      => 'tez-nav-menu',
+                    'fallback_cb'     => false,
+                    'depth'           => 2,
+                    'walker'          => class_exists('Tez_Desktop_Nav_Walker') ? new Tez_Desktop_Nav_Walker() : null,
                 );
-                if ( class_exists('Tez_Desktop_Nav_Walker') ) {
-                    $walker_args['walker'] = new Tez_Desktop_Nav_Walker();
-                }
-                if ( has_nav_menu('tez_primary') ) {
-                    wp_nav_menu( array_merge( $walker_args, array('theme_location' => 'tez_primary') ) );
-                } elseif ( has_nav_menu('primary') ) {
-                    wp_nav_menu( array_merge( $walker_args, array('theme_location' => 'primary') ) );
+                
+                if (has_nav_menu('tez_primary') || has_nav_menu('primary')) {
+                    wp_nav_menu($menu_args);
                 } else {
-                    echo '<ul class="tez-nav-menu"><li class="tez-menu-item"><a href="' . esc_url($_home) . '" class="tez-nav-link"><span>خانه</span></a></li></ul>';
+                    // Fallback menu if no menu assigned
+                    echo '<ul class="tez-nav-menu">';
+                    echo '<li class="tez-menu-item"><a href="' . esc_url(home_url('/')) . '" class="tez-nav-link">خانه</a></li>';
+                    echo '<li class="tez-menu-item"><a href="' . esc_url(home_url('/services/')) . '" class="tez-nav-link">خدمات</a></li>';
+                    echo '<li class="tez-menu-item"><a href="' . esc_url(home_url('/about/')) . '" class="tez-nav-link">درباره ما</a></li>';
+                    echo '<li class="tez-menu-item"><a href="' . esc_url(home_url('/contact/')) . '" class="tez-nav-link">تماس</a></li>';
+                    echo '</ul>';
                 }
                 ?>
             </nav>
-
+            
+            <!-- Header Actions -->
             <div class="tez-header-actions">
-                <a href="tel:<?php echo esc_attr($_phone); ?>"
-                   class="tez-action-btn tez-phone-btn"
-                   aria-label="تماس با ما: <?php echo esc_attr($_phone_display); ?>">
-                    <i class="fa-solid fa-phone" aria-hidden="true"></i>
-                </a>
-                <button type="button"
-                        class="tez-action-btn tez-search-btn"
-                        id="tez-search-toggle"
-                        aria-label="باز کردن جستجو"
-                        aria-expanded="false"
-                        aria-controls="tez-search-overlay">
-                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                
+                <!-- Search Button -->
+                <button type="button" class="tez-header-btn tez-search-btn" aria-label="جستجو" aria-expanded="false" aria-controls="tez-search-overlay">
+                    <i class="fa-solid fa-search" aria-hidden="true"></i>
                 </button>
-                <a href="<?php echo esc_url($_inquiry); ?>" class="tez-btn tez-btn-primary tez-cta-btn">
-                    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> ثبت سفارش
-                </a>
+                
+                <!-- Theme Mode Switcher -->
+                <div class="tez-theme-switcher" role="group" aria-label="تغییر حالت ظاهری">
+                    <button type="button" class="tez-theme-btn" data-theme="light" aria-label="حالت روشن" title="حالت روشن">
+                        <i class="fa-solid fa-sun" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="tez-theme-btn" data-theme="dark" aria-label="حالت تاریک" title="حالت تاریک">
+                        <i class="fa-solid fa-moon" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="tez-theme-btn" data-theme="sepia" aria-label="حالت سپیا" title="حالت سپیا">
+                        <i class="fa-solid fa-book" aria-hidden="true"></i>
+                    </button>
+                </div>
+                
+                <!-- Accessibility Toolbar -->
+                <div class="tez-a11y-toolbar" role="group" aria-label="ابزارهای دسترسی">
+                    <button type="button" class="tez-a11y-btn" data-action="font-size-increase" aria-label="افزایش اندازه فونت" title="افزایش اندازه فونت">
+                        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="tez-a11y-btn" data-action="font-size-decrease" aria-label="کاهش اندازه فونت" title="کاهش اندازه فونت">
+                        <i class="fa-solid fa-minus" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="tez-a11y-btn" data-action="contrast-toggle" aria-label="تغییر کنتراست" title="تغییر کنتراست">
+                        <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>
+                    </button>
+                </div>
+                
+                <!-- Mobile Menu Toggle -->
+                <button type="button" class="tez-mobile-toggle" aria-label="منوی موبایل" aria-expanded="false" aria-controls="tez-mobile-menu">
+                    <span class="tez-hamburger">
+                        <span class="tez-hamburger-line"></span>
+                        <span class="tez-hamburger-line"></span>
+                        <span class="tez-hamburger-line"></span>
+                    </span>
+                    <span class="tez-mobile-toggle-text">منو</span>
+                </button>
+                
             </div>
-
-            <button type="button"
-                    class="tez-mobile-toggle"
-                    id="tez-mobile-toggle"
-                    aria-label="باز کردن منو"
-                    aria-expanded="false"
-                    aria-controls="tez-mobile-menu">
-                <span class="tez-hamburger" aria-hidden="true">
-                    <span class="tez-hamburger-line"></span>
-                    <span class="tez-hamburger-line"></span>
-                    <span class="tez-hamburger-line"></span>
-                </span>
-            </button>
-
         </div>
     </div>
 </header>
 
-<div class="tez-mobile-overlay" id="tez-mobile-overlay" aria-hidden="true"></div>
-
-<nav class="tez-mobile-menu"
-     id="tez-mobile-menu"
-     role="dialog"
-     aria-modal="true"
-     aria-label="منوی موبایل"
-     aria-hidden="true">
-    <div class="tez-mobile-header">
-        <a href="<?php echo esc_url($_home); ?>" class="tez-mobile-logo-link">
-            <img src="<?php echo esc_url($_logo); ?>"
-                 alt="<?php echo esc_attr($_logo_alt); ?>"
-                 class="tez-logo" width="160" height="44" loading="lazy">
-        </a>
-        <button type="button" class="tez-mobile-close" id="tez-mobile-close" aria-label="بستن منو">
-            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-        </button>
-    </div>
-    <div class="tez-mobile-body">
-        <ul class="tez-mobile-nav" role="list">
+<!-- Mobile Menu Overlay -->
+<div class="tez-mobile-menu-overlay" id="tez-mobile-menu" role="dialog" aria-label="منوی موبایل" aria-hidden="true">
+    <div class="tez-mobile-menu-inner">
+        <div class="tez-mobile-menu-header">
+            <a href="<?php echo esc_url(home_url('/')); ?>" class="tez-mobile-logo-link" rel="home">
+                <?php if (defined('TEZ_LOGO')): ?>
+                    <img src="<?php echo esc_url(home_url(TEZ_LOGO)); ?>" alt="<?php bloginfo('name'); ?>" class="tez-logo">
+                <?php else: ?>
+                    <span class="tez-site-name"><?php bloginfo('name'); ?></span>
+                <?php endif; ?>
+            </a>
+            <button type="button" class="tez-mobile-close" aria-label="بستن منو">
+                <i class="fa-solid fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        
+        <nav class="tez-mobile-menu-content" role="navigation" aria-label="منوی موبایل">
             <?php
-            $m_args = array(
-                'container'   => false,
-                'items_wrap'  => '%3$s',
-                'fallback_cb' => false,
-            );
-            if ( class_exists('Tez_Mobile_Nav_Walker') ) {
-                $m_args['walker'] = new Tez_Mobile_Nav_Walker();
+            // Try tez_mobile first, fallback to tez_primary, then primary
+            $mobile_menu_location = 'primary';
+            if (has_nav_menu('tez_mobile')) {
+                $mobile_menu_location = 'tez_mobile';
+            } elseif (has_nav_menu('tez_primary')) {
+                $mobile_menu_location = 'tez_primary';
             }
-            if ( has_nav_menu('tez_mobile') ) {
-                wp_nav_menu( array_merge( $m_args, array('theme_location' => 'tez_mobile') ) );
-            } elseif ( has_nav_menu('tez_primary') ) {
-                wp_nav_menu( array_merge( $m_args, array('theme_location' => 'tez_primary') ) );
-            } elseif ( has_nav_menu('primary') ) {
-                wp_nav_menu( array_merge( $m_args, array('theme_location' => 'primary') ) );
+            
+            $mobile_menu_args = array(
+                'theme_location'  => $mobile_menu_location,
+                'container'       => false,
+                'menu_class'      => 'tez-mobile-menu-list',
+                'fallback_cb'     => false,
+                'depth'           => 2,
+                'walker'          => class_exists('Tez_Mobile_Nav_Walker') ? new Tez_Mobile_Nav_Walker() : null,
+            );
+            
+            if (has_nav_menu('tez_mobile') || has_nav_menu('tez_primary') || has_nav_menu('primary')) {
+                wp_nav_menu($mobile_menu_args);
             } else {
-                echo '<li class="tez-mobile-menu-item"><a href="' . esc_url($_home) . '" class="tez-mobile-link">خانه</a></li>';
+                // Fallback menu
+                echo '<ul class="tez-mobile-menu-list">';
+                echo '<li class="tez-mobile-menu-item"><a href="' . esc_url(home_url('/')) . '" class="tez-mobile-link">خانه</a></li>';
+                echo '<li class="tez-mobile-menu-item"><a href="' . esc_url(home_url('/services/')) . '" class="tez-mobile-link">خدمات</a></li>';
+                echo '<li class="tez-mobile-menu-item"><a href="' . esc_url(home_url('/about/')) . '" class="tez-mobile-link">درباره ما</a></li>';
+                echo '<li class="tez-mobile-menu-item"><a href="' . esc_url(home_url('/contact/')) . '" class="tez-mobile-link">تماس</a></li>';
+                echo '</ul>';
             }
             ?>
-        </ul>
-    </div>
-    <div class="tez-mobile-footer">
-        <a href="tel:<?php echo esc_attr($_phone); ?>" class="tez-mobile-phone">
-            <i class="fa-solid fa-phone" aria-hidden="true"></i>
-            <span><?php echo esc_html($_phone_display); ?></span>
-        </a>
-        <a href="<?php echo esc_url($_inquiry); ?>" class="tez-btn tez-btn-primary tez-btn-block">
-            <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> ثبت سفارش
-        </a>
-    </div>
-</nav>
-
-<div class="tez-search-overlay"
-     id="tez-search-overlay"
-     role="dialog"
-     aria-modal="true"
-     aria-label="جستجو"
-     aria-hidden="true">
-    <div class="tez-search-container">
-        <button type="button" class="tez-search-close" id="tez-search-close" aria-label="بستن جستجو">
-            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-        </button>
-        <form class="tez-search-form" role="search" method="get" action="<?php echo esc_url($_home); ?>">
-            <div class="tez-search-input-wrap">
-                <label for="tez-search-q" class="screen-reader-text">جستجو در سایت</label>
-                <input type="search"
-                       id="tez-search-q"
-                       class="tez-search-input"
-                       name="s"
-                       placeholder="جستجو در سایت..."
-                       autocomplete="off">
-                <button type="submit" class="tez-search-submit" aria-label="جستجو">
-                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                </button>
-            </div>
-        </form>
+        </nav>
+        
+        <?php if (defined('TEZ_PHONE') && defined('TEZ_PHONE_DISPLAY')): ?>
+        <div class="tez-mobile-menu-contact">
+            <a href="tel:<?php echo esc_attr(TEZ_PHONE); ?>" class="tez-mobile-contact-link">
+                <i class="fa-solid fa-phone" aria-hidden="true"></i>
+                <span><?php echo esc_html(TEZ_PHONE_DISPLAY); ?></span>
+            </a>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 
-<main id="tez-main-content" class="tez-main-content" tabindex="-1">
+<!-- Search Overlay -->
+<div class="tez-search-overlay" id="tez-search-overlay" role="dialog" aria-label="جستجو" aria-hidden="true">
+    <div class="tez-search-overlay-inner">
+        <button type="button" class="tez-search-close" aria-label="بستن جستجو">
+            <i class="fa-solid fa-times" aria-hidden="true"></i>
+        </button>
+        
+        <div class="tez-search-form-wrapper">
+            <form role="search" method="get" class="tez-search-form" action="<?php echo esc_url(home_url('/')); ?>">
+                <label for="tez-search-input" class="screen-reader-text">جستجو</label>
+                <input type="search" 
+                       id="tez-search-input" 
+                       class="tez-search-input" 
+                       placeholder="چه چیزی می‌خواهید پیدا کنید؟" 
+                       value="<?php echo get_search_query(); ?>" 
+                       name="s" 
+                       autocomplete="off"
+                       required>
+                <button type="submit" class="tez-search-submit" aria-label="جستجو">
+                    <i class="fa-solid fa-search" aria-hidden="true"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Area (opened, will be closed in footer.php) -->
+<main id="tez-main-content" class="tez-main-content" role="main">
