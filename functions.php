@@ -13,6 +13,7 @@
  * 4. Page templates & hub pages
  * 5. Post enhancements (ToC, polls, rating, takeaways, FAQ, meta)
  * 6. Feed, typography, icons, misc
+ * 7. Page content injection (universal templates)
  */
 
 if ( ! defined('ABSPATH') ) exit;
@@ -78,6 +79,9 @@ require_once TEZ_CHILD_DIR . '/inc/icon-mapping.php';
 
 // 17. Misc: comment tweaks, title overrides, page hero
 require_once TEZ_CHILD_DIR . '/inc/misc-tweaks.php';
+
+// 18. Page content injection (universal templates for Classic Editor)
+require_once TEZ_CHILD_DIR . '/inc/page-content-injection.php';
 
 // =============================================
 // ENQUEUE STYLES & SCRIPTS
