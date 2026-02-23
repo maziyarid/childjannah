@@ -1,7 +1,22 @@
 /**
  * Teznevisan Complete JavaScript
- * Version: 2.4.0
+ * Version: 3.1.0
  * Jannah Child Theme - Full interactive layer
+ *
+ * Modules:
+ * - Theme management (light / dark / sepia)
+ * - Accessibility toolbar (font size, high contrast, reset)
+ * - Mobile menu (open/close, submenu, focus trap, keyboard)
+ * - Fullscreen search overlay
+ * - Header scroll (hide on scroll down, reveal on scroll up)
+ * - Chaty floating contact widget
+ * - Scroll to top button
+ * - Desktop dropdown menus (keyboard + hover)
+ * - Smooth scroll (anchor links with header offset)
+ * - FAQ accordion
+ * - Scroll animations (IntersectionObserver)
+ * - Form enhancements (phone input sanitizer)
+ * - Global helpers (scrollToForm)
  */
 
 (function() {
@@ -20,6 +35,10 @@
             timeout = setTimeout(() => fn(...args), wait);
         };
     };
+
+    // Read PHP-passed context (set by wp_localize_script)
+    const tez = (typeof tezData !== 'undefined') ? tezData : {};
+    const isRTL = (tez.isRTL === 'true') || (document.documentElement.dir === 'rtl');
 
     // =============================================
     // THEME MANAGEMENT (light / dark / sepia)
@@ -108,8 +127,8 @@
     // MOBILE MENU
     // =============================================
     function initMobileMenu() {
-        const toggle = $('#tez-mobile-toggle');
-        const menu = $('#tez-mobile-menu');
+        const toggle  = $('#tez-mobile-toggle');
+        const menu    = $('#tez-mobile-menu');
         const overlay = $('#tez-mobile-overlay');
         const closeBtn = $('#tez-mobile-close');
 
@@ -122,20 +141,13 @@
             if (isOpen) return;
             lastFocused = document.activeElement;
             isOpen = true;
-
             menu.classList.add('is-open');
             menu.setAttribute('aria-hidden', 'false');
             toggle.setAttribute('aria-expanded', 'true');
             toggle.classList.add('is-active');
-
-            if (overlay) {
-                overlay.classList.add('is-visible');
-                overlay.setAttribute('aria-hidden', 'false');
-            }
-
+            if (overlay) { overlay.classList.add('is-visible'); overlay.setAttribute('aria-hidden', 'false'); }
             document.body.classList.add('tez-menu-open');
             document.body.style.overflow = 'hidden';
-
             setTimeout(() => {
                 const firstFocusable = menu.querySelector('button, a, input');
                 if (firstFocusable) firstFocusable.focus();
@@ -145,48 +157,27 @@
         function closeMenu() {
             if (!isOpen) return;
             isOpen = false;
-
             menu.classList.remove('is-open');
             menu.setAttribute('aria-hidden', 'true');
             toggle.setAttribute('aria-expanded', 'false');
             toggle.classList.remove('is-active');
-
-            if (overlay) {
-                overlay.classList.remove('is-visible');
-                overlay.setAttribute('aria-hidden', 'true');
-            }
-
+            if (overlay) { overlay.classList.remove('is-visible'); overlay.setAttribute('aria-hidden', 'true'); }
             document.body.classList.remove('tez-menu-open');
             document.body.style.overflow = '';
-
-            if (lastFocused) {
-                lastFocused.focus();
-                lastFocused = null;
-            }
+            if (lastFocused) { lastFocused.focus(); lastFocused = null; }
         }
 
-        toggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            isOpen ? closeMenu() : openMenu();
-        });
-
+        toggle.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); isOpen ? closeMenu() : openMenu(); });
         if (closeBtn) closeBtn.addEventListener('click', function(e) { e.preventDefault(); closeMenu(); });
         if (overlay) overlay.addEventListener('click', function(e) { e.preventDefault(); closeMenu(); });
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && isOpen) closeMenu();
-        });
-
-        menu.querySelectorAll('.tez-mobile-link').forEach(link => {
-            link.addEventListener('click', closeMenu);
-        });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && isOpen) closeMenu(); });
+        menu.querySelectorAll('.tez-mobile-link').forEach(link => link.addEventListener('click', closeMenu));
 
         // Submenu toggles
         menu.querySelectorAll('.tez-submenu-toggle').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
-                const parent = this.closest('.tez-has-submenu');
+                const parent  = this.closest('.tez-has-submenu');
                 const submenu = parent ? parent.querySelector('.tez-mobile-submenu') : null;
                 if (!submenu) return;
 
@@ -197,8 +188,8 @@
                         item.classList.remove('is-expanded');
                         const sub = item.querySelector('.tez-mobile-submenu');
                         if (sub) sub.style.maxHeight = null;
-                        const toggleBtn = item.querySelector('.tez-submenu-toggle');
-                        if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+                        const btn2 = item.querySelector('.tez-submenu-toggle');
+                        if (btn2) btn2.setAttribute('aria-expanded', 'false');
                     }
                 });
 
@@ -223,10 +214,10 @@
     // FULLSCREEN SEARCH
     // =============================================
     function initSearch() {
-        const toggle = $('#tez-search-toggle');
-        const overlay = $('#tez-search-overlay');
+        const toggle   = $('#tez-search-toggle');
+        const overlay  = $('#tez-search-overlay');
         const closeBtn = $('#tez-search-close');
-        const input = overlay ? overlay.querySelector('.tez-search-input') : null;
+        const input    = overlay ? overlay.querySelector('.tez-search-input') : null;
 
         if (!toggle || !overlay) return;
 
@@ -268,26 +259,17 @@
         function updateHeader() {
             const scrollTop = window.pageYOffset;
             header.classList.toggle('is-scrolled', scrollTop > 50);
-
             if (scrollTop > 300) {
-                if (scrollTop > lastScroll && scrollTop > 100) {
-                    header.classList.add('is-hidden');
-                } else {
-                    header.classList.remove('is-hidden');
-                }
+                header.classList.toggle('is-hidden', scrollTop > lastScroll && scrollTop > 100);
             } else {
                 header.classList.remove('is-hidden');
             }
-
             lastScroll = scrollTop <= 0 ? 0 : scrollTop;
             ticking = false;
         }
 
         window.addEventListener('scroll', function() {
-            if (!ticking) {
-                requestAnimationFrame(updateHeader);
-                ticking = true;
-            }
+            if (!ticking) { requestAnimationFrame(updateHeader); ticking = true; }
         });
     }
 
@@ -296,7 +278,7 @@
     // =============================================
     function initChaty() {
         const container = $('#tez-chaty');
-        const toggle = $('#tez-chaty-toggle');
+        const toggle   = $('#tez-chaty-toggle');
         const channels = $('#tez-chaty-channels');
 
         if (!toggle || !channels) return;
@@ -310,14 +292,9 @@
             channels.setAttribute('aria-hidden', !isOpen);
         }
 
-        toggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleChaty();
-        });
-
+        toggle.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); toggleChaty(); });
         document.addEventListener('click', function(e) {
-            if (isOpen && !container.contains(e.target)) {
+            if (isOpen && container && !container.contains(e.target)) {
                 isOpen = false;
                 container.classList.remove('is-open');
                 toggle.setAttribute('aria-expanded', 'false');
@@ -333,17 +310,12 @@
         const btn = $('#tez-scroll-top');
         if (!btn) return;
 
-        function updateVisibility() {
-            btn.classList.toggle('is-visible', window.pageYOffset > 300);
-        }
+        function updateVisibility() { btn.classList.toggle('is-visible', window.pageYOffset > 300); }
 
         window.addEventListener('scroll', debounce(updateVisibility, 100));
         updateVisibility();
 
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        btn.addEventListener('click', function(e) { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
     }
 
     // =============================================
@@ -362,14 +334,14 @@
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     const isExpanded = this.getAttribute('aria-expanded') === 'true';
-                    this.setAttribute('aria-expanded', !isExpanded);
+                    this.setAttribute('aria-expanded', String(!isExpanded));
                 }
             });
         });
     }
 
     // =============================================
-    // SMOOTH SCROLL (anchor links)
+    // SMOOTH SCROLL (anchor links, RTL-aware offset)
     // =============================================
     function initSmoothScroll() {
         $$('a[href^="#"]').forEach(anchor => {
@@ -384,7 +356,7 @@
                 const header = $('#tez-masthead');
                 const headerHeight = header ? header.offsetHeight : 0;
                 const targetPos = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
-                window.scrollTo({ top: targetPos, behavior: 'smooth' });
+                window.scrollTo({ top: Math.max(0, targetPos), behavior: 'smooth' });
             });
         });
     }
@@ -401,11 +373,14 @@
                 const answer = item.querySelector('.faq-lead-answer, .tez-faq-answer');
                 const isActive = item.classList.contains('active');
 
+                // Close all others
                 $$('.faq-lead-item.active, .tez-faq-item.active').forEach(i => {
                     if (i !== item) {
                         i.classList.remove('active');
                         const a = i.querySelector('.faq-lead-answer, .tez-faq-answer');
                         if (a) a.style.maxHeight = null;
+                        const q = i.querySelector('.faq-lead-question, .tez-faq-question');
+                        if (q) q.setAttribute('aria-expanded', 'false');
                     }
                 });
 
@@ -445,6 +420,7 @@
     // FORM ENHANCEMENTS
     // =============================================
     function initForms() {
+        // Sanitize phone inputs: digits only, max 11 chars (Iranian mobile)
         $$('input[type="tel"]').forEach(input => {
             input.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\D/g, '');
@@ -455,15 +431,18 @@
     }
 
     // =============================================
-    // GLOBAL: SCROLL TO FORM
+    // GLOBAL: SCROLL TO FORM (used by CTA buttons)
     // =============================================
-    window.scrollToForm = function() {
-        const form = document.querySelector('#order-form, #contact-form, .lead-form-box');
+    window.scrollToForm = function(selector) {
+        const query = selector || (isRTL
+            ? '#order-form, #contact-form, .lead-form-box, .tez-inquiry-form'
+            : '#contact-form, #order-form, .lead-form-box, .tez-inquiry-form');
+        const form = document.querySelector(query);
         if (form) {
             const header = $('#tez-masthead');
             const headerHeight = header ? header.offsetHeight : 0;
             const formPos = form.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
-            window.scrollTo({ top: formPos, behavior: 'smooth' });
+            window.scrollTo({ top: Math.max(0, formPos), behavior: 'smooth' });
         }
     };
 
@@ -493,4 +472,5 @@
     } else {
         init();
     }
+
 })();
