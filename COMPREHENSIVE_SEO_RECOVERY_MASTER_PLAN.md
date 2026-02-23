@@ -65,7 +65,7 @@
 - Encourage feedback and collaboration within the team for ongoing improvements.
 
 
-Based on my analysis of the `maziyarid/childjannah` repository, I can see that you have created a foundational structure with empty directories (`Analyses`, `Audit Data`, `Snippets`) alongside the base Jannah child theme files. Let me create a **comprehensive master document** that consolidates everything we've discussed—all issues, checklists, roadmap, and action plan with nothing missing.
+Based on my analysis of the `maziyarid/childjannah` repository, I can see that you have created a foundational structure with the base Jannah child theme files. All of the legacy `Snippets/` code has now been merged directly into the theme modules so the separate folder is no longer needed. The earlier placeholder documentation folders (`Analyses/`, `Audit Data/`) have also been archived outside the repository to keep the deliverable lightweight. Let me create a **comprehensive master document** that consolidates everything we've discussed—all issues, checklists, roadmap, and action plan with nothing missing.
 
 ```markdown name="COMPREHENSIVE_SEO_RECOVERY_MASTER_PLAN.md
 # 🎯 Comprehensive SEO Recovery & Jannah Child Theme Customization Master Plan
@@ -98,13 +98,18 @@ This document provides a **complete, zero-miss roadmap** for:
 ```
 maziyarid/childjannah/
 ├── README.md                    # Base documentation
-├── functions.php                # Child theme functions (needs expansion)
-├── style.css                    # Child theme styles (needs custom CSS)
+├── COMPREHENSIVE_SEO_RECOVERY_MASTER_PLAN.md
+├── DEVELOPMENT_REPORT.md
+├── functions.php                # Child theme bootstrap + module loader
+├── style.css                    # Child theme styles + metadata
 ├── screenshot.jpg               # Theme screenshot
-├── js/                          # JavaScript directory (empty)
-├── Analyses/                    # [EMPTY - TO BE POPULATED]
-├── Audit Data/                  # [EMPTY - TO BE POPULATED]
-└── Snippets/                    # [EMPTY - TO BE POPULATED]
+├── css/                         # Design system + layout stylesheets
+├── js/                          # Theme JavaScript (frontend + single post)
+├── inc/                         # Modular PHP includes (SEO, UX, widgets)
+├── templates/                   # Custom page templates
+├── robots.txt                   # SEO directives
+├── htaccess                     # Apache baseline rules
+└── 404.php                      # Custom error hub
 ```
 
 ## 1.2 Target Architecture (Post-Implementation)
@@ -154,28 +159,10 @@ maziyarid/childjannah/
 │   └── fonts/
 │
 ├── .htaccess                    # [NEW] Apache rewrite rules
-├── robots.txt                   # [NEW] SEO robots configuration
-│
-├── Analyses/                    # Documentation & Analysis
-│   ├── SEO-Audit-Report.md
-│   ├── Backlink-Analysis.md
-│   ├── Competitor-Analysis.md
-│   ├── Keyword-Research.md
-│   └── Technical-SEO-Audit.md
-│
-├── Audit Data/                  # Raw audit data
-│   ├── backlinks-export.csv
-│   ├── crawl-errors.json
-│   ├── 404-urls.txt
-│   ├── redirect-chains.txt
-│   └── spam-urls-identified.txt
-│
-└── Snippets/                    # Code snippets & examples
-    ├── htaccess-rules.txt
-    ├── functions-examples.php
-    ├── wpcli-commands.txt
-    └── api-integration-examples.php
+└── robots.txt                   # [NEW] SEO robots configuration
 ```
+
+> Legacy audit folders (`Analyses/`, `Audit Data/`) are now stored in an internal knowledge base instead of the repository.
 
 ---
 
@@ -501,7 +488,7 @@ maziyarid/childjannah/
 
 ### Technical Foundation
 - [ ] **Create `.htaccess` file**
-  - [ ] Copy template from `Snippets/.htaccess`
+  - [ ] Copy the curated baseline from `htaccess` in the child theme
   - [ ] Customize domain, paths, redirects
   - [ ] Test all rules on staging
   - [ ] Deploy to production with backup
@@ -601,7 +588,7 @@ maziyarid/childjannah/
   - [ ] Export backlinks from Ahrefs/Moz/SEMrush
   - [ ] Filter by spam score > 60
   - [ ] Identify unrelated/harmful anchor text
-  - [ ] Document in `Audit Data/backlinks-export.csv`
+  - [ ] Document in shared audit workbook (replaces former `Audit Data/backlinks-export.csv`)
   - Task Owner: _____
   - Deadline: _____
   - Status: ⬜ Not Started
@@ -1183,7 +1170,7 @@ Checklist:
 
 - [ ] **Task: Spam file audit**
   - List all suspicious files on server
-  - Document findings in `Audit Data/spam-urls-identified.txt`
+  - Document findings in shared incident log (replaces former `Audit Data/spam-urls-identified.txt`)
   - Owner: _____ | Deadline: Tuesday EOD
 
 - [ ] **Task: Delete spam files**
@@ -1684,25 +1671,13 @@ maziyarid/childjannah/
 │   └── fonts/
 │       └── (if custom fonts)
 │
-├── Analyses/
-│   ├── SEO-Audit-Report.md
-│   ├── Backlink-Analysis.md
-│   ├── Competitor-Analysis.md
-│   ├── Keyword-Research.md
-│   └── Technical-SEO-Audit.md
-│
-├── Audit Data/
-│   ├── backlinks-export.csv
-│   ├── crawl-errors.json
-│   ├── 404-urls.txt
-│   ├── redirect-chains.txt
-│   └── spam-urls-identified.txt
-│
-└── Snippets/
-    ├── htaccess-rules.txt
-    ├── functions-examples.php
-    ├── wpcli-commands.txt
-    └── api-integration-examples.php
+└── docs/
+    ├── COMPREHENSIVE_SEO_RECOVERY_MASTER_PLAN.md
+    └── DEVELOPMENT_REPORT.md
+
+> Documentation and raw audit exports now live alongside the repository (Feb 23, 2026 cleanup) to keep the distributable theme small.
+
+> Documentation and raw audit exports now live outside this repository (Feb 23, 2026 cleanup) to keep the deliverable small.
 ```
 
 ---

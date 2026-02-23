@@ -1,0 +1,75 @@
+/**
+ * Post Content Element Containment
+ * Fixes full-width post elements in Jannah Theme
+ * Version: 3.0.0
+ */
+
+/* Ensure post components stay contained */
+.single-post .post-components,
+.single-post .author-box,
+.single-post .share-buttons,
+.single-post .post-share,
+.single-post .post-meta,
+.single-post .related-posts,
+.single-post .comments-area,
+.single-post .entry-footer {
+    max-width: 100%;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+    float: none !important;
+}
+
+.single-post .container .entry-content + *,
+.single-post .content-wrap > * {
+    max-width: inherit;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Jannah specific overrides for contained elements */
+.single-post .entry-content .tez-toc,
+.single-post .entry-content .tez-faq-section,
+.single-post .entry-content .tez-poll-container,
+.single-post .entry-content .tez-key-takeaways,
+.single-post .entry-content .tez-star-rating {
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Fix Jannah's sidebar interference */
+.tez-no-sidebar .content-area,
+.tez-no-sidebar .site-content,
+.tez-no-sidebar #content {
+    width: 100% !important;
+    max-width: 100% !important;
+    float: none !important;
+}
+
+.tez-no-sidebar .sidebar,
+.tez-no-sidebar #sidebar,
+.tez-no-sidebar .side-aside {
+    display: none !important;
+}
+
+/* Ensure images in content don't overflow */
+.entry-content img,
+.post-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Fix Jannah's table overflow */
+.entry-content table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 768px) {
+    .entry-content table {
+        display: table;
+    }
+}
