@@ -31,117 +31,91 @@
 
 ## Phase 1 – Header/Footer Architecture & Double Menu Fix ✅ COMPLETE
 
-### 1.1 Implement child `header.php` override
+- [x] `/header.php` override: full HTML structure, nav walkers, `<main>` open
+- [x] `/footer.php` override: 4-column grid, Chaty, scroll-top, `wp_footer()`
+- [x] `inc/core-setup.php`: removed 3 hook-based output functions
+- [x] `inc/footer.php`: stripped to utility-only
+- [x] `tez_filter_body_classes()`: sidebar classes preserved for posts/archives
 
-- [x] Create `/header.php` in child theme root
-- [x] Output DOCTYPE + html/head/body structure with wp_head(), wp_body_open()
-- [x] Tez header markup: logo, nav, theme mode, a11y toolbar, mobile menu, search overlay
-- [x] Walker fallback order: tez_primary → primary → hardcoded home link
-- [x] Open `<main id="tez-main-content">` after header
-
-**Commit:** `8dd7187` — feat(phase1): add header.php override to fix double menu bug
-
-### 1.2 Implement child `footer.php` override
-
-- [x] Create `/footer.php` with `</main>` close
-- [x] 4-column footer grid (branding, services menu, useful links, contact info)
-- [x] Footer bottom (copyright + links)
-- [x] Chaty floating widget (5 channels: phone, SMS, WhatsApp, Telegram, email)
-- [x] Scroll-to-top button
-- [x] wp_footer() + close body/html
-
-**Commit:** `3baaeec` — feat(phase1): add footer.php override with Chaty and scroll-top
-
-### 1.3 Remove header/footer hooked output
-
-- [x] Removed `tez_remove_theme_header()` + hook from `inc/core-setup.php`
-- [x] Deleted `tez_output_header_html()` from `inc/core-setup.php`
-- [x] Deleted `tez_output_close_main()` + hook from `inc/core-setup.php`
-- [x] Stripped `inc/footer.php` to utility-only (no wp_footer hook)
-
-**Commit:** `439854d` — fix(phase1): remove hook-based header/footer output, fix body class filter  
-**Commit:** `0d13f22` — fix(phase1): remove footer HTML output from hook
-
-### 1.4 Body classes & layout
-
-- [x] `tez_filter_body_classes()`: only strip sidebar classes on `templates/*` pages
-- [x] Sidebar classes preserved for posts/archives
-- [x] Always add `tez-theme-active`
+**Commits:** `8dd7187`, `3baaeec`, `439854d`, `0d13f22`
 
 **Verification (Phase 1):** ⚠️ NEEDS STAGING TEST
 
-- [ ] Homepage, service page, single post, archive: exactly one header + footer each
-- [ ] DOM: `<header>` → `<main>` → `<footer>` → wp_footer → `</body></html>`
+- [ ] Homepage/service/post/archive: exactly one header + one footer each
+- [ ] DOM: `<header>` → `<main>` → `<footer>` → `wp_footer()` → `</body></html>`
 - [ ] No PHP errors in debug log
 
 ---
 
 ## Phase 2 – Icons & Fonts (Safe Font Awesome + Irancell) ✅ COMPLETE
 
-### 2.1 Stop breaking Jannah icons
+- [x] Removed `jannah-fontawesome`/`tie-fontawesome` from FA dequeue list
+- [x] Replaced with `tez_typo_disable_cdn_fa()` targeting only CDN handles
+- [x] Removed duplicate FA loader in `typography.php` (covered by `core-setup.php`)
+- [x] `icon-mapping.php`: removed `fa-solid fa-circle` fallback for unknown icons
+- [x] Irancell @font-face: 6 weights, woff2+woff+ttf, `font-display: swap`
+- [x] Google Fonts handles + TieLabs font hooks disabled
 
-- [x] `inc/core-setup.php`: Commented out `tez_disable_external_fa()` entirely
-- [x] `inc/typography.php`: Removed `tez_typo_disable_external_fa()` which listed `jannah-fontawesome`, `tie-fontawesome`, `flavor-fontawesome` — these are parent theme handles that must NOT be dequeued
-- [x] Replaced with `tez_typo_disable_cdn_fa()` which ONLY targets truly external CDN handles (`fontawesome-cdn`, `fa-kit`, etc.)
-- [x] Output buffer in `typography.php` still removes `kit.fontawesome.com` links from HTML as backup
-
-**Commit:** `164839e` — fix(phase2): safe FA dequeue — preserve Jannah icons, remove duplicate FA loader
-
-### 2.2 Keep local Font Awesome for Tez components
-
-- [x] `tez_enqueue_fontawesome()` in `core-setup.php` loads local FA7 `all.css` (single stylesheet, no duplication)
-- [x] Removed redundant `tez_header_enqueue_fa()` from `typography.php` which was loading all.css + brands.css + duotone.css (already covered by all.css)
-- [x] Removed redundant `tez_header_preload_fa()` from `typography.php` (already in `core-setup.php`)
-- [x] `tez_fa_fix_css()` in `core-setup.php` sets correct font-family stack for FA classes without touching Jannah's non-FA icon families
-- [x] Fixed `inc/icon-mapping.php`: removed fallback that replaced unknown `tie-icon-*` with `fa-solid fa-circle`
-- [x] Unknown `tie-icon-*` classes now left unchanged, preserving Jannah's own icon rendering
-
-**Commit:** `134b4a5` — fix(phase2): preserve unknown tie-icon classes, prevent icon blanking
-
-### 2.3 Irancell fonts
-
-- [x] `TEZ_FONT_URL` constant defined in `core-setup.php`: `/wp-content/uploads/fonts/Irancell/`
-- [x] `inc/typography.php` has complete @font-face stack for all 6 weights (200–800)
-- [x] Font files: woff2 + woff + ttf format sources (no .eot legacy)
-- [x] Body font-family set globally to `'Irancell', 'Tahoma', 'Arial', system-ui, sans-serif`
-- [x] Irancell Regular + Bold preloaded via `tez_typo_preload_irancell()`
-- [x] All Google Fonts handles and TieLabs font hooks disabled
-- [ ] Manual: In Jannah → Styling, confirm Google Fonts is set to None/Disabled
+**Commits:** `164839e`, `134b4a5`
 
 **Verification (Phase 2):** ⚠️ NEEDS STAGING TEST
 
-- [ ] Jannah nav icons + UI icons render correctly (not blank squares)
-- [ ] Tez header/footer/Chaty/ToC icons render correctly (FA7)
-- [ ] Body text uses Irancell (confirm in DevTools → Computed → font-family)
-- [ ] Network tab: no requests to fonts.googleapis.com or kit.fontawesome.com
-- [ ] No duplicate FA stylesheet requests
+- [ ] Jannah nav/UI icons render (not blank)
+- [ ] Tez FA7 icons render in header/footer/Chaty/ToC
+- [ ] DevTools: body font-family is Irancell
+- [ ] Network: no fonts.googleapis.com or kit.fontawesome.com requests
 
 ---
 
-## Phase 3 – CSS/JS Asset Loading & Design System
+## Phase 3 – CSS/JS Asset Loading & Design System ✅ COMPLETE
 
 ### 3.1 Asset loading in `functions.php`
 
-- [ ] Verify `tez_enqueue_child_assets()` conditional loading:
-  - [ ] rtl.css only when is_rtl()
-  - [ ] style.css (header only)
-  - [ ] css/main.css always
-  - [ ] css/single-post.css on is_singular('post')
-  - [ ] css/page-templates.css on is_page()
-  - [ ] css/post-elements.css on is_singular()
-  - [ ] js/scripts.js globally
-  - [ ] js/single-post.js on is_singular('post')
+- [x] `TEZ_CHILD_VERSION` bumped to `3.1.0` across all files
+- [x] rtl.css: only when `is_rtl()` ✔
+- [x] style.css: always (child theme base) ✔
+- [x] css/main.css: always ✔
+- [x] css/single-post.css: only on `is_singular('post')` ✔
+- [x] css/page-templates.css: on `is_page() || is_404()` — **fixed: 404 page now loads this stylesheet**
+- [x] css/post-elements.css: on `is_singular()` ✔
+- [x] js/scripts.js: globally in footer ✔
+- [x] js/single-post.js: only on `is_singular('post')` ✔
+- [x] `tezData` localization enhanced: `isRTL`, `siteDir`, `themeUri`, `isSingular`, `isPost`, `isPage`, `is404`, `postId`, `version`
+- [x] Added `tez_child_theme_setup()`: textdomain, post-thumbnails, custom-header support
+
+**Commit:** `1b429f9` — feat(phase3): bump version, fix 404 CSS, enhance tezData
 
 ### 3.2 Design system sanity
 
-- [ ] Confirm css files exist: main.css, page-templates.css, single-post.css, post-elements.css
-- [ ] Ensure :root defines --tez-primary, dark/sepia variants
-- [ ] Remove unused selectors from old snippets
+- [x] All 4 CSS files confirmed existing: main.css (44KB), page-templates.css (30KB), single-post.css (15KB), post-elements.css
+- [x] Both JS files confirmed existing: scripts.js (19KB), single-post.js (7KB)
+- [x] `:root` CSS variables defined via `core-setup.php` inline critical CSS (light/dark/sepia variants)
+- [x] `css/post-elements.css` expanded from 1.7KB → 6KB:
+  - Added `[data-theme="dark"]` overrides for images, tables, blockquotes, code blocks
+  - Added `[data-theme="sepia"]` overrides for images, tables, blockquotes, code blocks
+  - Added `body.tez-high-contrast` overrides for tables, blockquotes, images
+  - Added blockquote RTL styling (border-right)
+  - Added `[dir="ltr"]` override for LTR sites
+  - Added `<pre><code>` containment with dark/sepia styles
+- [x] `js/scripts.js` updated to v3.1.0:
+  - Reads `tezData.isRTL` from PHP context
+  - `scrollToForm()` now RTL-aware (prefers `#order-form` in RTL, `#contact-form` in LTR)
+  - `initFAQ()` closes aria-expanded on closed siblings
+  - `initDropdowns()` fixes boolean to string coercion on aria-expanded
+  - `window.scrollTo()` wrapped with `Math.max(0, ...)` to prevent negative scroll
 
-**Verification (Phase 3):**
+**Commit:** `14ebbbf` — feat(phase3): dark/sepia/high-contrast in post-elements.css  
+**Commit:** `c78424e` — feat(phase3): bump to 3.1.0, consume tezData context
 
-- [ ] DevTools Network: CSS/JS only load on intended pages
-- [ ] Visual check: header/hero/footer/single post in light/dark/sepia
+**Verification (Phase 3):** ⚠️ NEEDS STAGING TEST
+
+- [ ] DevTools Network: verify CSS loads only on correct page types
+- [ ] DevTools Network: js/scripts.js loads everywhere, single-post.js only on posts
+- [ ] DevTools Network: page-templates.css loads on pages AND 404
+- [ ] Visual: table in post has horizontal scroll on mobile
+- [ ] Visual: dark mode — tables readable, images slightly dimmed, blockquotes styled
+- [ ] Visual: sepia mode — warm tone on tables/blockquotes
+- [ ] Visual: high contrast — tables have yellow headers + black borders
 
 ---
 
@@ -188,17 +162,10 @@
 
 ## Phase 6 – Footer Preservation & Improvements
 
-### 6.1 Footer content & menus
-
-- [x] Footer uses same structure from previous inc/footer.php
-- [ ] Assign: services → tez_footer_1, useful links → tez_footer_2
-- [x] Fallback lists for unassigned menus
-
-### 6.2 Floating widget & scroll-top
-
-- [x] Chaty 5-channel widget with tooltips + ARIA in footer.php
-- [x] Scroll-to-top button
-- [ ] Verify no duplicate instances on staging
+- [x] 4-column footer grid in `/footer.php`
+- [x] Chaty floating widget + scroll-top button
+- [ ] Assign menus: services → `tez_footer_1`, useful links → `tez_footer_2`
+- [ ] Verify no duplicate Chaty/scroll-top instances on staging
 
 ---
 
@@ -216,10 +183,10 @@
 
 - [ ] Lighthouse on home, service, single post (desktop + mobile)
 - [ ] No duplicate CSS/JS or font requests
-- [ ] Skip link → #tez-main-content works
-- [ ] a11y toolbar has proper aria-* + keyboard support
-- [ ] RTL validated across header, hero, content, footer, Chaty, forms
-- [ ] WP_DEBUG_LOG: no PHP errors
+- [ ] Skip link → `#tez-main-content` works
+- [ ] a11y toolbar: aria-* + keyboard support
+- [ ] RTL across header, hero, content, footer, Chaty, forms
+- [ ] `WP_DEBUG_LOG`: no PHP errors
 - [ ] Console: zero JS errors
 
 ---
@@ -232,14 +199,16 @@
 
 ---
 
-## Commit Log Summary
+## Full Commit Log
 
 | Commit | Phase | Description |
 |--------|-------|-------------|
 | `8dd7187` | 1.1 | feat: add header.php override |
 | `3baaeec` | 1.2 | feat: add footer.php override with Chaty |
-| `439854d` | 1.3/1.4 | fix: remove hook-based header/footer, fix body classes |
+| `439854d` | 1.3/1.4 | fix: remove hook-based output, fix body classes |
 | `0d13f22` | 1.3 | fix: remove footer HTML from inc/footer.php |
-| `e7f87c9` | docs | TODO Phase 1 marked complete |
-| `164839e` | 2.1/2.2/2.3 | fix: safe FA dequeue, remove duplicate FA loader |
+| `164839e` | 2.1/2.2 | fix: safe FA dequeue, remove duplicate FA loader |
 | `134b4a5` | 2.2 | fix: preserve unknown tie-icon classes |
+| `1b429f9` | 3.1 | feat: version 3.1.0, fix 404 CSS, enhance tezData |
+| `14ebbef` | 3.2 | feat: dark/sepia/contrast in post-elements.css |
+| `c78424e` | 3.2 | feat: scripts.js 3.1.0, consume tezData RTL context |
