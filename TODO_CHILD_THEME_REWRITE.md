@@ -27,11 +27,6 @@
 - [ ] Deactivate overlapping WPCode snippets
 - [ ] Clear all caches
 
-**Verification (Phase 0):**
-
-- [ ] Staging loads with child theme
-- [ ] Layout bugs expected (will be fixed in Phase 1)
-
 ---
 
 ## Phase 1 – Header/Footer Architecture & Double Menu Fix ✅ COMPLETE
@@ -39,89 +34,87 @@
 ### 1.1 Implement child `header.php` override
 
 - [x] Create `/header.php` in child theme root
-- [x] Output DOCTYPE + html/head/body structure
-- [x] Call wp_head() and wp_body_open()
-- [x] Copy Tez header markup (logo, nav, theme mode, a11y, mobile menu, search)
-- [x] Use Tez_Desktop_Nav_Walker and Tez_Mobile_Nav_Walker
-- [x] Menu fallback order: tez_primary → primary → hardcoded home link
+- [x] Output DOCTYPE + html/head/body structure with wp_head(), wp_body_open()
+- [x] Tez header markup: logo, nav, theme mode, a11y toolbar, mobile menu, search overlay
+- [x] Walker fallback order: tez_primary → primary → hardcoded home link
 - [x] Open `<main id="tez-main-content">` after header
 
-**Commit:** `8dd7187` - feat(phase1): add header.php override to fix double menu bug
+**Commit:** `8dd7187` — feat(phase1): add header.php override to fix double menu bug
 
 ### 1.2 Implement child `footer.php` override
 
-- [x] Create `/footer.php` in child theme root
-- [x] Close `</main>` tag
-- [x] Render 4-column footer (logo/description/social, services menu, useful links, contact info)
-- [x] Render footer bottom (copyright + links)
-- [x] Include Chaty floating widget (5 channels)
-- [x] Include scroll-to-top button
-- [x] Call wp_footer() and close body/html
+- [x] Create `/footer.php` with `</main>` close
+- [x] 4-column footer grid (branding, services menu, useful links, contact info)
+- [x] Footer bottom (copyright + links)
+- [x] Chaty floating widget (5 channels: phone, SMS, WhatsApp, Telegram, email)
+- [x] Scroll-to-top button
+- [x] wp_footer() + close body/html
 
-**Commit:** `3baaeec` - feat(phase1): add footer.php override with Chaty and scroll-top
+**Commit:** `3baaeec` — feat(phase1): add footer.php override with Chaty and scroll-top
 
 ### 1.3 Remove header/footer hooked output
 
-- [x] In `inc/core-setup.php`: Remove `tez_remove_theme_header()` and its hook
-- [x] In `inc/core-setup.php`: Delete `tez_output_header_html()` function entirely
-- [x] In `inc/core-setup.php`: Delete `tez_output_close_main()` and its hook
-- [x] In `inc/footer.php`: Remove `add_action('wp_footer', 'tez_output_footer_html')`
-- [x] In `inc/footer.php`: Keep only widget registration utilities
+- [x] Removed `tez_remove_theme_header()` + hook from `inc/core-setup.php`
+- [x] Deleted `tez_output_header_html()` from `inc/core-setup.php`
+- [x] Deleted `tez_output_close_main()` + hook from `inc/core-setup.php`
+- [x] Stripped `inc/footer.php` to utility-only (no wp_footer hook)
 
-**Commit:** `439854d` - fix(phase1): remove hook-based header/footer output, fix body class filter
-**Commit:** `0d13f22` - fix(phase1): remove footer HTML output from hook
+**Commit:** `439854d` — fix(phase1): remove hook-based header/footer output, fix body class filter  
+**Commit:** `0d13f22` — fix(phase1): remove footer HTML output from hook
 
 ### 1.4 Body classes & layout
 
-- [x] Update `tez_filter_body_classes()` to only strip sidebar classes on pages with `templates/*` templates
-- [x] Keep sidebar classes intact for posts/archives
+- [x] `tez_filter_body_classes()`: only strip sidebar classes on `templates/*` pages
+- [x] Sidebar classes preserved for posts/archives
 - [x] Always add `tez-theme-active`
-
-**Commit:** Included in `439854d`
 
 **Verification (Phase 1):** ⚠️ NEEDS STAGING TEST
 
-- [ ] Deploy to staging and test:
-  - [ ] Homepage: exactly one header, one footer
-  - [ ] Service page: exactly one header, one footer
-  - [ ] Single post: exactly one header, one footer
-  - [ ] Archive/blog: exactly one header, one footer
-  - [ ] DOM structure: `<header>` → `<main>` → `<footer>` → wp_footer → `</body></html>`
+- [ ] Homepage, service page, single post, archive: exactly one header + footer each
+- [ ] DOM: `<header>` → `<main>` → `<footer>` → wp_footer → `</body></html>`
 - [ ] No PHP errors in debug log
-- [ ] Screenshot all key pages
 
 ---
 
-## Phase 2 – Icons & Fonts (Safe Font Awesome + Irancell)
+## Phase 2 – Icons & Fonts (Safe Font Awesome + Irancell) ✅ COMPLETE
 
 ### 2.1 Stop breaking Jannah icons
 
-- [x] In `inc/core-setup.php`: Commented out `tez_disable_external_fa()` and its hooks
-- [ ] Flush caches and reload
-- [ ] Verify Jannah nav icons / UI icons still appear
+- [x] `inc/core-setup.php`: Commented out `tez_disable_external_fa()` entirely
+- [x] `inc/typography.php`: Removed `tez_typo_disable_external_fa()` which listed `jannah-fontawesome`, `tie-fontawesome`, `flavor-fontawesome` — these are parent theme handles that must NOT be dequeued
+- [x] Replaced with `tez_typo_disable_cdn_fa()` which ONLY targets truly external CDN handles (`fontawesome-cdn`, `fa-kit`, etc.)
+- [x] Output buffer in `typography.php` still removes `kit.fontawesome.com` links from HTML as backup
 
-**Commit:** Included in `439854d`
+**Commit:** `164839e` — fix(phase2): safe FA dequeue — preserve Jannah icons, remove duplicate FA loader
 
 ### 2.2 Keep local Font Awesome for Tez components
 
-- [x] Keep `tez_enqueue_fontawesome()` loading local FA from TEZ_FA_URL
-- [x] Keep `tez_preload_fa()` for webfonts
-- [x] Keep `tez_fa_fix_css()` but ensure it doesn't override theme icon families globally
-- [ ] Check for aggressive icon mapping in `inc/icon-mapping.php` if exists
+- [x] `tez_enqueue_fontawesome()` in `core-setup.php` loads local FA7 `all.css` (single stylesheet, no duplication)
+- [x] Removed redundant `tez_header_enqueue_fa()` from `typography.php` which was loading all.css + brands.css + duotone.css (already covered by all.css)
+- [x] Removed redundant `tez_header_preload_fa()` from `typography.php` (already in `core-setup.php`)
+- [x] `tez_fa_fix_css()` in `core-setup.php` sets correct font-family stack for FA classes without touching Jannah's non-FA icon families
+- [x] Fixed `inc/icon-mapping.php`: removed fallback that replaced unknown `tie-icon-*` with `fa-solid fa-circle`
+- [x] Unknown `tie-icon-*` classes now left unchanged, preserving Jannah's own icon rendering
+
+**Commit:** `134b4a5` — fix(phase2): preserve unknown tie-icon classes, prevent icon blanking
 
 ### 2.3 Irancell fonts
 
-- [ ] Confirm TEZ_FONT_URL points to correct path
-- [ ] In `inc/typography.php`, ensure @font-face loads from TEZ_FONT_URL
-- [ ] Set body font to Irancell/Vazirmatn stack
-- [ ] In Jannah → Styling, disable Google Fonts
+- [x] `TEZ_FONT_URL` constant defined in `core-setup.php`: `/wp-content/uploads/fonts/Irancell/`
+- [x] `inc/typography.php` has complete @font-face stack for all 6 weights (200–800)
+- [x] Font files: woff2 + woff + ttf format sources (no .eot legacy)
+- [x] Body font-family set globally to `'Irancell', 'Tahoma', 'Arial', system-ui, sans-serif`
+- [x] Irancell Regular + Bold preloaded via `tez_typo_preload_irancell()`
+- [x] All Google Fonts handles and TieLabs font hooks disabled
+- [ ] Manual: In Jannah → Styling, confirm Google Fonts is set to None/Disabled
 
-**Verification (Phase 2):**
+**Verification (Phase 2):** ⚠️ NEEDS STAGING TEST
 
-- [ ] Theme icons (Jannah) render correctly
-- [ ] Tez icons (FA) render correctly in header/footer/Chaty/ToC
-- [ ] Irancell fonts apply to body text
-- [ ] No missing icon squares
+- [ ] Jannah nav icons + UI icons render correctly (not blank squares)
+- [ ] Tez header/footer/Chaty/ToC icons render correctly (FA7)
+- [ ] Body text uses Irancell (confirm in DevTools → Computed → font-family)
+- [ ] Network tab: no requests to fonts.googleapis.com or kit.fontawesome.com
+- [ ] No duplicate FA stylesheet requests
 
 ---
 
@@ -141,20 +134,20 @@
 
 ### 3.2 Design system sanity
 
-- [ ] Cross-check css/main.css, css/page-templates.css, css/single-post.css, css/post-elements.css exist
-- [ ] Ensure :root variables define --tez-primary, dark/sepia variants
+- [ ] Confirm css files exist: main.css, page-templates.css, single-post.css, post-elements.css
+- [ ] Ensure :root defines --tez-primary, dark/sepia variants
 - [ ] Remove unused selectors from old snippets
 
 **Verification (Phase 3):**
 
-- [ ] Browser DevTools: CSS/JS only load on intended pages
-- [ ] Visual check: header/hero/footer/single post look correct in light/dark/sepia
+- [ ] DevTools Network: CSS/JS only load on intended pages
+- [ ] Visual check: header/hero/footer/single post in light/dark/sepia
 
 ---
 
 ## Phase 4 – Page Templates & Hero System
 
-### 4.1 Template registration & usage
+### 4.1 Template registration
 
 - [ ] In `inc/page-templates.php`, confirm 7 templates registered
 - [ ] Verify templates appear in Page Editor dropdown
@@ -168,24 +161,13 @@
 
 ### 4.3 Auto hero for non-templated pages
 
-- [ ] In `inc/misc-tweaks.php` or new `inc/page-hero.php`:
-  - [ ] Add the_content filter (priority 1)
-  - [ ] Run only on is_page(), !is_admin(), main query
-  - [ ] Skip pages using templates/*
-  - [ ] Build hero from title, excerpt, featured image
-  - [ ] Output hero before $content
+- [ ] Add the_content filter (priority 1) in `inc/misc-tweaks.php`
+- [ ] Skip pages using `templates/*`
+- [ ] Build hero from title, excerpt, featured image
 
-### 4.4 Avoid duplicate titles
+### 4.4 Duplicate title prevention
 
-- [ ] Harden `tez_hide_page_title_on_templates()`:
-  - [ ] Guard for $id === null
-  - [ ] Only hide when is_page(), in_the_loop(), template starts with templates/
-
-**Verification (Phase 4):**
-
-- [ ] Pages with Tez templates display designed hero
-- [ ] Standard pages get auto hero without Page Builder
-- [ ] No duplicated H1 titles
+- [ ] Guard `tez_hide_page_title_on_templates()` for null ID + correct conditions
 
 ---
 
@@ -194,18 +176,13 @@
 ### 5.1 Module integrity
 
 - [ ] Confirm `functions.php` requires all modules in correct order
-- [ ] Check each inc/*.php loads without fatal errors
+- [ ] No fatal errors or duplicate function names
 
 ### 5.2 Single post UX
 
-- [ ] Confirm css/single-post.css styles all features
-- [ ] Confirm js/single-post.js: reading progress, ToC, share, copy link, external links
-- [ ] Confirm ToC, key takeaways, FAQ schema, polls, star rating, meta appear once per post
-
-**Verification (Phase 5):**
-
-- [ ] Test posts with all features, few features, no features
-- [ ] Layout stable, no console errors
+- [ ] css/single-post.css: reading progress, ToC, anchors, share, author box, related
+- [ ] js/single-post.js: reading progress bar, ToC active, share, copy link, external links
+- [ ] ToC, key takeaways, FAQ schema, polls, star rating, meta each appear once
 
 ---
 
@@ -213,98 +190,56 @@
 
 ### 6.1 Footer content & menus
 
-- [x] Footer uses same structure as previous inc/footer.php
-- [ ] In Appearance → Menus, assign services to tez_footer_1, links to tez_footer_2
-- [x] Fallback lists show reasonable links when menus not assigned
+- [x] Footer uses same structure from previous inc/footer.php
+- [ ] Assign: services → tez_footer_1, useful links → tez_footer_2
+- [x] Fallback lists for unassigned menus
 
 ### 6.2 Floating widget & scroll-top
 
-- [x] Chaty widget in footer.php with 5 channels, tooltips, ARIA
-- [x] Scroll-to-top button controlled by scripts.js
-- [ ] Verify no duplicate instances
-
-**Verification (Phase 6):**
-
-- [ ] Footer visually matches expectations on multiple pages
-- [ ] Chaty + scroll-top work in all viewports, dark/sepia included
+- [x] Chaty 5-channel widget with tooltips + ARIA in footer.php
+- [x] Scroll-to-top button
+- [ ] Verify no duplicate instances on staging
 
 ---
 
 ## Phase 7 – SEO, Redirects, Sitemap, Feeds
 
-### 7.1 URL cleanup & redirects
-
-- [ ] Review inc/seo-url-cleanup.php
-- [ ] Review inc/seo-redirects.php for redirect loops/404s
-
-### 7.2 Visual sitemap & 404 hub
-
-- [ ] Verify inc/visual-sitemap.php outputs HTML sitemap
-- [ ] Confirm 404.php + inc/404-hub.php show rich 404
-
-### 7.3 Feeds
-
-- [ ] Check inc/feed-controller.php for 410s, align with SEO strategy
-
-**Verification (Phase 7):**
-
-- [ ] Test date archive, author archive, /sitemap URLs
-- [ ] Check logs for redirect behavior
+- [ ] Review `inc/seo-url-cleanup.php` for canonical/query safety
+- [ ] Review `inc/seo-redirects.php` for loops/404s
+- [ ] Verify `inc/visual-sitemap.php` outputs HTML sitemap
+- [ ] Confirm `404.php` + `inc/404-hub.php` render rich 404
+- [ ] Check `inc/feed-controller.php` for 410s
 
 ---
 
 ## Phase 8 – QA: Performance, Accessibility, RTL
 
-### 8.1 Performance
-
-- [ ] Run Lighthouse on home, service page, single post (desktop + mobile)
-- [ ] Confirm CSS/JS bundles not duplicated
-- [ ] Check fonts and FA assets not requested multiple times
-
-### 8.2 Accessibility & RTL
-
-- [ ] Skip link jumps to #tez-main-content
-- [ ] Theme mode and a11y toolbar have proper aria-*
-- [ ] Validate RTL across header, hero, content, footer, Chaty, forms
-
-### 8.3 Error checks
-
-- [ ] Enable WP_DEBUG_LOG, browse all page types
-- [ ] DevTools console: zero JS errors on key pages
+- [ ] Lighthouse on home, service, single post (desktop + mobile)
+- [ ] No duplicate CSS/JS or font requests
+- [ ] Skip link → #tez-main-content works
+- [ ] a11y toolbar has proper aria-* + keyboard support
+- [ ] RTL validated across header, hero, content, footer, Chaty, forms
+- [ ] WP_DEBUG_LOG: no PHP errors
+- [ ] Console: zero JS errors
 
 ---
 
 ## Phase 9 – Git, Docs, and Merge
 
-### 9.1 Commits and documentation
-
 - [x] Commit after each phase with clear messages
 - [ ] Update DEVELOPMENT_REPORT.md with architectural changes
-- [x] Update this TODO with checkmarks
-
-### 9.2 Merge & release
-
-- [ ] When staging passes, optionally merge to main or keep on New
-- [ ] Tag release v3.1.0-final-child after deployment
+- [ ] Tag release `v3.1.0-final-child` after live deployment
 
 ---
 
-## Summary of Phase 1 Changes
+## Commit Log Summary
 
-**Files Created:**
-- `/header.php` - Complete header override with Tez design
-- `/footer.php` - Complete footer override with 4 columns + Chaty + scroll-top
-
-**Files Modified:**
-- `/inc/core-setup.php` - Removed 3 buggy functions, commented out FA dequeue, fixed body class filter
-- `/inc/footer.php` - Stripped to utility-only (widget registration)
-
-**Bug Fixed:**
-- Double top menu eliminated (parent header.php no longer renders)
-- Invalid HTML structure fixed (main opens/closes correctly)
-- Footer no longer duplicates or appears in wrong DOM location
-
-**Next Steps:**
-- Deploy to staging
-- Run Phase 1 verification checklist
-- Move to Phase 2 (icons & fonts safety)
+| Commit | Phase | Description |
+|--------|-------|-------------|
+| `8dd7187` | 1.1 | feat: add header.php override |
+| `3baaeec` | 1.2 | feat: add footer.php override with Chaty |
+| `439854d` | 1.3/1.4 | fix: remove hook-based header/footer, fix body classes |
+| `0d13f22` | 1.3 | fix: remove footer HTML from inc/footer.php |
+| `e7f87c9` | docs | TODO Phase 1 marked complete |
+| `164839e` | 2.1/2.2/2.3 | fix: safe FA dequeue, remove duplicate FA loader |
+| `134b4a5` | 2.2 | fix: preserve unknown tie-icon classes |
