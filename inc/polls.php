@@ -2,15 +2,10 @@
 /**
  * Advanced Poll System
  * IP-based voting, dark/sepia mode, RTL, animations.
+ * Font Awesome is loaded globally by core-setup.php - no need to load here.
  *
  * @package JannahChild
- * @version 2.4.0
- */
-
-/**
- * Teznevisan Advanced Poll System
- * Version: 2.0.0
- * Features: IP-Voting, Dark/Sepia Mode, RTL, Animations, Accessibility, Auto-Insert
+ * @version 3.1.0
  */
 
 if (!defined('ABSPATH')) exit;
@@ -47,17 +42,13 @@ function tez_poll_check_db() {
 
 // =============================================
 // 2. ENQUEUE ASSETS
+// Font Awesome already loaded by core-setup.php
 // =============================================
 add_action('wp_enqueue_scripts', 'tez_poll_assets');
 add_action('admin_enqueue_scripts', 'tez_poll_admin_assets');
 
 function tez_poll_assets() {
     if (!is_singular('post')) return;
-    
-    // Load FontAwesome if not present
-    if (!wp_style_is('font-awesome', 'enqueued') && !wp_style_is('fontawesome', 'enqueued')) {
-        wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css', array(), '6.5.1');
-    }
 
     // Frontend CSS
     wp_register_style('tez-poll-css', false);
@@ -66,7 +57,7 @@ function tez_poll_assets() {
 
     // Frontend JS
     wp_enqueue_script('jquery');
-    wp_register_script('tez-poll-js', '', array('jquery'), '2.0', true);
+    wp_register_script('tez-poll-js', '', array('jquery'), '3.1.0', true);
     wp_enqueue_script('tez-poll-js');
     wp_add_inline_script('tez-poll-js', tez_poll_get_js());
     
@@ -79,11 +70,6 @@ function tez_poll_assets() {
 function tez_poll_admin_assets($hook) {
     if ('post.php' !== $hook && 'post-new.php' !== $hook) return;
     
-    // Load FontAwesome
-    if (!wp_style_is('font-awesome', 'enqueued')) {
-        wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css', array(), '6.5.1');
-    }
-    
     // Admin CSS & JS
     wp_enqueue_script('jquery');
     wp_enqueue_script('jquery-ui-sortable');
@@ -92,7 +78,7 @@ function tez_poll_admin_assets($hook) {
     wp_enqueue_style('tez-poll-admin-css');
     wp_add_inline_style('tez-poll-admin-css', tez_poll_get_admin_css());
     
-    wp_register_script('tez-poll-admin-js', '', array('jquery', 'jquery-ui-sortable'), '2.0', true);
+    wp_register_script('tez-poll-admin-js', '', array('jquery', 'jquery-ui-sortable'), '3.1.0', true);
     wp_enqueue_script('tez-poll-admin-js');
     wp_add_inline_script('tez-poll-admin-js', tez_poll_get_admin_js());
 }
@@ -272,6 +258,7 @@ function tez_poll_shortcode($atts) {
 
 // =============================================
 // 7. AUTO INSERT INTO CONTENT
+// Priority 15 - After ToC (5), before FAQ (25)
 // =============================================
 add_filter('the_content', 'tez_poll_inject_content', 15);
 function tez_poll_inject_content($content) {
@@ -476,7 +463,7 @@ function tez_poll_ajax_handler() {
 function tez_poll_get_css() {
     return '
     /* ============================================
-       TEZ POLL - BASE STYLES
+       TEZ POLL - BASE STYLES (v3.1.0)
        ============================================ */
     
     .tez-poll-container {
