@@ -2,43 +2,16 @@
 /**
  * Table of Contents Generator
  * Auto-generates ToC from H2-H4 headings with multiple styles.
+ * Font Awesome is loaded globally by core-setup.php - no need to load here.
  *
  * @package JannahChild
- * @version 2.4.0
- */
-
-/**
- * Teznevisan Table of Contents Generator
- * Version: 2.0.0
- * Features: Auto-generate from H2-H4, Dark/Sepia Mode, RTL, Accessibility, Per-Post Settings
+ * @version 3.1.0
  */
 
 if (!defined('ABSPATH')) exit;
 
 // =============================================
-// 1. ENQUEUE FONT AWESOME
-// =============================================
-add_action('wp_enqueue_scripts', 'tez_toc_enqueue_assets');
-add_action('admin_enqueue_scripts', 'tez_toc_admin_assets');
-
-function tez_toc_enqueue_assets() {
-    if (!is_singular('post')) return;
-    
-    if (!wp_style_is('font-awesome', 'enqueued') && !wp_style_is('fontawesome', 'enqueued')) {
-        wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css', array(), '6.5.1');
-    }
-}
-
-function tez_toc_admin_assets($hook) {
-    if ('post.php' !== $hook && 'post-new.php' !== $hook) return;
-    
-    if (!wp_style_is('font-awesome', 'enqueued')) {
-        wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css', array(), '6.5.1');
-    }
-}
-
-// =============================================
-// 2. ADD META BOX
+// 1. ADD META BOX
 // =============================================
 add_action('add_meta_boxes', 'tez_toc_add_metabox');
 function tez_toc_add_metabox() {
@@ -53,7 +26,7 @@ function tez_toc_add_metabox() {
 }
 
 // =============================================
-// 3. META BOX HTML
+// 2. META BOX HTML
 // =============================================
 function tez_toc_metabox_html($post) {
     $data = get_post_meta($post->ID, '_tez_toc_data', true);
@@ -329,7 +302,7 @@ function tez_toc_metabox_html($post) {
 }
 
 // =============================================
-// 4. SAVE META BOX
+// 3. SAVE META BOX
 // =============================================
 add_action('save_post', 'tez_toc_save_meta');
 function tez_toc_save_meta($post_id) {
@@ -363,7 +336,7 @@ function tez_toc_save_meta($post_id) {
 }
 
 // =============================================
-// 5. SHORTCODE
+// 4. SHORTCODE
 // =============================================
 add_shortcode('tez_toc', 'tez_toc_shortcode');
 function tez_toc_shortcode($atts) {
@@ -374,7 +347,7 @@ function tez_toc_shortcode($atts) {
 }
 
 // =============================================
-// 6. AUTO INSERT INTO CONTENT
+// 5. AUTO INSERT INTO CONTENT
 // Priority 5 - Before Poll (15) and FAQ (25)
 // =============================================
 add_filter('the_content', 'tez_toc_inject_content', 5);
@@ -426,7 +399,7 @@ function tez_toc_inject_content($content) {
 }
 
 // =============================================
-// 7. HELPER: INSERT AFTER PARAGRAPH
+// 6. HELPER: INSERT AFTER PARAGRAPH
 // =============================================
 function tez_toc_insert_after_paragraph($content, $insert, $paragraph_num) {
     $paragraphs = explode('</p>', $content);
@@ -451,7 +424,7 @@ function tez_toc_insert_after_paragraph($content, $insert, $paragraph_num) {
 }
 
 // =============================================
-// 8. HELPER: ADD HEADING IDS
+// 7. HELPER: ADD HEADING IDS
 // =============================================
 function tez_toc_add_heading_ids($content, $data = array()) {
     $levels = isset($data['levels']) ? $data['levels'] : array('h2', 'h3');
@@ -477,7 +450,7 @@ function tez_toc_add_heading_ids($content, $data = array()) {
 }
 
 // =============================================
-// 9. GENERATE TOC
+// 8. GENERATE TOC
 // =============================================
 function tez_toc_generate($post_id, $content, $shortcode = false, $data = null) {
     if (!$data) {
@@ -596,7 +569,8 @@ function tez_toc_generate($post_id, $content, $shortcode = false, $data = null) 
 }
 
 // =============================================
-// 10. FRONTEND CSS
+// 9. FRONTEND CSS
+// Priority 99 - load after other styles
 // =============================================
 add_action('wp_head', 'tez_toc_frontend_css', 99);
 function tez_toc_frontend_css() {
@@ -604,7 +578,7 @@ function tez_toc_frontend_css() {
     ?>
     <style id="tez-toc-css">
     /* ============================================
-       TEZ TOC - BASE STYLES
+       TEZ TOC - BASE STYLES (v3.1.0)
        ============================================ */
     
     .tez-toc-container {
@@ -1212,7 +1186,8 @@ function tez_toc_frontend_css() {
 }
 
 // =============================================
-// 11. FRONTEND JS
+// 10. FRONTEND JS
+// Priority 99 - load after other scripts
 // =============================================
 add_action('wp_footer', 'tez_toc_frontend_js', 99);
 function tez_toc_frontend_js() {
