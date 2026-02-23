@@ -1,10 +1,10 @@
 <?php
 /**
- * Core Setup - Constants, Font Awesome, Header, Nav Walkers, Critical CSS
- * Extracted from Snippets/Core PHP Functions & Setup.php
+ * Core Setup - Constants, Font Awesome, Nav Walkers, Critical CSS
+ * Header/footer now live in template overrides (header.php, footer.php)
  *
  * @package JannahChild
- * @version 2.4.0
+ * @version 3.1.0
  */
 
 if (!defined('ABSPATH')) exit;
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) exit;
 // =============================================
 // CONSTANTS
 // =============================================
-if (!defined('TEZ_VERSION'))       define('TEZ_VERSION', '3.0.0');
+if (!defined('TEZ_VERSION'))       define('TEZ_VERSION', '3.1.0');
 if (!defined('TEZ_PHONE'))         define('TEZ_PHONE', '09331663849');
 if (!defined('TEZ_PHONE_DISPLAY')) define('TEZ_PHONE_DISPLAY', '۰۹۳۳۱۶۶۳۸۴۹');
 if (!defined('TEZ_WHATSAPP'))      define('TEZ_WHATSAPP', '09331663849');
@@ -27,7 +27,8 @@ if (!defined('TEZ_PRIMARY'))       define('TEZ_PRIMARY', '#22BE49');
 if (!defined('TEZ_PRIMARY_DARK'))  define('TEZ_PRIMARY_DARK', '#1a9e3b');
 
 // =============================================
-// ENQUEUE FONT AWESOME 7 PRO
+// ENQUEUE FONT AWESOME 7 PRO (LOCAL)
+// Loaded as ADDITIONAL stylesheet for Tez UI
 // =============================================
 if (!function_exists('tez_enqueue_fontawesome')) {
     function tez_enqueue_fontawesome() {
@@ -39,34 +40,25 @@ if (!function_exists('tez_enqueue_fontawesome')) {
 }
 
 // =============================================
-// DISABLE EXTERNAL FONT AWESOME (prevent conflicts)
+// DISABLE EXTERNAL FONT AWESOME
+// COMMENTED OUT to prevent breaking Jannah icons
+// Uncomment ONLY if you confirm Jannah doesn't use FA
 // =============================================
-if (!function_exists('tez_disable_external_fa')) {
-    function tez_disable_external_fa() {
-        $handles = array(
-            'font-awesome','fontawesome','font-awesome-4','font-awesome-5','font-awesome-6','font-awesome-7',
-            'fontawesome-free','fontawesome-pro','tie-fontawesome','flavor-fontawesome','jannah-fontawesome',
-            'fa-css','fa-all','fa-brands','fa-solid','fa-regular','fa-light','fa-thin','fa-duotone','fa-sharp','fontawesome-all',
-        );
-        foreach ($handles as $handle) {
-            wp_dequeue_style($handle);
-            wp_deregister_style($handle);
-        }
-    }
-    add_action('wp_enqueue_scripts', 'tez_disable_external_fa', 1);
-    add_action('wp_enqueue_scripts', 'tez_disable_external_fa', 100);
-}
-
-// =============================================
-// PREVENT DUPLICATE HEADER
-// =============================================
-if (!function_exists('tez_remove_theme_header')) {
-    function tez_remove_theme_header() {
-        remove_all_actions('wp_body_open');
-        add_action('wp_body_open', 'tez_output_header_html', 5);
-    }
-    add_action('after_setup_theme', 'tez_remove_theme_header', 999);
-}
+// if (!function_exists('tez_disable_external_fa')) {
+//     function tez_disable_external_fa() {
+//         $handles = array(
+//             'font-awesome','fontawesome','font-awesome-4','font-awesome-5','font-awesome-6','font-awesome-7',
+//             'fontawesome-free','fontawesome-pro','tie-fontawesome','flavor-fontawesome','jannah-fontawesome',
+//             'fa-css','fa-all','fa-brands','fa-solid','fa-regular','fa-light','fa-thin','fa-duotone','fa-sharp','fontawesome-all',
+//         );
+//         foreach ($handles as $handle) {
+//             wp_dequeue_style($handle);
+//             wp_deregister_style($handle);
+//         }
+//     }
+//     add_action('wp_enqueue_scripts', 'tez_disable_external_fa', 1);
+//     add_action('wp_enqueue_scripts', 'tez_disable_external_fa', 100);
+// }
 
 // =============================================
 // REGISTER NAV MENUS
@@ -252,140 +244,21 @@ if (!function_exists('tez_output_logo_styles')) {
 
 // =============================================
 // BODY CLASSES
+// Only strip sidebar classes on pages with custom templates
 // =============================================
 if (!function_exists('tez_filter_body_classes')) {
     function tez_filter_body_classes($classes) {
-        $remove = array('sidebar-right', 'sidebar-left', 'has-sidebar', 'boxed-layout', 'has-sticky-header');
-        $classes = array_diff($classes, $remove);
+        // Only remove layout classes on pages with custom templates (from templates/*)
+        if ( is_page() && get_page_template_slug() ) {
+            $template = get_page_template_slug();
+            if ( strpos($template, 'templates/') === 0 ) {
+                $remove = array('sidebar-right', 'sidebar-left', 'has-sidebar', 'boxed-layout', 'has-sticky-header');
+                $classes = array_diff($classes, $remove);
+                $classes[] = 'tez-no-sidebar';
+            }
+        }
         $classes[] = 'tez-theme-active';
-        $classes[] = 'tez-full-width';
-        $classes[] = 'tez-no-sidebar';
-        return $classes;
+        return array_values($classes);
     }
     add_filter('body_class', 'tez_filter_body_classes', 999);
-}
-
-// =============================================
-// HEADER OUTPUT
-// =============================================
-if (!function_exists('tez_output_header_html')) {
-    function tez_output_header_html() {
-        static $header_output = false;
-        if ($header_output) return;
-        $header_output = true;
-
-        $logo = home_url(TEZ_LOGO);
-        $name = get_bloginfo('name');
-        $home = home_url('/');
-        $phone = TEZ_PHONE;
-        $phone_display = TEZ_PHONE_DISPLAY;
-        $inquiry = home_url('/inquiry');
-        ?>
-<a href="#tez-main-content" class="tez-skip-link">رفتن به محتوای اصلی</a>
-
-<div class="tez-theme-buttons" id="tez-theme-buttons" role="toolbar">
-    <button type="button" class="tez-mode-btn active" data-theme="light" title="حالت روشن" aria-pressed="true"><i class="fa-solid fa-sun"></i></button>
-    <button type="button" class="tez-mode-btn" data-theme="dark" title="حالت تاریک" aria-pressed="false"><i class="fa-solid fa-moon"></i></button>
-    <button type="button" class="tez-mode-btn" data-theme="sepia" title="حالت کتاب" aria-pressed="false"><i class="fa-solid fa-book-open"></i></button>
-</div>
-
-<div class="tez-a11y-toolbar" id="tez-a11y-toolbar" role="toolbar">
-    <button type="button" class="tez-a11y-btn" data-action="increase-font" title="افزایش متن"><i class="fa-solid fa-plus"></i></button>
-    <button type="button" class="tez-a11y-btn" data-action="decrease-font" title="کاهش متن"><i class="fa-solid fa-minus"></i></button>
-    <button type="button" class="tez-a11y-btn" data-action="high-contrast" title="کنتراست"><i class="fa-solid fa-circle-half-stroke"></i></button>
-    <button type="button" class="tez-a11y-btn" data-action="reset" title="بازنشانی"><i class="fa-solid fa-rotate-right"></i></button>
-</div>
-
-<header id="tez-masthead" class="tez-site-header">
-    <div class="tez-container">
-        <div class="tez-header-inner">
-            <div class="tez-site-branding">
-                <a href="<?php echo esc_url($home); ?>" class="tez-logo-link" rel="home">
-                    <img src="<?php echo esc_url($logo); ?>" alt="<?php echo esc_attr($name); ?>" class="tez-logo" width="220" height="60">
-                </a>
-            </div>
-
-            <nav class="tez-main-nav" id="tez-main-nav" role="navigation">
-                <?php
-                if (has_nav_menu('tez_primary')) {
-                    wp_nav_menu(array('theme_location' => 'tez_primary', 'container' => false, 'menu_class' => 'tez-nav-menu', 'fallback_cb' => false, 'walker' => new Tez_Desktop_Nav_Walker()));
-                } elseif (has_nav_menu('primary')) {
-                    wp_nav_menu(array('theme_location' => 'primary', 'container' => false, 'menu_class' => 'tez-nav-menu', 'fallback_cb' => false, 'walker' => new Tez_Desktop_Nav_Walker()));
-                } else {
-                    echo '<ul class="tez-nav-menu"><li class="tez-menu-item"><a href="' . esc_url($home) . '" class="tez-nav-link"><span>خانه</span></a></li></ul>';
-                }
-                ?>
-            </nav>
-
-            <div class="tez-header-actions">
-                <a href="tel:<?php echo esc_attr($phone); ?>" class="tez-action-btn tez-phone-btn" title="تماس"><i class="fa-solid fa-phone"></i></a>
-                <button type="button" class="tez-action-btn tez-search-btn" id="tez-search-toggle" title="جستجو"><i class="fa-solid fa-magnifying-glass"></i></button>
-                <a href="<?php echo esc_url($inquiry); ?>" class="tez-btn tez-btn-primary tez-cta-btn">ثبت سفارش</a>
-            </div>
-
-            <button type="button" class="tez-mobile-toggle" id="tez-mobile-toggle" aria-label="منو">
-                <span class="tez-hamburger"><span class="tez-hamburger-line"></span><span class="tez-hamburger-line"></span><span class="tez-hamburger-line"></span></span>
-            </button>
-        </div>
-    </div>
-</header>
-
-<div class="tez-mobile-overlay" id="tez-mobile-overlay"></div>
-
-<nav class="tez-mobile-menu" id="tez-mobile-menu" role="dialog" aria-hidden="true">
-    <div class="tez-mobile-header">
-        <a href="<?php echo esc_url($home); ?>" class="tez-mobile-logo-link">
-            <img src="<?php echo esc_url($logo); ?>" alt="<?php echo esc_attr($name); ?>" class="tez-logo" width="160" height="44">
-        </a>
-        <button type="button" class="tez-mobile-close" id="tez-mobile-close" aria-label="بستن"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="tez-mobile-body">
-        <ul class="tez-mobile-nav">
-            <?php
-            if (has_nav_menu('tez_mobile')) {
-                wp_nav_menu(array('theme_location' => 'tez_mobile', 'container' => false, 'items_wrap' => '%3$s', 'fallback_cb' => false, 'walker' => new Tez_Mobile_Nav_Walker()));
-            } elseif (has_nav_menu('tez_primary')) {
-                wp_nav_menu(array('theme_location' => 'tez_primary', 'container' => false, 'items_wrap' => '%3$s', 'fallback_cb' => false, 'walker' => new Tez_Mobile_Nav_Walker()));
-            } elseif (has_nav_menu('primary')) {
-                wp_nav_menu(array('theme_location' => 'primary', 'container' => false, 'items_wrap' => '%3$s', 'fallback_cb' => false, 'walker' => new Tez_Mobile_Nav_Walker()));
-            } else {
-                echo '<li class="tez-mobile-menu-item"><a href="' . esc_url($home) . '" class="tez-mobile-link">خانه</a></li>';
-            }
-            ?>
-        </ul>
-    </div>
-    <div class="tez-mobile-footer">
-        <a href="tel:<?php echo esc_attr($phone); ?>" class="tez-mobile-phone"><i class="fa-solid fa-phone"></i><span><?php echo esc_html($phone_display); ?></span></a>
-        <a href="<?php echo esc_url($inquiry); ?>" class="tez-btn tez-btn-primary tez-btn-block"><i class="fa-solid fa-pen-to-square"></i> ثبت سفارش</a>
-    </div>
-</nav>
-
-<div class="tez-search-overlay" id="tez-search-overlay" role="dialog" aria-hidden="true">
-    <div class="tez-search-container">
-        <button type="button" class="tez-search-close" id="tez-search-close" aria-label="بستن"><i class="fa-solid fa-xmark"></i></button>
-        <form class="tez-search-form" role="search" method="get" action="<?php echo esc_url($home); ?>">
-            <div class="tez-search-input-wrap">
-                <input type="search" class="tez-search-input" name="s" placeholder="جستجو در سایت...">
-                <button type="submit" class="tez-search-submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<main id="tez-main-content" class="tez-main-content">
-<?php
-    }
-}
-
-// =============================================
-// CLOSE MAIN TAG
-// =============================================
-if (!function_exists('tez_output_close_main')) {
-    function tez_output_close_main() {
-        static $closed = false;
-        if ($closed) return;
-        $closed = true;
-        echo '</main>';
-    }
-    add_action('wp_footer', 'tez_output_close_main', 5);
 }
