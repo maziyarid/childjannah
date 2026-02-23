@@ -1,206 +1,328 @@
-Jannah Child Theme Full Revision & Fix Plan – Teznevisan3.com
-Version: 1.0 – February 23, 2026
-Status: Pre-Coding Documentation (Zero Missings)
-Repository Structure to Create:
-textteznevisan3-child-theme-fix/
-├── README.md                  ← this entire plan (copy here)
-├── docs/
-│   ├── issues-audit.md
-│   ├── jannah-builtins-used.md
-│   └── verification-checklist.md
-├── src/                       ← actual child theme folder (will become wp-content/themes/jannah-child)
-│   ├── style.css
-│   ├── functions.php
-│   ├── js/scripts.js
-│   ├── assets/css/tez-custom.css
-│   ├── inc/                   ← moved modules only
-│   └── templates/             ← minimal if needed
-├── tasks/
-│   ├── phase-0-prep.md
-│   ├── phase-1-foundation.md
-│   └── ... (one per phase)
-└── verification/              ← screenshots + GSC exports after each phase
-Success Criteria (Must All Be True Before Launch)
+***
 
-PageSpeed 100/100 mobile + desktop (tested on PageSpeed Insights + GTmetrix).
-Core Web Vitals: LCP <1.8 s, CLS = 0, INP <100 ms (GSC + Web Vitals report).
-Zero console errors (DevTools on all page types).
-No double top menu (Jannah sticky + mega-menu only).
-Every page has hero section via Jannah Page Builder (full-width section + background + Custom Content Block).
-All service pages built inside Jannah Page Builder (no PHP bypass).
-Blog uses Jannah single layouts only.
-Dark/sepia modes fully functional.
-Clean GSC (no 4xx/redirect chains, all legitimate pages indexed).
-Child theme only — zero WP Code snippets active.
+# Jannah Child Theme – FINAL REVISION TODO (No Missings)
+
+**Branch:** `fix/final-child-theme-rewrite`
+**Goal:** Stable, bug‑free Jannah child theme that:
+
+- Uses built‑in Jannah features as base
+- Uses child theme mainly for **appearance + advanced enhancements**
+- Keeps footer, single‑post enhancements, ToC, FAQ, polls, ratings, meta
+- Uses Irancell fonts + local Font Awesome **without breaking Jannah icons**
+- Fixes double top menu and invalid HTML structure
+
+***
+
+## Phase 0 – Git \& Prep
+
+### 0.1 Branch \& file setup
+
+- [ ] Create branch from `New`:
+    - `git checkout New`
+    - `git pull`
+    - `git checkout -b fix/final-child-theme-rewrite`
+- [ ] Add this file as `TODO_CHILD_THEME_REWRITE.md` at repo root and commit:
+    - `git add TODO_CHILD_THEME_REWRITE.md`
+    - `git commit -m "docs: add final child theme TODO"`
 
 
-1. Complete Issue Audit (Every Single Detail, No Missings)
-1.1 Performance & Render-Blocking (From All Code + Audits)
+### 0.2 Environment \& theme setup
 
-Inline <style> + <script> at priority 9999 (Typography, Single Post CSS/JS, Service Page, Star Rating, Remove Titles, Critical CSS).
-Duplicated Font Awesome (local FA7 + CDN).
-Service pages render 200+ KB inline HTML/CSS/JS outside theme hierarchy.
-Multiple setTimeout + repeated DOMContentLoaded.
-No defer/async on custom JS.
-Reading progress + custom TOC + FAQ JS not optimised.
+- [ ] Ensure a separate **staging** environment (subdomain or local) that runs the same code as live.
+- [ ] Full backup of database + `wp-content` on staging.
+- [ ] Ensure **Jannah** parent theme is installed and updated.
+- [ ] Activate the **child theme** (`Jannah Child` / `jannah-child`).
+- [ ] Deactivate WPCode / Code Snippets that overlap with child‑theme modules (ToC, redirects, FAQ, polls, ratings, etc.).
+- [ ] Clear plugin cache (e.g. WP Rocket), server cache, and CDN/Cloudflare cache.
 
-1.2 SEO & Indexing (From Ahrefs/GSC + Grok Reports)
+**Verification (Phase 0):**
 
-Duplicate H1s (Jannah .entry-title + custom service/single-post code).
-Overlapping schemas (RankMath/Yoast + manual Article/AggregateRating + Service schema).
-Custom taxonomies (tez_service_*) not in Jannah sitemap.
-Tracking-parameter URLs still leaking.
-Noindex bleed on legitimate pages (history remnants).
-404s: /assignments/, /isi-paper/, missing screenshots (/2024/10/Screenshot-*.png).
-Redirect chains (archives, www/non-www).
-Missing titles/descriptions (50+ pages), alt texts (70 %+ images).
-Low word count + thin content on some service pages.
+- [ ] Staging loads with the `New` branch child theme active.
+- [ ] Some layout bugs and double menus are still visible (expected at this stage).
 
-1.3 UI/UX & Theme Breakage
+***
 
-Double top menu (custom header conflicting with Jannah sticky/mega-menu).
-.tez-* classes override Jannah responsive grid → broken mobile menu/layout.
-Service pages bypass header/footer/mega-menu/sticky elements.
-!important + hardcoded colors break dark/sepia modes.
-Custom back-to-top, breadcrumbs, reading progress, FAQ accordion, star rating duplicate Jannah natives.
+## Phase 1 – Header/Footer Architecture \& Double Menu Fix
 
-1.4 Maintainability & Security (From All Modules)
+### 1.1 Implement child `header.php` override
 
-All logic in WP Code → no version control, update conflicts.
-Service form AJAX: weak rate-limiting, open upload folder.
-Hardcoded emails in PHP.
-No caching headers on custom assets.
-
-1.5 Redundancies (80 % to Delete)
-25–40. All listed in previous Deepseek/Grok reports (star rating, basic TOC, buttons/boxes, etc.).
-Spam Remnants (From Ahrefs + GSC)
-41. 410 rules + robots.txt updates already done — confirm in child sitemap generation.
-42. Disavow file uploaded — monitor in GSC.
-Multilingual & AI (From Excel Sheet 2)
-43–60. WPML/Polylang, hreflang, llms.txt, English pages — integrate via child + Jannah options (no new plugins beyond what’s already in history).
-
-2. Jannah Built-in Features We Will Use Exclusively (Confirmed List)
-Page Builder (for ALL pages – Hero Sections)
-
-Sections: full-width, background image/video, parallax, dark skin, sticky sidebar.
-Custom Content Blocks: arbitrary HTML + shortcodes + title + color + dark mode.
-
-Shortcodes (Jannah Extensions – Required)
-
-[button], [box], [columns], [tabs], [toggle], [content_index], [review], [quote], [list], [divider], [padding], [highlight], [author_box], etc.
-
-Theme Options (Appearance Only)
-
-Styling Settings → Primary color, skins, typography (local Irancell), disable Google Fonts.
-Post Settings → single layout, reading progress bar, back-to-top, title/breadcrumb per page.
-Layout Settings → header style, mega-menu, sticky elements.
-Block Settings → meta control, block heads.
-
-Template Overrides (Minimal)
-
-404.php (use your Beautiful 404 Hub inside get_header()/get_footer()).
-No full page-*.php bypass — use Page Builder on every page.
-
-Other Natives
-
-Local fonts upload, RTL support, schema via post settings/Rank Math.
+- [ ] Create `/header.php` in child theme root.
+- [ ] Structure:
+    - DOCTYPE + `<html <?php language_attributes(); ?>>`
+    - `<head>` with `wp_head()`.
+    - `<body <?php body_class(); ?>>` then `wp_body_open()`.
+- [ ] Copy the Tez header markup (logo, nav, theme mode switcher, a11y toolbar, mobile menu, search overlay) from `tez_output_header_html()` in `inc/core-setup.php` and adapt it into `header.php`.
+- [ ] Keep:
+    - Desktop nav using `Tez_Desktop_Nav_Walker` when available.
+    - Mobile nav using `Tez_Mobile_Nav_Walker`.
+    - Menu order: prefer `tez_primary`, fall back to `primary` if needed.
+- [ ] Leave header builder / header options in Jannah mostly untouched; child header should *be* the effective header via this template override.[^1]
+- [ ] Open `<main id="tez-main-content" class="tez-main-content">` after the header and skip‑link.
 
 
-3. What We Keep (Minimal Custom – Integrated into Child)
+### 1.2 Implement child `footer.php` override
 
-Complete Page Templates CSS (design tokens + .tez-* renamed to .tez- prefix only where needed; variables for dark/sepia).
-Beautiful Table of Contents (meta box + auto-insert).
-Complete Poll System (DB + shortcode).
-Visual Sitemap, Tag Hub, 404 Hub (as content filters/shortcodes inside Jannah pages).
-SEO URL Cleanup (hooks only).
-Service Form Handler (shortcode only).
+- [ ] Create `/footer.php` in child theme root.
+- [ ] Close `</main>` (which was opened in `header.php`).
+- [ ] Move the footer markup you liked from `inc/footer.php` into `footer.php`:
+    - 4‑column footer:
+        - Col 1: logo + description + social icons.
+        - Col 2: “خدمات ما” menu (`tez_footer_1`) with fallback list if empty.
+        - Col 3: “لینک‌های مفید” menu (`tez_footer_2`) with fallback links.
+        - Col 4: contact info (phone, email, address, hours).
+    - Footer bottom: copyright, footer links (Terms, Privacy, Sitemap).
+- [ ] After footer, render:
+    - Chaty floating contact widget with 5 channels (phone, SMS, WhatsApp, Telegram, email).
+    - Scroll‑to‑top button.
 
-Everything else deleted/replaced.
-
-4. Exact Child Theme Structure (Final – Copy to Repo)
-(See repository structure above.)
-
-5. Phase-by-Phase Execution Plan (7 Days Max – Verifiable Tasks)
-Phase 0: Preparation (Day 1 – 30 min)
-
-Create staging subdomain + full backup.
-Deactivate all WP Code snippets.
-Activate official jannah-child.
-Install/activate: Jannah Extensions, WP Rocket, ShortPixel, Rank Math.
-Clear all caches.
-Verification: Site loads (may look broken — expected). Screenshot homepage.
-
-Phase 1: Foundation & Double Top Menu Fix (Day 1)
-
-Paste exact functions.php + style.css (I will provide in next message after you confirm Phase 0).
-Enqueue parent + child + tez-custom.css (priority 30).
-Fix double top menu: In Theme Options → Header → disable custom header overrides; use Jannah sticky + mega-menu only + child CSS for appearance.
-Verification: Single clean top menu (sticky on scroll). No console errors.
-
-Phase 2: CSS Consolidation & Design System (Day 2)
-
-Merge all CSS into assets/css/tez-custom.css (variables only, no !important).
-Align Jannah Theme Options (Primary #2563eb, local Irancell, dark skin enabled).
-Remove all hardcoded colors/fonts.
-Verification: Dark/sepia toggle works on homepage. Mobile grid perfect.
-
-Phase 3: Hero Sections & Page Builder Standard (Day 3)
-
-For every page (service, about, contact, etc.):
+```
+- [ ] Call `wp_footer()` and close `</body></html>`.  
+```
 
 
-Edit → Template: Default (or Full-width).
-Open TieLabs Page Builder.
-First section: Full-width + background image + Custom Content Block (H1 + USP using Jannah [box] + [button]).
+### 1.3 Remove header/footer hooked output
+
+- [ ] In `inc/core-setup.php`:
+    - [ ] Remove the entire `tez_remove_theme_header()` function and its `add_action('after_setup_theme', 'tez_remove_theme_header', 999);` line.
+    - [ ] Remove the entire `tez_output_header_html()` function (now handled by `header.php`).
+- [ ] In `inc/core-setup.php`:
+    - [ ] Remove `tez_output_close_main()` and its hook `add_action('wp_footer', 'tez_output_close_main', 5);` (closing `</main>` is now in `footer.php`).
+- [ ] In `inc/footer.php`:
+    - [ ] Remove `add_action('wp_footer', 'tez_output_footer_html', 10);`.
+    - [ ] Optionally keep a minimal file with just widget registration or future utilities; it should not output markup directly.
 
 
-Blog pages: Keep Jannah single layout + child CSS only.
-Verification: All pages have hero section. Screenshot 5 pages.
+### 1.4 Body classes \& layout
 
-Phase 4: Replace Redundancies + Keep Modules (Day 4)
+- [ ] In `inc/core-setup.php`, update `tez_filter_body_classes()` to:
+    - Only strip sidebar / boxed layout classes on **pages with custom templates** (from `templates/*`).
+    - Keep sidebars intact for posts/archives.
+    - Always add `tez-theme-active` for targeting.
 
-Delete Star Rating, Remove Titles, custom FAQ, basic TOC, reading progress, back-to-top from WP Code.
-Use Jannah equivalents (listed in section 2).
-Move kept modules to /inc/ + require in functions.php (order: seo-url-cleanup → toc → poll → sitemap/tag/404 → form).
-Verification: No duplicate features. Poll/ToC work on test post.
+**Verification (Phase 1):**
 
-Phase 5: Service Pages Rebuild (Day 5)
+- [ ] On staging, inspect several pages (home, services, about, single post, archives):
+    - Exactly **one** header (no double top menu).
+    - Exactly **one** footer.
 
-Delete old PHP service pages.
-Rebuild each as draft with Page Builder + your CSS classes inside Custom Content Blocks (hero, features, pricing, FAQ via [toggle], form shortcode).
-Verification: 5 service pages live, load <2 s, fully responsive.
+```
+- DOM order: `<header>` → `<main>` → `<footer>` → `wp_footer()` → `</body></html>`.  
+```
 
-Phase 6: Performance + QA Lockdown (Day 6)
+- [ ] No PHP errors in debug log after refresh.
 
-WP Rocket full config (page cache, minify, combine, delay JS, critical CSS auto).
-ShortPixel WebP + lazy.
-Run full checklist: console, schema (Rich Results Test), mobile devices, GSC coverage.
-Verification: 100/100 PageSpeed + perfect CWV screenshot.
+***
 
-Phase 7: Launch & Monitoring (Day 7)
+## Phase 2 – Icons \& Fonts (Safe Font Awesome + Irancell)
 
-Deploy to live → clear all caches.
-Submit clean XML sitemap (Jannah + legitimate pages only).
-Request indexing for all pages in GSC.
-Update Excel remaining tasks (featured images, alts, excerpts — I will provide ready list).
-Verification: GSC “Indexed” count rising, no new errors.
+### 2.1 Stop breaking Jannah icons
+
+- [ ] In `inc/core-setup.php`:
+    - [ ] Comment out or delete `tez_disable_external_fa()` and its `add_action('wp_enqueue_scripts', 'tez_disable_external_fa', ...)`.
+- [ ] Flush caches and reload: check that Jannah’s own nav icons / UI icons still appear.
 
 
-6. Repository Monitoring Checklist (Copy to tasks/ folder)
+### 2.2 Keep local Font Awesome for Tez components
 
- Phase 0 complete – staging screenshot
- Phase 1 – double menu fixed
- Phase 2 – CSS variables working
- Phase 3 – hero on every page
- Phase 4 – modules moved, redundancies deleted
- Phase 5 – 5 service pages rebuilt
- Phase 6 – 100/100 + CWV
- Phase 7 – live + GSC indexing requested
+- [ ] Keep `tez_enqueue_fontawesome()` so it enqueues local FA from `TEZ_FA_URL` for Tez header/footer/Chaty/ToC icons.
+- [ ] Keep `tez_preload_fa()` but confirm the `font-family` stack in `tez_fa_fix_css()` **adds** FA families, not removes Jannah’s icon family:
+    - E.g. ensure selectors like `.fa, .fas, ...` don’t override theme‑specific icon families where not needed.
+- [ ] Check for any “icon mapping” that replaces Jannah/Tie “tie-icon” classes globally; if `inc/icon-mapping.php` is too aggressive, adjust it to only act where you explicitly opt in.
 
-Weekly Monitoring After Launch (From Excel)
 
-GSC Coverage + Performance
-PageSpeed weekly
-Console errors
-Dark/sepia test
-Spam re-appearance check
+### 2.3 Irancell fonts
+
+- [ ] Confirm `TEZ_FONT_URL` is correct and Irancell font files exist at that path.
+- [ ] In `inc/typography.php`, ensure:
+    - `@font-face` definitions load fonts from `TEZ_FONT_URL`.
+    - The body font family uses Irancell/Vazirmatn stack plus system fonts.
+- [ ] In Jannah → Styling, disable Google Fonts if not already done.[^2]
+
+**Verification (Phase 2):**
+
+- [ ] Theme icons (Jannah default) and Tez icons both render.
+- [ ] Irancell fonts apply to body text.
+- [ ] No missing icon squares anywhere.
+
+***
+
+## Phase 3 – CSS/JS Asset Loading \& Design System
+
+### 3.1 Asset loading in `functions.php`
+
+- [ ] Verify `tez_enqueue_child_assets()` does:
+    - Enqueue `rtl.css` from parent only when `is_rtl()`.
+    - Enqueue child `style.css` (header only).
+    - Enqueue `css/main.css` always.
+    - Conditionally enqueue `css/single-post.css` on `is_singular('post')`.
+    - Conditionally enqueue `css/page-templates.css` on `is_page()`.
+    - Conditionally enqueue `css/post-elements.css` on `is_singular()`.
+    - Enqueue `js/scripts.js` globally.
+    - Conditionally enqueue `js/single-post.js` on `is_singular('post')`.
+
+
+### 3.2 Design system sanity
+
+- [ ] Open `DEVELOPMENT_REPORT.md` and cross‑check `css/main.css`, `css/page-templates.css`, `css/single-post.css`, `css/post-elements.css` exist and roughly match the described line counts.
+- [ ] Ensure `:root` variables define: `--tez-primary`, `--tez-primary-dark`, `--tez-bg`, `--tez-text`, etc., and that dark/sepia variants are defined.
+- [ ] Remove any old selectors left from earlier snippet copies that are no longer used by templates (keep CSS slim).
+
+**Verification (Phase 3):**
+
+- [ ] Use browser dev tools to check network: CSS/JS only load on intended pages.
+- [ ] Visual regression check: header, hero, footer, single post look correct across light/dark/sepia.
+
+***
+
+## Phase 4 – Page Templates \& Hero System
+
+### 4.1 Template registration \& usage
+
+- [ ] In `inc/page-templates.php`, confirm all 7 page templates are registered: about, contact, FAQ, service, homepage, inquiry, tag hub.
+- [ ] On staging, verify each template appears in the Page Editor (Template dropdown).
+
+
+### 4.2 Refine existing templates
+
+- [ ] `templates/homepage.php`: ensure hero, stats, services overview, process, CTA, and blog posts sections render correctly and use current CSS classes.
+- [ ] `templates/services.php`: confirm hero, quick inquiry area, service accordions, and CTA layout follow design system.
+- [ ] `templates/inquiry.php`: confirm hero + full form + sidebar content render correctly.
+- [ ] `templates/about.php`, `contact.php`, `faq.php`, `tag-hub.php`: ensure they at least output the content area in a Tez hero + content wrapper; extend later if needed.
+
+
+### 4.3 Auto hero for non‑templated pages
+
+- [ ] In `inc/misc-tweaks.php` (or a new `inc/page-hero.php`):
+    - [ ] Add a `the_content` filter with priority 1 that:
+        - Runs only on `is_page()`, `!is_admin()`, main query.
+        - Skips pages using templates under `templates/`.
+        - Builds hero section from: title, excerpt (subtitle), and featured image.
+        - Outputs hero markup before original `$content` using the same Tez hero classes.
+
+
+### 4.4 Avoid duplicate titles
+
+- [ ] Harden `tez_hide_page_title_on_templates()` (in `inc/misc-tweaks.php`):
+    - Guard for `$id === null`.
+    - Only hide when `is_page()`, `in_the_loop()`, and the template slug starts with `templates/`.
+
+**Verification (Phase 4):**
+
+- [ ] Pages with Tez templates display their designed hero.
+- [ ] Standard pages (no template) get an auto hero without any Page Builder use.
+- [ ] No duplicated H1 titles on pages.
+
+***
+
+## Phase 5 – Blog Enhancements \& Single Post Features
+
+### 5.1 Module integrity
+
+- [ ] Confirm `functions.php` still requires all modules in correct order: core, footer, SEO, redirects, page templates, 404 hub, visual sitemap, ToC, polls, star rating, key takeaways, FAQ schema, post meta, feed controller, typography, icon mapping, misc tweaks.
+- [ ] Check each `inc/*.php` file loads without fatal errors and does not declare duplicate function names.
+
+
+### 5.2 Single post UX
+
+- [ ] Confirm `css/single-post.css` styles: reading progress, ToC, heading anchors, sidebar share, author box, related posts, navigation, FAQ and dark mode.
+- [ ] Confirm `js/single-post.js` features: reading progress bar, ToC active state, share popups, copy link, external link markers.
+- [ ] Confirm ToC, key takeaways, FAQ schema, polls, star rating, and enhanced meta appear once per post and do not conflict with Jannah’s native options.
+
+**Verification (Phase 5):**
+
+- [ ] Test a post with all features, a post with few features, and a post with none; layout remains stable.
+- [ ] No console errors arising from single‑post scripts.
+
+***
+
+## Phase 6 – Footer Preservation \& Improvements
+
+### 6.1 Footer content \& menus
+
+- [ ] Ensure `footer.php` uses the same text and structure from `inc/footer.php` that you liked.
+- [ ] In Appearance → Menus, assign:
+    - Services menu to `tez_footer_1`.
+    - Useful links to `tez_footer_2`.
+- [ ] Ensure fallback lists in footer show reasonable links when menus are not assigned.
+
+
+### 6.2 Floating widget \& scroll‑top
+
+- [ ] Confirm Chaty widget markup is present in `footer.php` and matches the original behavior:
+    - 5 fixed channels with tooltips and ARIA.
+- [ ] Confirm scroll‑to‑top button exists and is controlled by `scripts.js`.
+- [ ] Ensure no duplicate instances of these widgets get created.
+
+**Verification (Phase 6):**
+
+- [ ] Footer visually matches expectations on multiple pages.
+- [ ] Chaty + scroll‑top work in all viewports, dark/sepia included.
+
+***
+
+## Phase 7 – SEO, Redirects, Sitemap, Feeds
+
+### 7.1 URL cleanup \& redirects
+
+- [ ] Review `inc/seo-url-cleanup.php` to ensure tracking parameter cleanup targets only relevant URLs (canonical, schema, etc.), and does not break necessary query strings.
+- [ ] Review `inc/seo-redirects.php` to confirm:
+    - Date archives redirect appropriately or are disabled.
+    - Author archives are removed/redirected as intended.
+    - No redirect loops or unintended 404s.
+
+
+### 7.2 Visual sitemap \& 404 hub
+
+- [ ] Verify `inc/visual-sitemap.php` outputs an HTML sitemap page (check URL or shortcode as implemented).
+- [ ] Confirm `404.php` + `inc/404-hub.php` show the rich 404 layout with search, popular posts, categories, quick links.
+
+
+### 7.3 Feeds
+
+- [ ] Check `inc/feed-controller.php` for any 410 responses or feed disabling; confirm these align with your SEO strategy.
+
+**Verification (Phase 7):**
+
+- [ ] Manually test a date archive URL, an author archive URL, and `/sitemap`.
+- [ ] Check logs or browser for redirect behavior and status codes.
+
+***
+
+## Phase 8 – QA: Performance, Accessibility, RTL
+
+### 8.1 Performance
+
+- [ ] Run Lighthouse (DevTools) on home, a service page, and a single post (desktop + mobile).
+- [ ] Confirm CSS/JS bundles are not duplicated and that conditional loading decisions from Phase 3 still hold.
+- [ ] Check that fonts and FA assets are not requested multiple times.
+
+
+### 8.2 Accessibility \& RTL
+
+- [ ] Confirm skip link jumps to `#tez-main-content` and is visible on focus.
+- [ ] Confirm theme mode and a11y toolbar buttons have proper `aria-*` attributes and keyboard accessibility.
+- [ ] Validate RTL layout across header, hero, content, footer, Chaty, and forms.
+
+
+### 8.3 Error checks
+
+- [ ] Enable `WP_DEBUG_LOG` on staging and browse all major page types; confirm no new PHP notices/warnings.
+- [ ] Open DevTools console on key pages; ensure **zero** JS errors.
+
+***
+
+## Phase 9 – Git, Docs, and Merge
+
+### 9.1 Commits and documentation
+
+- [ ] Commit after each phase with clear messages (`feat: add header.php override`, `fix: remove FA dequeue`, etc.).
+- [ ] Keep `DEVELOPMENT_REPORT.md` updated with any architectural changes (header/footer overrides, hero system behavior changes).
+- [ ] At the end, update this TODO with checkmarks and optionally notes/links to test screenshots.
+
+
+### 9.2 Merge \& release
+
+- [ ] When staging passes all checks, merge `fix/final-child-theme-rewrite` into `New`.
+- [ ] Optionally tag a release `v3.1.0-final-child` after deployment and smoke tests on live.
+
+***
