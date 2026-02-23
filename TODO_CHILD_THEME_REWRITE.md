@@ -1,132 +1,200 @@
 # Jannah Child Theme – FINAL REVISION TODO (No Missings)
 
-**Branch:** `New` (implementing directly)
-**Goal:** Stable, bug‑free Jannah child theme that:  
-- Uses built‑in Jannah features as base  
-- Uses child theme mainly for **appearance + advanced enhancements**  
-- Keeps footer, single‑post enhancements, ToC, FAQ, polls, ratings, meta  
-- Uses Irancell fonts + local Font Awesome **without breaking Jannah icons**  
-- Fixes double top menu and invalid HTML structure  
+**Branch:** `New` (working branch)
+**Goal:** Stable, bug‑free Jannah child theme that:
+
+- Uses built‑in Jannah features as base
+- Uses child theme mainly for **appearance + advanced enhancements**
+- Keeps footer, single‑post enhancements, ToC, FAQ, polls, ratings, meta
+- Uses Irancell fonts + local Font Awesome **without breaking Jannah icons**
+- Fixes double top menu and invalid HTML structure
+
+**Status:** 🚧 In Progress  
+**Last Updated:** 2026-02-23
+
+---
+
+## ✅ Completed Pre-Phase Work
+
+### Module Enhancements (v3.0.0)
+
+- [x] **Poll System v3.0.0** – Advanced voting with real-time results, analytics, CSV export
+- [x] **Key Takeaways v3.0.0** – Collapsible, reading time, copy-to-clipboard, numbered lists
+- [x] **FAQ Schema v3.0.0** – Search/filter, expand all, copy answers, URL hash navigation
+
+**Commits:**
+- Poll System: `3d97285` (2026-02-23)
+- Key Takeaways: `0494c93` (2026-02-23)
+- FAQ Schema: `d96197f` (2026-02-23)
 
 ---
 
 ## Phase 0 – Git & Prep
 
-- [x] Git branch setup
-- [x] TODO file added and committed
-- [ ] Staging environment + backup + cache clear (manual verification needed)
+### 0.1 Branch & file setup
+
+- [x] Working on `New` branch (already established)
+- [x] Add TODO file as `TODO_CHILD_THEME_REWRITE.md` at repo root
+- [x] Commit TODO file with proper message
+
+### 0.2 Environment & theme setup
+
+- [ ] Ensure staging environment is ready
+- [ ] Full backup of database + `wp-content` on staging
+- [ ] Ensure **Jannah** parent theme is installed and updated
+- [ ] Activate the **child theme** (`Jannah Child` / `jannah-child`)
+- [ ] Deactivate WPCode / Code Snippets that overlap with child‑theme modules
+- [ ] Clear plugin cache, server cache, and CDN/Cloudflare cache
+
+**Verification (Phase 0):**
+
+- [ ] Staging loads with the `New` branch child theme active
+- [ ] Layout bugs and double menus visible (expected at this stage)
+
+**Status:** 🟡 Partially Complete (TODO file added, environment prep needed)
 
 ---
 
-## Phase 1 – Header/Footer Architecture ✅ COMPLETE
+## Phase 1 – Header/Footer Architecture & Double Menu Fix
 
-- [x] `/header.php` + `/footer.php` overrides created
-- [x] Removed hook-based header/footer output from `core-setup.php`
-- [x] Fixed body class filter to preserve sidebar classes for posts/archives
+### 1.1 Implement child `header.php` override
 
-**Commits:** `8dd7187`, `3baaeec`, `439854d`, `0d13f22`
+- [ ] Create `/header.php` in child theme root
+- [ ] Structure with DOCTYPE, `<html>`, `<head>`, `wp_head()`
+- [ ] Add `<body>` with `body_class()` and `wp_body_open()`
+- [ ] Copy Tez header markup from `inc/core-setup.php`
+- [ ] Adapt header with `Tez_Desktop_Nav_Walker` and `Tez_Mobile_Nav_Walker`
+- [ ] Menu order: prefer `tez_primary`, fallback to `primary`
+- [ ] Open `<main id="tez-main-content">` after header
+
+### 1.2 Implement child `footer.php` override
+
+- [ ] Create `/footer.php` in child theme root
+- [ ] Close `</main>` tag
+- [ ] Move footer markup from `inc/footer.php` to `footer.php`
+- [ ] 4-column footer with menus and contact info
+- [ ] Footer bottom with copyright and links
+- [ ] Chaty floating contact widget (5 channels)
+- [ ] Scroll-to-top button
+- [ ] Call `wp_footer()` and close `</body></html>`
+
+### 1.3 Remove header/footer hooked output
+
+- [ ] Remove `tez_remove_theme_header()` from `inc/core-setup.php`
+- [ ] Remove `tez_output_header_html()` from `inc/core-setup.php`
+- [ ] Remove `tez_output_close_main()` and its hook
+- [ ] Remove `add_action('wp_footer', 'tez_output_footer_html', 10)` from `inc/footer.php`
+
+### 1.4 Body classes & layout
+
+- [ ] Update `tez_filter_body_classes()` in `inc/core-setup.php`
+- [ ] Strip sidebar classes only on pages with custom templates
+- [ ] Keep sidebars intact for posts/archives
+- [ ] Always add `tez-theme-active` class
+
+**Verification (Phase 1):**
+
+- [ ] Exactly **one** header (no double top menu)
+- [ ] Exactly **one** footer
+- [ ] DOM order: `<header>` → `<main>` → `<footer>` → `wp_footer()` → `</body></html>`
+- [ ] No PHP errors in debug log
+
+**Status:** 🔴 Not Started
 
 ---
 
-## Phase 2 – Icons & Fonts ✅ COMPLETE
+## Phase 2 – Icons & Fonts (Safe Font Awesome + Irancell)
 
-- [x] Safe Font Awesome dequeue (only CDN handles, preserve parent theme handles)
-- [x] Removed duplicate FA loader in `typography.php`
-- [x] Fixed `icon-mapping.php` fallback (preserve unknown icons)
-- [x] Irancell @font-face stack complete (6 weights, woff2+woff+ttf)
+### 2.1 Stop breaking Jannah icons
 
-**Commits:** `164839e`, `134b4a5`
+- [ ] Comment out `tez_disable_external_fa()` in `inc/core-setup.php`
+- [ ] Verify Jannah's nav icons / UI icons still appear
+
+### 2.2 Keep local Font Awesome for Tez components
+
+- [ ] Keep `tez_enqueue_fontawesome()` for Tez components
+- [ ] Keep `tez_preload_fa()` with proper font-family stack
+- [ ] Check `inc/icon-mapping.php` doesn't override Jannah icons
+
+### 2.3 Irancell fonts
+
+- [ ] Confirm `TEZ_FONT_URL` path is correct
+- [ ] Verify `@font-face` in `inc/typography.php`
+- [ ] Ensure body font uses Irancell/Vazirmatn stack
+- [ ] Disable Google Fonts in Jannah → Styling
+
+**Verification (Phase 2):**
+
+- [ ] Theme icons (Jannah) and Tez icons both render
+- [ ] Irancell fonts apply to body text
+- [ ] No missing icon squares
+
+**Status:** 🔴 Not Started
 
 ---
 
-## Phase 3 – CSS/JS Asset Loading ✅ COMPLETE
+## Phase 3 – CSS/JS Asset Loading & Design System
 
-- [x] `TEZ_CHILD_VERSION` bumped to `3.1.0`
-- [x] Fixed 404 page CSS loading (`page-templates.css` now loads on `is_404()`)
-- [x] Enhanced `tezData` localization (9 keys: isRTL, siteDir, isPost, is404, etc.)
-- [x] `post-elements.css`: added dark/sepia/high-contrast overrides (1.7KB → 6KB)
-- [x] `scripts.js` v3.1.0: RTL-aware `scrollToForm()`, tighter FAQ/dropdown ARIA
+### 3.1 Asset loading in `functions.php`
 
-**Commits:** `1b429f9`, `14ebbef`, `c78424e`
+- [ ] Verify `tez_enqueue_child_assets()` conditional loading:
+  - [ ] `rtl.css` only when `is_rtl()`
+  - [ ] Child `style.css` in header
+  - [ ] `css/main.css` always
+  - [ ] `css/single-post.css` on `is_singular('post')`
+  - [ ] `css/page-templates.css` on `is_page()`
+  - [ ] `css/post-elements.css` on `is_singular()`
+  - [ ] `js/scripts.js` globally
+  - [ ] `js/single-post.js` on `is_singular('post')`
+
+### 3.2 Design system sanity
+
+- [ ] Cross-check CSS files exist and match line counts
+- [ ] Verify `:root` variables define all design tokens
+- [ ] Remove unused selectors from old snippets
+
+**Verification (Phase 3):**
+
+- [ ] CSS/JS only load on intended pages (check network tab)
+- [ ] Visual consistency across light/dark/sepia modes
+
+**Status:** 🔴 Not Started
 
 ---
 
-## Phase 4 – Page Templates & Hero System ✅ COMPLETE
+## Phase 4 – Page Templates & Hero System
 
-### 4.1 Template registration
+### 4.1 Template registration & usage
 
-- [x] 7 templates registered in `inc/page-templates.php`:
-  1. `templates/homepage.php` (9.6KB) — hero, stats, services, process, CTA, blog grid
-  2. `templates/services.php` (26KB) — hero, inquiry form, service accordions, CTA
-  3. `templates/inquiry.php` (10.7KB) — hero, lead form, sidebar
-  4. `templates/about.php` (381B) — minimal wrapper, supports Page Builder
-  5. `templates/contact.php` (240B) — minimal wrapper, supports Page Builder
-  6. `templates/faq.php` (243B) — minimal wrapper, supports Page Builder
-  7. `templates/tag-hub.php` (251B) — minimal wrapper, supports Page Builder
-- [x] All templates load from child theme via `tez_load_page_template()` filter
-- [x] All templates confirmed existing in `/templates` directory
-
-**Commit:** `237780c` — docs(phase4): bump version + improve comments in page-templates.php
+- [ ] Confirm 7 page templates registered in `inc/page-templates.php`
+- [ ] Verify templates appear in Page Editor dropdown
 
 ### 4.2 Refine existing templates
 
-- [x] `templates/homepage.php`: Production-ready
-  - Hero section with site title, description, CTA buttons (inquiry + phone)
-  - Stats grid (4 cards: 450+ researchers, 10+ years, 1000+ projects, 98% satisfaction)
-  - Services overview grid (6 cards: research, proposal, article, stats, simulation, business plan)
-  - Process timeline (6 steps: order → consult → start → work → deliver → support)
-  - CTA section
-  - Latest blog posts (4 posts with thumbnails)
-  - All sections use `.scroll-animate` class for IntersectionObserver
-- [x] `templates/services.php`: Production-ready (hero, inquiry form, accordions, CTA)
-- [x] `templates/inquiry.php`: Production-ready (hero, form, sidebar)
-- [x] Minimal templates (about, contact, faq, tag-hub): Rely on Page Builder or `the_content()` — working as designed
+- [ ] `templates/homepage.php` – hero, stats, services, process, CTA, blog
+- [ ] `templates/services.php` – hero, inquiry, accordions, CTA
+- [ ] `templates/inquiry.php` – hero, form, sidebar
+- [ ] `templates/about.php`, `contact.php`, `faq.php`, `tag-hub.php`
 
-### 4.3 Auto-hero for non-templated pages
+### 4.3 Auto hero for non-templated pages
 
-- [x] Added `tez_auto_hero_on_pages()` filter on `the_content` (priority 1)
-- [x] Runs only on `is_page()`, main query, in the loop, non-admin
-- [x] Skips pages using `templates/*` (those build their own hero)
-- [x] Builds hero section from:
-  - Page title (H1 with class `.tez-page-hero-title`)
-  - Excerpt (if set, wrapped in `.tez-page-hero-excerpt`)
-  - Featured image (as background if available, adds `.tez-has-bg` class)
-- [x] Hero HTML structure:
-  ```html
-  <div class="tez-page-hero [tez-has-bg]" style="background-image: url(...)">
-    <div class="tez-page-hero-overlay"></div>
-    <div class="tez-page-hero-content">
-      <h1 class="tez-page-hero-title">Title</h1>
-      <p class="tez-page-hero-excerpt">Excerpt</p>
-    </div>
-  </div>
-  ```
-- [x] Prepended before `$content`, no Page Builder required
+- [ ] Add `the_content` filter for auto hero on standard pages
+- [ ] Skip pages using `templates/*`
+- [ ] Build hero from title, excerpt, featured image
 
-**Commit:** `f0014b0` — feat(phase4): add auto-hero for non-templated pages
+### 4.4 Avoid duplicate titles
 
-### 4.4 Duplicate title prevention
+- [ ] Harden `tez_hide_page_title_on_templates()` in `inc/misc-tweaks.php`
+- [ ] Guard for null ID
+- [ ] Only hide when template slug starts with `templates/`
 
-- [x] Hardened `tez_hide_page_title_on_templates()` filter:
-  - Added null guard: `if ($id === null || !is_page($id)) return $title;`
-  - Only hides when `in_the_loop()` and NOT `is_admin()`
-  - Checks if page template starts with `templates/`
-  - Returns empty string to suppress default WordPress title output
-- [x] Prevents H1 duplication on pages with custom templates
+**Verification (Phase 4):**
 
-**Commit:** Included in `f0014b0`
+- [ ] Templated pages display designed hero
+- [ ] Standard pages get auto hero
+- [ ] No duplicate H1 titles
 
-**Verification (Phase 4):** ⚠️ NEEDS STAGING TEST
-
-- [ ] Page Editor: all 7 templates appear in dropdown
-- [ ] Homepage: hero + stats + services + process + CTA + blog posts render correctly
-- [ ] Service page: hero + inquiry form + accordions + CTA render correctly
-- [ ] Inquiry page: hero + form + sidebar render correctly
-- [ ] About/Contact/FAQ/Tag Hub: minimal templates work with Page Builder content
-- [ ] Standard page (no template assigned): auto-hero appears with title + excerpt + featured image background
-- [ ] Standard page (no featured image): auto-hero appears without background
-- [ ] No duplicate H1 titles on any page type
-- [ ] Visual: `.scroll-animate` elements fade in on scroll
+**Status:** 🔴 Not Started
 
 ---
 
@@ -134,68 +202,149 @@
 
 ### 5.1 Module integrity
 
-- [ ] Confirm `functions.php` requires all 17 modules in correct order
-- [ ] No fatal errors or duplicate function names on staging
+- [ ] Confirm `functions.php` requires all modules in correct order
+- [ ] Check each `inc/*.php` file loads without errors
+- [ ] Verify no duplicate function names
 
 ### 5.2 Single post UX
 
-- [ ] css/single-post.css: reading progress, ToC, anchors, share, author box, related
-- [ ] js/single-post.js: reading progress bar, ToC active, share, copy link, external links
-- [ ] ToC, key takeaways, FAQ schema, polls, star rating, meta each appear once per post
+- [ ] Confirm `css/single-post.css` styles all features
+- [ ] Confirm `js/single-post.js` features work
+- [ ] Verify ToC, takeaways, FAQ, polls, rating don't conflict
+
+**Verification (Phase 5):**
+
+- [ ] Test posts with all features, few features, no features
+- [ ] No console errors from single-post scripts
+
+**Status:** 🟢 Modules Enhanced (v3.0.0 completed)
 
 ---
 
 ## Phase 6 – Footer Preservation & Improvements
 
-- [x] 4-column footer grid in `/footer.php`
-- [x] Chaty floating widget + scroll-top button
-- [ ] Assign menus: services → `tez_footer_1`, useful links → `tez_footer_2`
-- [ ] Verify no duplicate Chaty/scroll-top instances
+### 6.1 Footer content & menus
+
+- [ ] Ensure `footer.php` uses correct text/structure
+- [ ] Assign menus to `tez_footer_1` and `tez_footer_2`
+- [ ] Verify fallback lists
+
+### 6.2 Floating widget & scroll-top
+
+- [ ] Confirm Chaty widget markup in `footer.php`
+- [ ] Confirm scroll-to-top button controlled by `scripts.js`
+- [ ] Ensure no duplicate instances
+
+**Verification (Phase 6):**
+
+- [ ] Footer matches expectations on all pages
+- [ ] Chaty + scroll-top work in all viewports
+
+**Status:** 🔴 Not Started
 
 ---
 
 ## Phase 7 – SEO, Redirects, Sitemap, Feeds
 
+### 7.1 URL cleanup & redirects
+
 - [ ] Review `inc/seo-url-cleanup.php`
-- [ ] Review `inc/seo-redirects.php`
-- [ ] Verify `inc/visual-sitemap.php`
-- [ ] Confirm `404.php` + `inc/404-hub.php`
-- [ ] Check `inc/feed-controller.php`
+- [ ] Review `inc/seo-redirects.php` for loops/404s
+
+### 7.2 Visual sitemap & 404 hub
+
+- [ ] Verify `inc/visual-sitemap.php` outputs HTML sitemap
+- [ ] Confirm `404.php` + `inc/404-hub.php` show rich layout
+
+### 7.3 Feeds
+
+- [ ] Check `inc/feed-controller.php` for 410/disabled feeds
+
+**Verification (Phase 7):**
+
+- [ ] Test date archive, author archive, `/sitemap`
+- [ ] Check redirect behavior and status codes
+
+**Status:** 🔴 Not Started
 
 ---
 
 ## Phase 8 – QA: Performance, Accessibility, RTL
 
-- [ ] Lighthouse audit (home, service, post)
-- [ ] No duplicate CSS/JS/font requests
-- [ ] Skip link works
-- [ ] a11y toolbar: aria-* + keyboard
-- [ ] RTL validated everywhere
-- [ ] Zero PHP errors in `WP_DEBUG_LOG`
-- [ ] Zero JS errors in console
+### 8.1 Performance
+
+- [ ] Run Lighthouse on home, service page, single post
+- [ ] Confirm no duplicate CSS/JS bundles
+- [ ] Check fonts/FA not requested multiple times
+
+### 8.2 Accessibility & RTL
+
+- [ ] Confirm skip link jumps to `#tez-main-content`
+- [ ] Verify theme mode and a11y toolbar ARIA attributes
+- [ ] Validate RTL layout across all components
+
+### 8.3 Error checks
+
+- [ ] Enable `WP_DEBUG_LOG` and check for notices/warnings
+- [ ] Check DevTools console for JS errors
+
+**Verification (Phase 8):**
+
+- [ ] Lighthouse scores > 90 for performance/accessibility
+- [ ] Zero PHP/JS errors across all page types
+
+**Status:** 🔴 Not Started
 
 ---
 
 ## Phase 9 – Git, Docs, and Merge
 
-- [x] Commit after each phase
-- [ ] Update DEVELOPMENT_REPORT.md
-- [ ] Tag release `v3.1.0-final-child`
+### 9.1 Commits and documentation
+
+- [x] Commit after each phase with clear messages
+- [ ] Keep `DEVELOPMENT_REPORT.md` updated
+- [ ] Update TODO with checkmarks and notes
+
+### 9.2 Merge & release
+
+- [ ] Merge into `New` when staging passes all checks
+- [ ] Tag release `v3.1.0-final-child` after deployment
+
+**Status:** 🟡 In Progress (documenting as we go)
 
 ---
 
-## Full Commit Log
+## 📊 Overall Progress
 
-| Commit | Phase | Description |
-|--------|-------|-------------|
-| `8dd7187` | 1 | feat: header.php override |
-| `3baaeec` | 1 | feat: footer.php override |
-| `439854d` | 1 | fix: remove hooked output, body classes |
-| `0d13f22` | 1 | fix: footer HTML from inc/footer.php |
-| `164839e` | 2 | fix: safe FA dequeue, duplicate loader |
-| `134b4a5` | 2 | fix: preserve unknown tie-icon classes |
-| `1b429f9` | 3 | feat: v3.1.0, 404 CSS, tezData |
-| `14ebbef` | 3 | feat: dark/sepia/contrast post-elements |
-| `c78424e` | 3 | feat: scripts.js 3.1.0, RTL context |
-| `237780c` | 4 | docs: page-templates.php v3.1.0 |
-| `f0014b0` | 4 | feat: auto-hero, harden title filter |
+```
+✅ Phase 0: 50% (TODO added, environment prep needed)
+⏳ Phase 1: 0%  (Header/Footer architecture)
+⏳ Phase 2: 0%  (Icons & Fonts)
+⏳ Phase 3: 0%  (CSS/JS Assets)
+⏳ Phase 4: 0%  (Page Templates)
+✅ Phase 5: 100% (Blog enhancements - modules upgraded)
+⏳ Phase 6: 0%  (Footer preservation)
+⏳ Phase 7: 0%  (SEO & Redirects)
+⏳ Phase 8: 0%  (QA & Performance)
+⏳ Phase 9: 30% (Documentation ongoing)
+
+ Total: ~18% Complete
+```
+
+---
+
+## 🎯 Next Steps
+
+1. **Phase 1:** Create `header.php` and `footer.php` overrides
+2. **Phase 2:** Fix Font Awesome conflicts
+3. **Phase 3:** Optimize asset loading
+4. **Phase 4:** Refine page templates
+5. **Phase 6-9:** Complete remaining phases
+
+---
+
+## 📝 Notes
+
+- Module enhancements (v3.0.0) completed ahead of schedule
+- Focus now shifts to architectural improvements
+- Staging environment setup required before Phase 1 verification
