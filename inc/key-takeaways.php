@@ -2,9 +2,10 @@
 /**
  * Key Takeaways Box
  * Adds a key takeaways section to posts.
+ * Font Awesome is loaded globally by core-setup.php - no need to load here.
  *
  * @package JannahChild
- * @version 2.4.0
+ * @version 3.1.0
  */
 
 /**
@@ -17,18 +18,8 @@
 if (!defined('ABSPATH')) exit;
 
 // =============================================
-// ENQUEUE FONT AWESOME
-// =============================================
-add_action('wp_enqueue_scripts', 'tez_enqueue_font_awesome');
-add_action('admin_enqueue_scripts', 'tez_enqueue_font_awesome');
-function tez_enqueue_font_awesome() {
-    if (!wp_style_is('font-awesome', 'enqueued') && !wp_style_is('fontawesome', 'enqueued')) {
-        wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css', array(), '6.5.1');
-    }
-}
-
-// =============================================
 // ADD META BOX
+// Font Awesome already loaded by core-setup.php
 // =============================================
 add_action('add_meta_boxes', 'tez_add_key_takeaways_metabox');
 function tez_add_key_takeaways_metabox() {
@@ -268,7 +259,8 @@ function tez_key_takeaways_callback($post) {
             <textarea id="tez_key_takeaways" 
                       name="tez_key_takeaways" 
                       class="tez-takeaways-textarea"
-                      placeholder="هر نکته را در یک خط جدید وارد کنید...&#10;Enter each takeaway on a new line..."><?php echo esc_textarea($takeaways); ?></textarea>
+                      placeholder="هر نکته را در یک خط جدید وارد کنید...
+Enter each takeaway on a new line..."><?php echo esc_textarea($takeaways); ?></textarea>
             <p class="tez-takeaways-help">
                 <i class="fas fa-info-circle"></i>
                 هر نکته در یک خط جدید | شورت‌کد: <code>[key_takeaways]</code>
