@@ -1,0 +1,5 @@
+- name: GitHub PR Review Agent
+  uses: sam253narula/ai-pr-reviewer@v3.0.0
+
+- name: Codex Reviewer
+  uses: p2achAI/codex-reviewer@v2.0.0
