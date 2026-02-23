@@ -5,14 +5,14 @@
  * Font Awesome is loaded globally by core-setup.php - no need to load here.
  *
  * @package JannahChild
- * @version 3.1.0
+ * @version 3.0.0
  */
 
 /**
  * Key Takeaways/Summary Section with Schema.org Support
  * Customized for Teznevisan Theme
- * Version: 2.0.0
- * Features: Dark Mode, Sepia Mode, RTL, Schema.org, Accessibility
+ * Version: 3.0.0
+ * NEW: Collapsible, Reading Time, Copy-to-Clipboard, Print Mode, Numbered Lists
  */
 
 if (!defined('ABSPATH')) exit;
@@ -38,7 +38,7 @@ function tez_add_key_takeaways_metabox() {
 }
 
 // =============================================
-// META BOX CALLBACK
+// META BOX CALLBACK (Enhanced)
 // =============================================
 function tez_key_takeaways_callback($post) {
     wp_nonce_field('tez_key_takeaways_nonce', 'tez_key_takeaways_nonce');
@@ -49,6 +49,10 @@ function tez_key_takeaways_callback($post) {
     $style = get_post_meta($post->ID, '_tez_takeaways_style', true);
     $enable_schema = get_post_meta($post->ID, '_tez_takeaways_schema', true);
     $icon = get_post_meta($post->ID, '_tez_takeaways_icon', true);
+    $collapsible = get_post_meta($post->ID, '_tez_takeaways_collapsible', true);
+    $list_type = get_post_meta($post->ID, '_tez_takeaways_list_type', true);
+    $show_reading_time = get_post_meta($post->ID, '_tez_takeaways_reading_time', true);
+    $show_copy_btn = get_post_meta($post->ID, '_tez_takeaways_copy_btn', true);
     
     // Default values
     if (empty($heading)) $heading = 'در این مقاله خواهید خواند:';
@@ -56,6 +60,10 @@ function tez_key_takeaways_callback($post) {
     if (empty($style)) $style = 'modern';
     if (empty($enable_schema)) $enable_schema = 'yes';
     if (empty($icon)) $icon = 'bookmark';
+    if (empty($collapsible)) $collapsible = 'no';
+    if (empty($list_type)) $list_type = 'bullet';
+    if (empty($show_reading_time)) $show_reading_time = 'yes';
+    if (empty($show_copy_btn)) $show_copy_btn = 'yes';
     ?>
     
     <style>
@@ -78,6 +86,16 @@ function tez_key_takeaways_callback($post) {
         .tez-takeaways-label i {
             margin-left: 6px;
             color: #2563eb;
+        }
+        .tez-takeaways-label .tez-new-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-right: 6px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
         .tez-takeaways-input,
         .tez-takeaways-select {
@@ -154,9 +172,15 @@ function tez_key_takeaways_callback($post) {
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
         }
+        .tez-takeaways-cols-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
         @media (max-width: 782px) {
             .tez-takeaways-cols,
-            .tez-takeaways-cols-3 {
+            .tez-takeaways-cols-3,
+            .tez-takeaways-cols-4 {
                 grid-template-columns: 1fr;
             }
         }
@@ -251,6 +275,49 @@ function tez_key_takeaways_callback($post) {
             </div>
         </div>
         
+        <!-- Row 3: NEW Advanced Features -->
+        <div class="tez-takeaways-cols-4">
+            <div class="tez-takeaways-section">
+                <label class="tez-takeaways-label" for="tez_takeaways_collapsible">
+                    <i class="fas fa-compress-arrows-alt"></i> <span class="tez-new-badge">NEW</span> جمع شدنی / Collapsible
+                </label>
+                <select id="tez_takeaways_collapsible" name="tez_takeaways_collapsible" class="tez-takeaways-select">
+                    <option value="no" <?php selected($collapsible, 'no'); ?>>خیر (No)</option>
+                    <option value="yes" <?php selected($collapsible, 'yes'); ?>>بله (Yes)</option>
+                </select>
+            </div>
+            
+            <div class="tez-takeaways-section">
+                <label class="tez-takeaways-label" for="tez_takeaways_list_type">
+                    <i class="fas fa-list-ol"></i> <span class="tez-new-badge">NEW</span> نوع لیست / List Type
+                </label>
+                <select id="tez_takeaways_list_type" name="tez_takeaways_list_type" class="tez-takeaways-select">
+                    <option value="bullet" <?php selected($list_type, 'bullet'); ?>>غیرشماره‌ای (Bullets)</option>
+                    <option value="numbered" <?php selected($list_type, 'numbered'); ?>>شماره‌ای (Numbered)</option>
+                </select>
+            </div>
+            
+            <div class="tez-takeaways-section">
+                <label class="tez-takeaways-label" for="tez_takeaways_reading_time">
+                    <i class="fas fa-clock"></i> <span class="tez-new-badge">NEW</span> زمان خواندن / Reading Time
+                </label>
+                <select id="tez_takeaways_reading_time" name="tez_takeaways_reading_time" class="tez-takeaways-select">
+                    <option value="yes" <?php selected($show_reading_time, 'yes'); ?>>نمایش (Show)</option>
+                    <option value="no" <?php selected($show_reading_time, 'no'); ?>>مخفی (Hide)</option>
+                </select>
+            </div>
+            
+            <div class="tez-takeaways-section">
+                <label class="tez-takeaways-label" for="tez_takeaways_copy_btn">
+                    <i class="fas fa-copy"></i> <span class="tez-new-badge">NEW</span> کپی متن / Copy Button
+                </label>
+                <select id="tez_takeaways_copy_btn" name="tez_takeaways_copy_btn" class="tez-takeaways-select">
+                    <option value="yes" <?php selected($show_copy_btn, 'yes'); ?>>نمایش (Show)</option>
+                    <option value="no" <?php selected($show_copy_btn, 'no'); ?>>مخفی (Hide)</option>
+                </select>
+            </div>
+        </div>
+        
         <!-- Takeaways Textarea -->
         <div class="tez-takeaways-section">
             <label class="tez-takeaways-label" for="tez_key_takeaways">
@@ -322,7 +389,7 @@ Enter each takeaway on a new line..."><?php echo esc_textarea($takeaways); ?></t
 }
 
 // =============================================
-// SAVE META BOX DATA
+// SAVE META BOX DATA (Enhanced)
 // =============================================
 add_action('save_post', 'tez_save_key_takeaways');
 function tez_save_key_takeaways($post_id) {
@@ -337,7 +404,11 @@ function tez_save_key_takeaways($post_id) {
         'tez_takeaways_position' => 'sanitize_text_field',
         'tez_takeaways_style' => 'sanitize_text_field',
         'tez_takeaways_schema' => 'sanitize_text_field',
-        'tez_takeaways_icon' => 'sanitize_text_field'
+        'tez_takeaways_icon' => 'sanitize_text_field',
+        'tez_takeaways_collapsible' => 'sanitize_text_field',
+        'tez_takeaways_list_type' => 'sanitize_text_field',
+        'tez_takeaways_reading_time' => 'sanitize_text_field',
+        'tez_takeaways_copy_btn' => 'sanitize_text_field'
     );
     
     foreach ($fields as $field => $sanitize_func) {
@@ -348,7 +419,20 @@ function tez_save_key_takeaways($post_id) {
 }
 
 // =============================================
-// SHORTCODE WITH SCHEMA.ORG SUPPORT
+// NEW: CALCULATE READING TIME
+// =============================================
+function tez_calculate_reading_time($lines) {
+    $total_words = 0;
+    foreach ($lines as $line) {
+        $total_words += str_word_count(strip_tags($line));
+    }
+    // Average reading speed: 200 words per minute
+    $minutes = ceil($total_words / 200);
+    return max(1, $minutes); // Minimum 1 minute
+}
+
+// =============================================
+// SHORTCODE WITH SCHEMA.ORG SUPPORT (Enhanced)
 // =============================================
 add_shortcode('key_takeaways', 'tez_key_takeaways_shortcode');
 function tez_key_takeaways_shortcode($atts) {
@@ -360,7 +444,11 @@ function tez_key_takeaways_shortcode($atts) {
         'heading' => '',
         'style' => '',
         'schema' => '',
-        'icon' => ''
+        'icon' => '',
+        'collapsible' => '',
+        'list_type' => '',
+        'reading_time' => '',
+        'copy_btn' => ''
     ), $atts);
     
     $takeaways = get_post_meta($post->ID, '_tez_key_takeaways', true);
@@ -368,17 +456,28 @@ function tez_key_takeaways_shortcode($atts) {
     $saved_style = get_post_meta($post->ID, '_tez_takeaways_style', true);
     $saved_schema = get_post_meta($post->ID, '_tez_takeaways_schema', true);
     $saved_icon = get_post_meta($post->ID, '_tez_takeaways_icon', true);
+    $saved_collapsible = get_post_meta($post->ID, '_tez_takeaways_collapsible', true);
+    $saved_list_type = get_post_meta($post->ID, '_tez_takeaways_list_type', true);
+    $saved_reading_time = get_post_meta($post->ID, '_tez_takeaways_reading_time', true);
+    $saved_copy_btn = get_post_meta($post->ID, '_tez_takeaways_copy_btn', true);
     
     // Use shortcode attributes if provided, otherwise use saved values
     $heading = !empty($atts['heading']) ? $atts['heading'] : (!empty($saved_heading) ? $saved_heading : 'در این مقاله خواهید خواند:');
     $style = !empty($atts['style']) ? $atts['style'] : (!empty($saved_style) ? $saved_style : 'modern');
     $enable_schema = !empty($atts['schema']) ? $atts['schema'] : (!empty($saved_schema) ? $saved_schema : 'yes');
     $icon = !empty($atts['icon']) ? $atts['icon'] : (!empty($saved_icon) ? $saved_icon : 'bookmark');
+    $collapsible = !empty($atts['collapsible']) ? $atts['collapsible'] : (!empty($saved_collapsible) ? $saved_collapsible : 'no');
+    $list_type = !empty($atts['list_type']) ? $atts['list_type'] : (!empty($saved_list_type) ? $saved_list_type : 'bullet');
+    $show_reading_time = !empty($atts['reading_time']) ? $atts['reading_time'] : (!empty($saved_reading_time) ? $saved_reading_time : 'yes');
+    $show_copy_btn = !empty($atts['copy_btn']) ? $atts['copy_btn'] : (!empty($saved_copy_btn) ? $saved_copy_btn : 'yes');
     
     if (empty($takeaways)) return '';
     
     $lines = array_filter(explode("\n", $takeaways), 'trim');
     if (empty($lines)) return '';
+    
+    // Calculate reading time
+    $reading_minutes = tez_calculate_reading_time($lines);
     
     // Icon mapping
     $icon_map = array(
@@ -391,21 +490,51 @@ function tez_key_takeaways_shortcode($atts) {
     );
     $icon_class = isset($icon_map[$icon]) ? $icon_map[$icon] : 'fa-bookmark';
     
+    // Generate unique ID
+    $unique_id = 'tez-takeaways-' . $post->ID;
+    
     // Build output
-    $output = '<div class="tez-key-takeaways tez-takeaways-' . esc_attr($style) . '" dir="rtl"';
+    $output = '<div class="tez-key-takeaways tez-takeaways-' . esc_attr($style) . ' tez-list-' . esc_attr($list_type) . ($collapsible === 'yes' ? ' tez-collapsible' : '') . '" dir="rtl" id="' . $unique_id . '"';
     
     if ($enable_schema === 'yes') {
         $output .= ' itemscope itemtype="https://schema.org/ItemList"';
     }
     $output .= ' role="region" aria-label="' . esc_attr($heading) . '">';
     
+    // Header with controls
+    $output .= '<div class="tez-takeaways-header">';
     $output .= '<h3 class="tez-takeaways-heading"';
     if ($enable_schema === 'yes') {
         $output .= ' itemprop="name"';
     }
     $output .= '><i class="fas ' . esc_attr($icon_class) . '" aria-hidden="true"></i> ' . esc_html($heading) . '</h3>';
     
-    $output .= '<ul class="tez-takeaways-list">';
+    // Controls
+    if ($collapsible === 'yes' || $show_copy_btn === 'yes' || $show_reading_time === 'yes') {
+        $output .= '<div class="tez-takeaways-controls">';
+        
+        if ($show_reading_time === 'yes') {
+            $output .= '<span class="tez-reading-time"><i class="fas fa-clock" aria-hidden="true"></i> ' . sprintf("%d دقیقه", $reading_minutes) . '</span>';
+        }
+        
+        if ($show_copy_btn === 'yes') {
+            $output .= '<button type="button" class="tez-copy-btn" aria-label="کپی متن" title="کپی همه نکات"><i class="fas fa-copy"></i> <span class="tez-copy-text">کپی</span></button>';
+        }
+        
+        if ($collapsible === 'yes') {
+            $output .= '<button type="button" class="tez-toggle-btn" aria-expanded="true" aria-controls="' . $unique_id . '-content" aria-label="جمع/باز کردن"><i class="fas fa-chevron-up"></i></button>';
+        }
+        
+        $output .= '</div>';
+    }
+    
+    $output .= '</div>'; // Close header
+    
+    // Content (collapsible)
+    $output .= '<div class="tez-takeaways-content" id="' . $unique_id . '-content">';
+    
+    $list_tag = $list_type === 'numbered' ? 'ol' : 'ul';
+    $output .= '<' . $list_tag . ' class="tez-takeaways-list">';
     
     $position = 1;
     foreach ($lines as $line) {
@@ -428,7 +557,8 @@ function tez_key_takeaways_shortcode($atts) {
         $position++;
     }
     
-    $output .= '</ul>';
+    $output .= '</' . $list_tag . '>';
+    $output .= '</div>'; // Close content
     
     if ($enable_schema === 'yes') {
         $output .= '<meta itemprop="description" content="' . esc_attr__('Key takeaways and summary points from this article', 'flavor') . '" />';
@@ -471,7 +601,7 @@ function tez_auto_insert_takeaways($content) {
 }
 
 // =============================================
-// FRONTEND STYLES - THEME MATCHED
+// FRONTEND STYLES - THEME MATCHED (Enhanced)
 // =============================================
 add_action('wp_head', 'tez_key_takeaways_styles', 99);
 function tez_key_takeaways_styles() {
@@ -508,9 +638,19 @@ function tez_key_takeaways_styles() {
         overflow: hidden;
     }
     
+    /* NEW: Header with controls */
+    .tez-takeaways-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+    }
+    
     /* Heading */
     .tez-takeaways-heading {
-        margin: 0 0 1.25rem 0;
+        margin: 0;
         font-size: 1.25rem;
         font-weight: 700;
         color: var(--kt-text);
@@ -519,6 +659,7 @@ function tez_key_takeaways_styles() {
         align-items: center;
         gap: 0.625rem;
         line-height: 1.4;
+        flex: 1 1 auto;
     }
     
     .tez-takeaways-heading i {
@@ -527,11 +668,100 @@ function tez_key_takeaways_styles() {
         flex-shrink: 0;
     }
     
+    /* NEW: Controls */
+    .tez-takeaways-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        flex-shrink: 0;
+    }
+    
+    .tez-reading-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.8125rem;
+        color: var(--kt-text-muted);
+        padding: 0.375rem 0.75rem;
+        background: var(--kt-bg-tertiary);
+        border-radius: var(--tez-radius-md, 0.5rem);
+    }
+    
+    .tez-reading-time i {
+        font-size: 0.75rem;
+    }
+    
+    .tez-copy-btn,
+    .tez-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.5rem 0.875rem;
+        background: var(--kt-primary);
+        color: white;
+        border: none;
+        border-radius: var(--tez-radius-md, 0.5rem);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--kt-transition);
+        font-family: inherit;
+    }
+    
+    .tez-toggle-btn {
+        padding: 0.5rem;
+        background: var(--kt-bg-tertiary);
+        color: var(--kt-text);
+    }
+    
+    .tez-copy-btn:hover {
+        background: var(--kt-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--kt-primary-rgb), 0.3);
+    }
+    
+    .tez-toggle-btn:hover {
+        background: var(--kt-border);
+    }
+    
+    .tez-copy-btn:active,
+    .tez-toggle-btn:active {
+        transform: translateY(0);
+    }
+    
+    .tez-copy-btn.copied {
+        background: #10b981;
+    }
+    
+    .tez-toggle-btn i {
+        transition: transform var(--kt-transition);
+    }
+    
+    .tez-collapsible.collapsed .tez-toggle-btn i {
+        transform: rotate(180deg);
+    }
+    
+    /* NEW: Collapsible content */
+    .tez-takeaways-content {
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    }
+    
+    .tez-collapsible.collapsed .tez-takeaways-content {
+        max-height: 0 !important;
+        opacity: 0;
+    }
+    
     /* List */
     .tez-takeaways-list {
         list-style: none;
         margin: 0;
         padding: 0;
+    }
+    
+    /* Numbered lists */
+    .tez-list-numbered .tez-takeaways-list {
+        counter-reset: tez-counter;
     }
     
     /* List Items */
@@ -551,8 +781,8 @@ function tez_key_takeaways_styles() {
         margin-bottom: 0;
     }
     
-    /* Checkmark Icon */
-    .tez-takeaway-item:before {
+    /* Checkmark Icon (Bullet lists) */
+    .tez-list-bullet .tez-takeaway-item:before {
         content: "\f00c";
         font-family: "Font Awesome 6 Free";
         font-weight: 900;
@@ -568,6 +798,27 @@ function tez_key_takeaways_styles() {
         align-items: center;
         justify-content: center;
         font-size: 0.6875rem;
+        transition: all var(--kt-transition);
+    }
+    
+    /* Numbered Icon (Numbered lists) */
+    .tez-list-numbered .tez-takeaway-item:before {
+        counter-increment: tez-counter;
+        content: counter(tez-counter);
+        position: absolute;
+        right: 0;
+        top: 0.875rem;
+        width: 1.625rem;
+        height: 1.625rem;
+        background: var(--kt-primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        font-family: inherit;
         transition: all var(--kt-transition);
     }
     
@@ -644,6 +895,29 @@ function tez_key_takeaways_styles() {
     
     .tez-takeaways-gradient .tez-takeaway-item:hover {
         background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .tez-takeaways-gradient .tez-reading-time {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+    
+    .tez-takeaways-gradient .tez-toggle-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+    
+    .tez-takeaways-gradient .tez-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .tez-takeaways-gradient .tez-copy-btn {
+        background: white;
+        color: var(--kt-primary);
+    }
+    
+    .tez-takeaways-gradient .tez-copy-btn:hover {
+        background: rgba(255, 255, 255, 0.9);
     }
     
     /* ============================================
@@ -789,7 +1063,9 @@ function tez_key_takeaways_styles() {
         }
         
         .tez-takeaway-item,
-        .tez-takeaway-item:before {
+        .tez-takeaway-item:before,
+        .tez-takeaways-content,
+        .tez-toggle-btn i {
             transition: none;
         }
     }
@@ -808,6 +1084,12 @@ function tez_key_takeaways_styles() {
         box-shadow: 0 0 0 2px rgba(var(--kt-primary-rgb), 0.4);
     }
     
+    .tez-copy-btn:focus-visible,
+    .tez-toggle-btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(var(--kt-primary-rgb), 0.4);
+    }
+    
     /* ============================================
        RESPONSIVE STYLES
        ============================================ */
@@ -816,6 +1098,16 @@ function tez_key_takeaways_styles() {
             margin: 1.5rem 0;
             padding: 1.25rem;
             border-radius: var(--tez-radius-lg, 0.75rem);
+        }
+        
+        .tez-takeaways-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .tez-takeaways-controls {
+            width: 100%;
+            justify-content: space-between;
         }
         
         .tez-takeaways-heading {
@@ -837,6 +1129,10 @@ function tez_key_takeaways_styles() {
             height: 1.5rem;
             font-size: 0.625rem;
             top: 0.75rem;
+        }
+        
+        .tez-list-numbered .tez-takeaway-item:before {
+            font-size: 0.6875rem;
         }
     }
     
@@ -860,6 +1156,18 @@ function tez_key_takeaways_styles() {
             height: 1.375rem;
             font-size: 0.5625rem;
             top: 0.625rem;
+        }
+        
+        .tez-list-numbered .tez-takeaway-item:before {
+            font-size: 0.625rem;
+        }
+        
+        .tez-copy-btn .tez-copy-text {
+            display: none;
+        }
+        
+        .tez-copy-btn {
+            padding: 0.5rem;
         }
     }
     
@@ -890,6 +1198,16 @@ function tez_key_takeaways_styles() {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
+        
+        .tez-copy-btn,
+        .tez-toggle-btn {
+            display: none !important;
+        }
+        
+        .tez-collapsible .tez-takeaways-content {
+            max-height: none !important;
+            opacity: 1 !important;
+        }
     }
     
     /* ============================================
@@ -905,6 +1223,102 @@ function tez_key_takeaways_styles() {
         }
     }
     </style>
+    <?php
+}
+
+// =============================================
+// NEW: FRONTEND JAVASCRIPT
+// =============================================
+add_action('wp_footer', 'tez_key_takeaways_js', 99);
+function tez_key_takeaways_js() {
+    if (!is_singular(array('post', 'page'))) return;
+    ?>
+    <script id="tez-key-takeaways-js">
+    (function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all takeaways boxes
+            var takeawaysBoxes = document.querySelectorAll('.tez-key-takeaways');
+            
+            takeawaysBoxes.forEach(function(box) {
+                var content = box.querySelector('.tez-takeaways-content');
+                var toggleBtn = box.querySelector('.tez-toggle-btn');
+                var copyBtn = box.querySelector('.tez-copy-btn');
+                
+                // Set initial max-height for collapsible
+                if (content && box.classList.contains('tez-collapsible')) {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                }
+                
+                // Toggle functionality
+                if (toggleBtn && content) {
+                    toggleBtn.addEventListener('click', function() {
+                        if (box.classList.contains('collapsed')) {
+                            box.classList.remove('collapsed');
+                            toggleBtn.setAttribute('aria-expanded', 'true');
+                            content.style.maxHeight = content.scrollHeight + 'px';
+                        } else {
+                            box.classList.add('collapsed');
+                            toggleBtn.setAttribute('aria-expanded', 'false');
+                            content.style.maxHeight = '0';
+                        }
+                    });
+                }
+                
+                // Copy functionality
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', function() {
+                        var items = box.querySelectorAll('.tez-takeaway-item');
+                        var text = Array.from(items).map(function(item) {
+                            return item.textContent.trim();
+                        }).join('\n');
+                        
+                        // Modern Clipboard API
+                        if (navigator.clipboard && window.isSecureContext) {
+                            navigator.clipboard.writeText(text).then(function() {
+                                showCopySuccess(copyBtn);
+                            }).catch(function() {
+                                fallbackCopy(text, copyBtn);
+                            });
+                        } else {
+                            fallbackCopy(text, copyBtn);
+                        }
+                    });
+                }
+            });
+            
+            function showCopySuccess(btn) {
+                var originalText = btn.querySelector('.tez-copy-text');
+                var originalHtml = btn.innerHTML;
+                
+                btn.classList.add('copied');
+                btn.innerHTML = '<i class="fas fa-check"></i> ' + (originalText ? '<span class="tez-copy-text">کپی شد!</span>' : '');
+                
+                setTimeout(function() {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = originalHtml;
+                }, 2000);
+            }
+            
+            function fallbackCopy(text, btn) {
+                var textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    showCopySuccess(btn);
+                } catch (err) {
+                    console.error('خطا در کپی متن:', err);
+                }
+                
+                document.body.removeChild(textarea);
+            }
+        });
+    })();
+    </script>
     <?php
 }
 
