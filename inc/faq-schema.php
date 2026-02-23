@@ -1,9 +1,10 @@
 <?php
 /**
  * FAQ System with Schema.org markup
+ * Font Awesome is loaded globally by core-setup.php - no need to load here.
  *
  * @package JannahChild
- * @version 2.4.0
+ * @version 3.1.0
  */
 
 /**
@@ -15,26 +16,21 @@
 if (!defined('ABSPATH')) exit;
 
 // =============================================
-// 1. ENQUEUE FONT AWESOME (if not loaded)
+// 1. ENQUEUE ASSETS
+// Font Awesome already loaded by core-setup.php
 // =============================================
 add_action('wp_enqueue_scripts', 'tez_faq_enqueue_assets');
 add_action('admin_enqueue_scripts', 'tez_faq_admin_assets');
 
 function tez_faq_enqueue_assets() {
     if (!is_singular('post')) return;
-    
-    if (!wp_style_is('font-awesome', 'enqueued') && !wp_style_is('fontawesome', 'enqueued')) {
-        wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css', array(), '6.5.1');
-    }
+    // Font Awesome already loaded by core-setup.php
 }
 
 function tez_faq_admin_assets($hook) {
     if ('post.php' !== $hook && 'post-new.php' !== $hook) return;
-    
-    if (!wp_style_is('font-awesome', 'enqueued')) {
-        wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css', array(), '6.5.1');
-    }
-    
+    // Font Awesome already loaded by core-setup.php
+
     wp_enqueue_script('jquery');
     wp_enqueue_script('jquery-ui-sortable');
 }
