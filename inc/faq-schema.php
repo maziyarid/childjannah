@@ -4,13 +4,13 @@
  * Font Awesome is loaded globally by core-setup.php - no need to load here.
  *
  * @package JannahChild
- * @version 3.1.0
+ * @version 3.0.0
  */
 
 /**
  * Teznevisan FAQ System with Schema.org
- * Version: 2.0.0
- * Features: Accordion, Schema.org, Dark/Sepia Mode, RTL, Accessibility
+ * Version: 3.0.0
+ * NEW: Search, Expand All/Collapse All, Copy Answers, URL Hash Navigation, Auto-expand First
  */
 
 if (!defined('ABSPATH')) exit;
@@ -36,7 +36,7 @@ function tez_faq_admin_assets($hook) {
 }
 
 // =============================================
-// 2. ADD META BOX
+// 2. ADD META BOX (Enhanced)
 // =============================================
 add_action('add_meta_boxes', 'tez_faq_add_metabox');
 function tez_faq_add_metabox() {
@@ -51,7 +51,7 @@ function tez_faq_add_metabox() {
 }
 
 // =============================================
-// 3. META BOX HTML
+// 3. META BOX HTML (Enhanced)
 // =============================================
 function tez_faq_metabox_html($post) {
     $faqs = get_post_meta($post->ID, '_tez_faqs', true) ?: array();
@@ -59,6 +59,9 @@ function tez_faq_metabox_html($post) {
     $style = get_post_meta($post->ID, '_tez_faq_style', true) ?: 'modern';
     $position = get_post_meta($post->ID, '_tez_faq_position', true) ?: 'after_content';
     $heading = get_post_meta($post->ID, '_tez_faq_heading', true) ?: 'سوالات متداول';
+    $show_search = get_post_meta($post->ID, '_tez_faq_show_search', true) ?: 'yes';
+    $show_counter = get_post_meta($post->ID, '_tez_faq_show_counter', true) ?: 'yes';
+    $auto_expand_first = get_post_meta($post->ID, '_tez_faq_auto_expand_first', true) ?: 'no';
     
     wp_nonce_field('tez_faq_save', 'tez_faq_nonce');
     ?>
@@ -122,6 +125,16 @@ function tez_faq_metabox_html($post) {
             font-weight: 600;
             color: #1e293b;
         }
+        .faq-new-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-right: 6px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
         .faq-body {
             margin-top: 20px;
         }
@@ -160,8 +173,14 @@ function tez_faq_metabox_html($post) {
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
         }
+        .faq-cols-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
         @media (max-width: 782px) {
-            .faq-cols {
+            .faq-cols,
+            .faq-cols-4 {
                 grid-template-columns: 1fr;
             }
         }
@@ -331,7 +350,7 @@ function tez_faq_metabox_html($post) {
         </div>
 
         <div class="faq-body" style="display: <?php echo ($enabled === 'yes') ? 'block' : 'none'; ?>">
-            <!-- Settings Row -->
+            <!-- Settings Row 1 -->
             <div class="faq-cols">
                 <div class="faq-field">
                     <label><i class="fas fa-heading"></i> عنوان بخش / Heading</label>
@@ -355,6 +374,40 @@ function tez_faq_metabox_html($post) {
                         <option value="boxed" <?php selected($style, 'boxed'); ?>>باکسی (Boxed)</option>
                         <option value="gradient" <?php selected($style, 'gradient'); ?>>گرادیان (Gradient)</option>
                     </select>
+                </div>
+            </div>
+            
+            <!-- Settings Row 2: NEW Advanced Options -->
+            <div class="faq-cols-4">
+                <div class="faq-field">
+                    <label><i class="fas fa-search"></i> <span class="faq-new-badge">NEW</span> نمایش جستجو / Show Search</label>
+                    <select name="tez_faq_show_search" class="faq-select">
+                        <option value="yes" <?php selected($show_search, 'yes'); ?>>بله (Yes)</option>
+                        <option value="no" <?php selected($show_search, 'no'); ?>>خیر (No)</option>
+                    </select>
+                </div>
+                
+                <div class="faq-field">
+                    <label><i class="fas fa-hashtag"></i> <span class="faq-new-badge">NEW</span> شمارنده / Counter Badge</label>
+                    <select name="tez_faq_show_counter" class="faq-select">
+                        <option value="yes" <?php selected($show_counter, 'yes'); ?>>بله (Yes)</option>
+                        <option value="no" <?php selected($show_counter, 'no'); ?>>خیر (No)</option>
+                    </select>
+                </div>
+                
+                <div class="faq-field">
+                    <label><i class="fas fa-circle-chevron-down"></i> <span class="faq-new-badge">NEW</span> باز شدن اولین / Auto Expand First</label>
+                    <select name="tez_faq_auto_expand_first" class="faq-select">
+                        <option value="no" <?php selected($auto_expand_first, 'no'); ?>>خیر (No)</option>
+                        <option value="yes" <?php selected($auto_expand_first, 'yes'); ?>>بله (Yes)</option>
+                    </select>
+                </div>
+                
+                <div class="faq-field">
+                    <label><i class="fas fa-link"></i> <span class="faq-new-badge">NEW</span> لینک‌دهی با Hash</label>
+                    <div style="padding: 10px 14px; background: #f8fafc; border-radius: 8px; font-size: 13px; color: #64748b;">
+                        ✓ فعال (Enabled)
+                    </div>
                 </div>
             </div>
 
@@ -482,7 +535,7 @@ function tez_faq_metabox_html($post) {
 }
 
 // =============================================
-// 4. SAVE META BOX
+// 4. SAVE META BOX (Enhanced)
 // =============================================
 add_action('save_post', 'tez_faq_save_meta');
 function tez_faq_save_meta($post_id) {
@@ -494,14 +547,19 @@ function tez_faq_save_meta($post_id) {
     update_post_meta($post_id, '_tez_faq_enable', isset($_POST['tez_faq_enable']) ? 'yes' : 'no');
     
     // Save settings
-    if (isset($_POST['tez_faq_heading'])) {
-        update_post_meta($post_id, '_tez_faq_heading', sanitize_text_field($_POST['tez_faq_heading']));
-    }
-    if (isset($_POST['tez_faq_position'])) {
-        update_post_meta($post_id, '_tez_faq_position', sanitize_text_field($_POST['tez_faq_position']));
-    }
-    if (isset($_POST['tez_faq_style'])) {
-        update_post_meta($post_id, '_tez_faq_style', sanitize_text_field($_POST['tez_faq_style']));
+    $fields = array(
+        'tez_faq_heading' => 'sanitize_text_field',
+        'tez_faq_position' => 'sanitize_text_field',
+        'tez_faq_style' => 'sanitize_text_field',
+        'tez_faq_show_search' => 'sanitize_text_field',
+        'tez_faq_show_counter' => 'sanitize_text_field',
+        'tez_faq_auto_expand_first' => 'sanitize_text_field'
+    );
+    
+    foreach ($fields as $field => $sanitize_func) {
+        if (isset($_POST[$field])) {
+            update_post_meta($post_id, '_' . $field, $sanitize_func($_POST[$field]));
+        }
     }
     
     // Save FAQs
@@ -562,7 +620,7 @@ function tez_faq_inject_content($content) {
 }
 
 // =============================================
-// 7. RENDER FAQ HTML
+// 7. RENDER FAQ HTML (Enhanced)
 // =============================================
 function tez_faq_render_html($post_id) {
     $faqs = get_post_meta($post_id, '_tez_faqs', true);
@@ -570,6 +628,9 @@ function tez_faq_render_html($post_id) {
     
     $style = get_post_meta($post_id, '_tez_faq_style', true) ?: 'modern';
     $heading = get_post_meta($post_id, '_tez_faq_heading', true) ?: 'سوالات متداول';
+    $show_search = get_post_meta($post_id, '_tez_faq_show_search', true) ?: 'yes';
+    $show_counter = get_post_meta($post_id, '_tez_faq_show_counter', true) ?: 'yes';
+    $auto_expand_first = get_post_meta($post_id, '_tez_faq_auto_expand_first', true) ?: 'no';
     
     // Add Schema to footer
     add_action('wp_footer', function() use ($faqs) {
@@ -597,26 +658,58 @@ function tez_faq_render_html($post_id) {
     ?>
     <div class="tez-faq-container tez-faq-<?php echo esc_attr($style); ?>" 
          id="tez-faq-<?php echo $post_id; ?>"
+         data-auto-expand="<?php echo esc_attr($auto_expand_first); ?>"
          role="region"
          aria-label="<?php echo esc_attr($heading); ?>"
          dir="rtl"
          itemscope 
          itemtype="https://schema.org/FAQPage">
         
-        <h3 class="tez-faq-heading">
-            <i class="fas fa-circle-question" aria-hidden="true"></i>
-            <?php echo esc_html($heading); ?>
-        </h3>
+        <div class="tez-faq-header">
+            <div class="tez-faq-title-wrapper">
+                <h3 class="tez-faq-heading">
+                    <i class="fas fa-circle-question" aria-hidden="true"></i>
+                    <?php echo esc_html($heading); ?>
+                </h3>
+                <?php if ($show_counter === 'yes'): ?>
+                <span class="tez-faq-counter" aria-label="تعداد سوالات">
+                    <i class="fas fa-hashtag" aria-hidden="true"></i>
+                    <span class="tez-faq-counter-text"><?php echo count($faqs); ?> سوال</span>
+                </span>
+                <?php endif; ?>
+            </div>
+            
+            <div class="tez-faq-controls">
+                <?php if ($show_search === 'yes'): ?>
+                <div class="tez-faq-search-wrapper">
+                    <input type="text" 
+                           class="tez-faq-search" 
+                           placeholder="جستجو در سوالات..." 
+                           aria-label="جستجو در سوالات متداول">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                </div>
+                <?php endif; ?>
+                
+                <button type="button" 
+                        class="tez-faq-expand-all" 
+                        aria-label="باز کردن همه">
+                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                    <span>باز کردن همه</span>
+                </button>
+            </div>
+        </div>
         
         <div class="tez-faq-list">
             <?php foreach ($faqs as $index => $faq): 
                 if (empty($faq['q'])) continue;
             ?>
             <div class="tez-faq-item" 
+                 id="faq-<?php echo ($index + 1); ?>"
                  itemscope 
                  itemprop="mainEntity" 
                  itemtype="https://schema.org/Question"
-                 data-index="<?php echo $index; ?>">
+                 data-index="<?php echo $index; ?>"
+                 data-search-text="<?php echo esc_attr(strtolower($faq['q'] . ' ' . strip_tags($faq['a']))); ?>">
                 
                 <button class="tez-faq-question" 
                         type="button"
@@ -640,9 +733,21 @@ function tez_faq_render_html($post_id) {
                     <div itemprop="text">
                         <?php echo wpautop($faq['a']); ?>
                     </div>
+                    <button type="button" 
+                            class="tez-faq-copy-btn" 
+                            aria-label="کپی پاسخ"
+                            title="کپی پاسخ">
+                        <i class="fas fa-copy"></i>
+                        <span class="tez-faq-copy-text">کپی</span>
+                    </button>
                 </div>
             </div>
             <?php endforeach; ?>
+        </div>
+        
+        <div class="tez-faq-no-results" hidden>
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <p>نتیجه‌ای یافت نشد</p>
         </div>
     </div>
     <?php
@@ -650,7 +755,7 @@ function tez_faq_render_html($post_id) {
 }
 
 // =============================================
-// 8. FRONTEND CSS
+// 8. FRONTEND CSS (Enhanced)
 // =============================================
 add_action('wp_head', 'tez_faq_frontend_css', 99);
 function tez_faq_frontend_css() {
@@ -685,23 +790,134 @@ function tez_faq_frontend_css() {
         position: relative;
     }
     
+    /* NEW: Header */
+    .tez-faq-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--faq-primary);
+    }
+    
+    .tez-faq-title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1 1 auto;
+    }
+    
     /* Heading */
     .tez-faq-heading {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        margin: 0 0 1.5rem 0;
-        padding-bottom: 1rem;
+        margin: 0;
         font-size: 1.5rem;
         font-weight: 700;
         color: var(--faq-text);
         font-family: inherit;
-        border-bottom: 2px solid var(--faq-primary);
     }
     
     .tez-faq-heading i {
         color: var(--faq-primary);
         font-size: 1.375rem;
+    }
+    
+    /* NEW: Counter Badge */
+    .tez-faq-counter {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        background: var(--faq-primary);
+        color: white;
+        border-radius: var(--tez-radius-md, 0.5rem);
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+    
+    .tez-faq-counter i {
+        font-size: 0.75rem;
+    }
+    
+    /* NEW: Controls */
+    .tez-faq-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-shrink: 0;
+    }
+    
+    /* NEW: Search Box */
+    .tez-faq-search-wrapper {
+        position: relative;
+    }
+    
+    .tez-faq-search {
+        width: 250px;
+        padding: 0.625rem 2.5rem 0.625rem 1rem;
+        border: 1px solid var(--faq-border);
+        border-radius: var(--tez-radius-md, 0.5rem);
+        font-size: 0.875rem;
+        font-family: inherit;
+        background: var(--faq-bg);
+        color: var(--faq-text);
+        transition: all var(--faq-transition);
+    }
+    
+    .tez-faq-search:focus {
+        outline: none;
+        border-color: var(--faq-primary);
+        box-shadow: 0 0 0 3px rgba(var(--faq-primary-rgb), 0.15);
+    }
+    
+    .tez-faq-search-wrapper i {
+        position: absolute;
+        right: 0.875rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--faq-text-muted);
+        font-size: 0.875rem;
+        pointer-events: none;
+    }
+    
+    /* NEW: Expand All Button */
+    .tez-faq-expand-all {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1rem;
+        background: var(--faq-primary);
+        color: white;
+        border: none;
+        border-radius: var(--tez-radius-md, 0.5rem);
+        font-size: 0.875rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all var(--faq-transition);
+        white-space: nowrap;
+    }
+    
+    .tez-faq-expand-all:hover {
+        background: var(--faq-primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--faq-primary-rgb), 0.3);
+    }
+    
+    .tez-faq-expand-all:active {
+        transform: translateY(0);
+    }
+    
+    .tez-faq-expand-all.all-expanded i {
+        transform: rotate(180deg);
+    }
+    
+    .tez-faq-expand-all i {
+        transition: transform var(--faq-transition);
     }
     
     /* List */
@@ -719,9 +935,18 @@ function tez_faq_frontend_css() {
         transition: all var(--faq-transition);
     }
     
+    .tez-faq-item.hidden {
+        display: none;
+    }
+    
     .tez-faq-item:hover {
         border-color: var(--faq-primary);
         box-shadow: 0 4px 12px rgba(var(--faq-primary-rgb), 0.1);
+    }
+    
+    .tez-faq-item:target {
+        border-color: var(--faq-primary);
+        box-shadow: 0 0 0 3px rgba(var(--faq-primary-rgb), 0.2);
     }
     
     /* Question Button */
@@ -794,6 +1019,7 @@ function tez_faq_frontend_css() {
         background: var(--faq-bg-secondary);
         border-top: 1px solid var(--faq-border);
         transition: all 0.35s ease;
+        position: relative;
     }
     
     .tez-faq-answer:not([hidden]) {
@@ -819,6 +1045,61 @@ function tez_faq_frontend_css() {
     
     .tez-faq-answer p:last-child {
         margin-bottom: 0;
+    }
+    
+    /* NEW: Copy Button */
+    .tez-faq-copy-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.5rem 0.875rem;
+        margin-top: 0.75rem;
+        background: var(--faq-bg-tertiary);
+        color: var(--faq-text-muted);
+        border: 1px solid var(--faq-border);
+        border-radius: var(--tez-radius-md, 0.5rem);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all var(--faq-transition);
+    }
+    
+    .tez-faq-copy-btn:hover {
+        background: var(--faq-primary);
+        color: white;
+        border-color: var(--faq-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--faq-primary-rgb), 0.2);
+    }
+    
+    .tez-faq-copy-btn:active {
+        transform: translateY(0);
+    }
+    
+    .tez-faq-copy-btn.copied {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+    }
+    
+    /* NEW: No Results Message */
+    .tez-faq-no-results {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--faq-text-muted);
+    }
+    
+    .tez-faq-no-results i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+        opacity: 0.5;
+    }
+    
+    .tez-faq-no-results p {
+        margin: 0;
+        font-size: 1.125rem;
     }
     
     /* ============================================
@@ -851,7 +1132,7 @@ function tez_faq_frontend_css() {
         box-shadow: none;
     }
     
-    .tez-faq-minimal .tez-faq-heading {
+    .tez-faq-minimal .tez-faq-header {
         padding-bottom: 0.75rem;
     }
     
@@ -892,7 +1173,7 @@ function tez_faq_frontend_css() {
         border: 2px solid var(--faq-primary);
     }
     
-    .tez-faq-boxed .tez-faq-heading {
+    .tez-faq-boxed .tez-faq-header {
         background: var(--faq-primary);
         color: #fff;
         margin: -2rem -2rem 1.5rem -2rem;
@@ -900,8 +1181,26 @@ function tez_faq_frontend_css() {
         border-bottom: none;
     }
     
+    .tez-faq-boxed .tez-faq-heading,
     .tez-faq-boxed .tez-faq-heading i {
         color: #fff;
+    }
+    
+    .tez-faq-boxed .tez-faq-counter {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .tez-faq-boxed .tez-faq-search {
+        background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .tez-faq-boxed .tez-faq-expand-all {
+        background: white;
+        color: var(--faq-primary);
+    }
+    
+    .tez-faq-boxed .tez-faq-expand-all:hover {
+        background: rgba(255, 255, 255, 0.9);
     }
     
     .tez-faq-boxed .tez-faq-item {
@@ -928,6 +1227,28 @@ function tez_faq_frontend_css() {
     
     .tez-faq-gradient .tez-faq-heading i {
         color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .tez-faq-gradient .tez-faq-header {
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .tez-faq-gradient .tez-faq-counter {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .tez-faq-gradient .tez-faq-search {
+        background: rgba(255, 255, 255, 0.9);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .tez-faq-gradient .tez-faq-expand-all {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .tez-faq-gradient .tez-faq-expand-all:hover {
+        background: rgba(255, 255, 255, 0.3);
     }
     
     .tez-faq-gradient .tez-faq-item {
@@ -971,6 +1292,17 @@ function tez_faq_frontend_css() {
         color: rgba(255, 255, 255, 0.9);
     }
     
+    .tez-faq-gradient .tez-faq-copy-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .tez-faq-gradient .tez-faq-copy-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+    
     /* ============================================
        DARK MODE
        ============================================ */
@@ -992,7 +1324,7 @@ function tez_faq_frontend_css() {
         background: linear-gradient(135deg, var(--faq-bg-secondary) 0%, var(--faq-bg-tertiary) 100%);
     }
     
-    [data-theme="dark"] .tez-faq-boxed .tez-faq-heading {
+    [data-theme="dark"] .tez-faq-boxed .tez-faq-header {
         background: var(--faq-primary);
     }
     
@@ -1064,7 +1396,10 @@ function tez_faq_frontend_css() {
         .tez-faq-answer,
         .tez-faq-question,
         .tez-faq-icon,
-        .tez-faq-icon i {
+        .tez-faq-icon i,
+        .tez-faq-expand-all,
+        .tez-faq-expand-all i,
+        .tez-faq-copy-btn {
             transition: none;
         }
     }
@@ -1079,11 +1414,34 @@ function tez_faq_frontend_css() {
             border-radius: var(--tez-radius-lg, 0.75rem);
         }
         
+        .tez-faq-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .tez-faq-title-wrapper {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .tez-faq-controls {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .tez-faq-search {
+            width: 100%;
+        }
+        
+        .tez-faq-expand-all {
+            width: 100%;
+            justify-content: center;
+        }
+        
         .tez-faq-heading {
             font-size: 1.25rem;
             gap: 0.5rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
         }
         
         .tez-faq-heading i {
@@ -1110,9 +1468,17 @@ function tez_faq_frontend_css() {
             font-size: 0.875rem;
         }
         
-        .tez-faq-boxed .tez-faq-heading {
+        .tez-faq-boxed .tez-faq-header {
             margin: -1.25rem -1.25rem 1.25rem -1.25rem;
             padding: 1rem 1.25rem;
+        }
+        
+        .tez-faq-copy-btn .tez-faq-copy-text {
+            display: none;
+        }
+        
+        .tez-faq-copy-btn {
+            padding: 0.5rem;
         }
     }
     
@@ -1123,6 +1489,11 @@ function tez_faq_frontend_css() {
         
         .tez-faq-heading {
             font-size: 1.125rem;
+        }
+        
+        .tez-faq-counter {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
         }
         
         .tez-faq-question {
@@ -1151,6 +1522,11 @@ function tez_faq_frontend_css() {
             border: 1px solid #ddd !important;
             break-inside: avoid;
             page-break-inside: avoid;
+        }
+        
+        .tez-faq-controls,
+        .tez-faq-copy-btn {
+            display: none !important;
         }
         
         .tez-faq-answer {
@@ -1191,12 +1567,19 @@ function tez_faq_frontend_css() {
         box-shadow: inset 0 0 0 2px var(--faq-primary);
         border-radius: var(--tez-radius-lg, 0.75rem) var(--tez-radius-lg, 0.75rem) 0 0;
     }
+    
+    .tez-faq-search:focus-visible,
+    .tez-faq-expand-all:focus-visible,
+    .tez-faq-copy-btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(var(--faq-primary-rgb), 0.4);
+    }
     </style>
     <?php
 }
 
 // =============================================
-// 9. FRONTEND JS
+// 9. FRONTEND JS (Enhanced)
 // =============================================
 add_action('wp_footer', 'tez_faq_frontend_js', 99);
 function tez_faq_frontend_js() {
@@ -1205,31 +1588,171 @@ function tez_faq_frontend_js() {
     <script id="tez-faq-js">
     (function() {
         document.addEventListener('DOMContentLoaded', function() {
-            // Get all FAQ questions
-            var questions = document.querySelectorAll('.tez-faq-question');
+            var containers = document.querySelectorAll('.tez-faq-container');
             
-            questions.forEach(function(question) {
-                question.addEventListener('click', function() {
-                    var answer = this.nextElementSibling;
-                    var isExpanded = this.getAttribute('aria-expanded') === 'true';
-                    
-                    // Toggle current
-                    this.setAttribute('aria-expanded', !isExpanded);
-                    
-                    if (isExpanded) {
-                        answer.setAttribute('hidden', '');
-                    } else {
-                        answer.removeAttribute('hidden');
+            containers.forEach(function(container) {
+                var questions = container.querySelectorAll('.tez-faq-question');
+                var expandAllBtn = container.querySelector('.tez-faq-expand-all');
+                var searchInput = container.querySelector('.tez-faq-search');
+                var items = container.querySelectorAll('.tez-faq-item');
+                var noResults = container.querySelector('.tez-faq-no-results');
+                var autoExpand = container.getAttribute('data-auto-expand') === 'yes';
+                
+                // Auto-expand first FAQ if enabled
+                if (autoExpand && questions.length > 0) {
+                    questions[0].click();
+                }
+                
+                // Handle URL hash navigation
+                if (window.location.hash) {
+                    var targetId = window.location.hash.substring(1);
+                    var targetItem = container.querySelector('#' + targetId);
+                    if (targetItem) {
+                        var targetQuestion = targetItem.querySelector('.tez-faq-question');
+                        if (targetQuestion && targetQuestion.getAttribute('aria-expanded') !== 'true') {
+                            setTimeout(function() {
+                                targetQuestion.click();
+                                targetItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 300);
+                        }
                     }
+                }
+                
+                // Toggle FAQ
+                questions.forEach(function(question) {
+                    question.addEventListener('click', function() {
+                        var answer = this.nextElementSibling;
+                        var isExpanded = this.getAttribute('aria-expanded') === 'true';
+                        
+                        this.setAttribute('aria-expanded', !isExpanded);
+                        
+                        if (isExpanded) {
+                            answer.setAttribute('hidden', '');
+                        } else {
+                            answer.removeAttribute('hidden');
+                            
+                            // Update URL hash
+                            var faqItem = this.closest('.tez-faq-item');
+                            if (faqItem && faqItem.id) {
+                                history.replaceState(null, null, '#' + faqItem.id);
+                            }
+                        }
+                    });
+                    
+                    // Keyboard navigation
+                    question.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            this.click();
+                        }
+                    });
                 });
                 
-                // Keyboard navigation
-                question.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        this.click();
-                    }
+                // Expand/Collapse All
+                if (expandAllBtn) {
+                    expandAllBtn.addEventListener('click', function() {
+                        var allExpanded = this.classList.contains('all-expanded');
+                        var visibleQuestions = Array.from(questions).filter(function(q) {
+                            return !q.closest('.tez-faq-item').classList.contains('hidden');
+                        });
+                        
+                        visibleQuestions.forEach(function(question) {
+                            var answer = question.nextElementSibling;
+                            var isExpanded = question.getAttribute('aria-expanded') === 'true';
+                            
+                            if (allExpanded && isExpanded) {
+                                answer.setAttribute('hidden', '');
+                                question.setAttribute('aria-expanded', 'false');
+                            } else if (!allExpanded && !isExpanded) {
+                                answer.removeAttribute('hidden');
+                                question.setAttribute('aria-expanded', 'true');
+                            }
+                        });
+                        
+                        this.classList.toggle('all-expanded');
+                        this.querySelector('span').textContent = allExpanded ? 'باز کردن همه' : 'بستن همه';
+                    });
+                }
+                
+                // Search functionality
+                if (searchInput) {
+                    var searchTimeout;
+                    searchInput.addEventListener('input', function() {
+                        clearTimeout(searchTimeout);
+                        searchTimeout = setTimeout(function() {
+                            var searchTerm = searchInput.value.toLowerCase().trim();
+                            var visibleCount = 0;
+                            
+                            items.forEach(function(item) {
+                                var searchText = item.getAttribute('data-search-text');
+                                if (searchTerm === '' || searchText.indexOf(searchTerm) !== -1) {
+                                    item.classList.remove('hidden');
+                                    visibleCount++;
+                                } else {
+                                    item.classList.add('hidden');
+                                }
+                            });
+                            
+                            if (noResults) {
+                                if (visibleCount === 0) {
+                                    noResults.removeAttribute('hidden');
+                                } else {
+                                    noResults.setAttribute('hidden', '');
+                                }
+                            }
+                        }, 300);
+                    });
+                }
+                
+                // Copy answer functionality
+                var copyButtons = container.querySelectorAll('.tez-faq-copy-btn');
+                copyButtons.forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        var answerDiv = this.previousElementSibling;
+                        var text = answerDiv.textContent.trim();
+                        
+                        if (navigator.clipboard && window.isSecureContext) {
+                            navigator.clipboard.writeText(text).then(function() {
+                                showCopySuccess(btn);
+                            }).catch(function() {
+                                fallbackCopy(text, btn);
+                            });
+                        } else {
+                            fallbackCopy(text, btn);
+                        }
+                    });
                 });
+                
+                function showCopySuccess(btn) {
+                    var originalHTML = btn.innerHTML;
+                    var textSpan = btn.querySelector('.tez-faq-copy-text');
+                    
+                    btn.classList.add('copied');
+                    btn.innerHTML = '<i class="fas fa-check"></i>' + (textSpan ? '<span class="tez-faq-copy-text">کپی شد!</span>' : '');
+                    
+                    setTimeout(function() {
+                        btn.classList.remove('copied');
+                        btn.innerHTML = originalHTML;
+                    }, 2000);
+                }
+                
+                function fallbackCopy(text, btn) {
+                    var textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    
+                    try {
+                        document.execCommand('copy');
+                        showCopySuccess(btn);
+                    } catch (err) {
+                        console.error('خطا در کپی متن:', err);
+                    }
+                    
+                    document.body.removeChild(textarea);
+                }
             });
         });
     })();
