@@ -4,13 +4,14 @@
  * Font Awesome is loaded globally by core-setup.php - no need to load here.
  *
  * @package JannahChild
- * @version 3.1.0
+ * @version 4.0.0
  */
 
 /**
  * Teznevisan IP-Based Star Rating System
- * Version: 2.0.0
- * Features: IP-Voting, Dark/Sepia Mode, RTL, Schema.org, Accessibility, Per-Post Settings
+ * Version: 4.0.0
+ * Features: IP-Voting, Rating Distribution, Dark/Sepia Mode, RTL, Schema.org, Accessibility
+ * NEW: Rating breakdown visualization with progress bars
  */
 
 if (!defined('ABSPATH')) exit;
@@ -90,7 +91,36 @@ function tez_rating_get_user_ip() {
 }
 
 // =============================================
-// 4. ADD META BOX
+// 4. NEW: GET RATING DISTRIBUTION
+// =============================================
+function tez_rating_get_distribution($post_id) {
+    global $wpdb;
+    $table = $wpdb->prefix . 'tez_ratings';
+    
+    $distribution = array(
+        5 => 0,
+        4 => 0,
+        3 => 0,
+        2 => 0,
+        1 => 0
+    );
+    
+    $results = $wpdb->get_results($wpdb->prepare(
+        "SELECT rating, COUNT(*) as count FROM $table WHERE post_id = %d GROUP BY rating",
+        $post_id
+    ));
+    
+    if ($results) {
+        foreach ($results as $row) {
+            $distribution[intval($row->rating)] = intval($row->count);
+        }
+    }
+    
+    return $distribution;
+}
+
+// =============================================
+// 5. ADD META BOX
 // =============================================
 add_action('add_meta_boxes', 'tez_rating_add_metabox');
 function tez_rating_add_metabox() {
@@ -105,7 +135,7 @@ function tez_rating_add_metabox() {
 }
 
 // =============================================
-// 5. META BOX HTML
+// 6. META BOX HTML (Enhanced with Distribution)
 // =============================================
 function tez_rating_metabox_html($post) {
     $data = get_post_meta($post->ID, '_tez_rating_data', true);
@@ -113,6 +143,7 @@ function tez_rating_metabox_html($post) {
     // Defaults
     $enabled = isset($data['enabled']) ? $data['enabled'] : 'yes';
     $style = isset($data['style']) ? $data['style'] : 'modern';
+    $show_distribution = isset($data['show_distribution']) ? $data['show_distribution'] : 'yes';
     $heading_before = isset($data['heading_before']) ? $data['heading_before'] : 'به این مطلب امتیاز دهید:';
     $heading_after = isset($data['heading_after']) ? $data['heading_after'] : 'امتیاز شما ثبت شد!';
     
@@ -125,6 +156,9 @@ function tez_rating_metabox_html($post) {
     ));
     $avg = $stats && $stats->avg ? round($stats->avg, 1) : 0;
     $count = $stats && $stats->count ? intval($stats->count) : 0;
+    
+    // Get distribution
+    $distribution = tez_rating_get_distribution($post->ID);
     
     wp_nonce_field('tez_rating_save', 'tez_rating_nonce');
     ?>
@@ -179,6 +213,53 @@ function tez_rating_metabox_html($post) {
             font-weight: 700;
             color: #b45309;
         }
+        .tez-dist-preview {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .tez-dist-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .tez-dist-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+        .tez-dist-row:last-child {
+            margin-bottom: 0;
+        }
+        .tez-dist-label {
+            color: #f59e0b;
+            min-width: 12px;
+        }
+        .tez-dist-bar {
+            flex: 1;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .tez-dist-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .tez-dist-count {
+            color: #64748b;
+            min-width: 20px;
+            text-align: left;
+            font-weight: 600;
+        }
     </style>
     
     <div class="tez-rating-meta">
@@ -192,6 +273,25 @@ function tez_rating_metabox_html($post) {
             <div class="avg"><?php echo $avg; ?></div>
             <div class="info"><?php echo $count; ?> رای</div>
         </div>
+        
+        <!-- Distribution Preview -->
+        <?php if ($count > 0): ?>
+        <div class="tez-dist-preview">
+            <div class="tez-dist-title">توزیع امتیازها</div>
+            <?php for ($i = 5; $i >= 1; $i--): 
+                $star_count = $distribution[$i];
+                $percentage = $count > 0 ? round(($star_count / $count) * 100) : 0;
+            ?>
+            <div class="tez-dist-row">
+                <div class="tez-dist-label"><?php echo $i; ?>★</div>
+                <div class="tez-dist-bar">
+                    <div class="tez-dist-fill" style="width: <?php echo $percentage; ?>%"></div>
+                </div>
+                <div class="tez-dist-count"><?php echo $star_count; ?></div>
+            </div>
+            <?php endfor; ?>
+        </div>
+        <?php endif; ?>
         
         <!-- Enable/Disable -->
         <div class="field">
@@ -210,6 +310,16 @@ function tez_rating_metabox_html($post) {
                 <option value="minimal" <?php selected($style, 'minimal'); ?>>مینیمال (Minimal)</option>
                 <option value="boxed" <?php selected($style, 'boxed'); ?>>باکسی (Boxed)</option>
                 <option value="gradient" <?php selected($style, 'gradient'); ?>>گرادیان (Gradient)</option>
+                <option value="detailed" <?php selected($style, 'detailed'); ?>>🆕 جزئیات کامل (Detailed)</option>
+            </select>
+        </div>
+        
+        <!-- Show Distribution -->
+        <div class="field">
+            <label>نمایش توزیع / Show Distribution</label>
+            <select name="tez_rating[show_distribution]">
+                <option value="yes" <?php selected($show_distribution, 'yes'); ?>>✅ نمایش (Show)</option>
+                <option value="no" <?php selected($show_distribution, 'no'); ?>>❌ مخفی (Hide)</option>
             </select>
         </div>
         
@@ -229,7 +339,7 @@ function tez_rating_metabox_html($post) {
 }
 
 // =============================================
-// 6. SAVE META BOX
+// 7. SAVE META BOX (Enhanced)
 // =============================================
 add_action('save_post', 'tez_rating_save_meta');
 function tez_rating_save_meta($post_id) {
@@ -241,6 +351,7 @@ function tez_rating_save_meta($post_id) {
         $clean_data = array();
         $clean_data['enabled'] = sanitize_text_field($_POST['tez_rating']['enabled']);
         $clean_data['style'] = sanitize_text_field($_POST['tez_rating']['style']);
+        $clean_data['show_distribution'] = sanitize_text_field($_POST['tez_rating']['show_distribution']);
         $clean_data['heading_before'] = sanitize_text_field($_POST['tez_rating']['heading_before']);
         $clean_data['heading_after'] = sanitize_text_field($_POST['tez_rating']['heading_after']);
         
@@ -249,7 +360,7 @@ function tez_rating_save_meta($post_id) {
 }
 
 // =============================================
-// 7. SHORTCODE
+// 8. SHORTCODE
 // =============================================
 add_shortcode('tez_rating', 'tez_rating_shortcode');
 function tez_rating_shortcode($atts) {
@@ -265,7 +376,7 @@ function tez_rating_shortcode($atts) {
 }
 
 // =============================================
-// 8. AUTO INSERT INTO CONTENT
+// 9. AUTO INSERT INTO CONTENT
 // Priority 30 - After FAQ (25)
 // =============================================
 add_filter('the_content', 'tez_rating_inject_content', 30);
@@ -288,7 +399,7 @@ function tez_rating_inject_content($content) {
 }
 
 // =============================================
-// 9. RENDER RATING HTML
+// 10. RENDER RATING HTML (Enhanced with Distribution)
 // =============================================
 function tez_rating_render_html($post_id, $data = null) {
     if (!$data) {
@@ -297,6 +408,7 @@ function tez_rating_render_html($post_id, $data = null) {
     
     // Settings
     $style = isset($data['style']) ? $data['style'] : 'modern';
+    $show_distribution = isset($data['show_distribution']) ? $data['show_distribution'] : 'yes';
     $heading_before = isset($data['heading_before']) ? $data['heading_before'] : 'به این مطلب امتیاز دهید:';
     $heading_after = isset($data['heading_after']) ? $data['heading_after'] : 'امتیاز شما ثبت شد!';
     
@@ -317,6 +429,9 @@ function tez_rating_render_html($post_id, $data = null) {
     ));
     $avg = $stats && $stats->avg ? round($stats->avg, 1) : 0;
     $count = $stats && $stats->count ? intval($stats->count) : 0;
+    
+    // Get Distribution
+    $distribution = tez_rating_get_distribution($post_id);
     
     $has_voted = !empty($user_vote);
     $voted_class = $has_voted ? ' has-voted' : '';
@@ -339,6 +454,7 @@ function tez_rating_render_html($post_id, $data = null) {
         <meta itemprop="bestRating" content="5">
         <meta itemprop="ratingValue" content="<?php echo $avg; ?>">
         <meta itemprop="ratingCount" content="<?php echo $count; ?>">
+        <meta itemprop="reviewCount" content="<?php echo $count; ?>">
         
         <div class="tez-rating-header">
             <div class="tez-rating-icon" aria-hidden="true">
@@ -371,6 +487,30 @@ function tez_rating_render_html($post_id, $data = null) {
             </span>
         </div>
         
+        <?php if ($show_distribution === 'yes' && $count > 0): ?>
+        <div class="tez-rating-distribution" role="group" aria-label="توزیع امتیازها">
+            <?php for ($i = 5; $i >= 1; $i--): 
+                $star_count = $distribution[$i];
+                $percentage = $count > 0 ? round(($star_count / $count) * 100) : 0;
+            ?>
+            <div class="tez-dist-item">
+                <div class="tez-dist-star-label" aria-label="<?php echo $i; ?> ستاره">
+                    <?php echo $i; ?> <i class="fas fa-star" aria-hidden="true"></i>
+                </div>
+                <div class="tez-dist-bar-wrapper" role="progressbar" 
+                     aria-valuenow="<?php echo $percentage; ?>" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100"
+                     aria-label="<?php echo $percentage; ?> درصد">
+                    <div class="tez-dist-bar-fill" style="width: <?php echo $percentage; ?>%" data-percentage="<?php echo $percentage; ?>"></div>
+                </div>
+                <div class="tez-dist-percentage"><?php echo $percentage; ?>%</div>
+                <div class="tez-dist-count-value">(<?php echo $star_count; ?>)</div>
+            </div>
+            <?php endfor; ?>
+        </div>
+        <?php endif; ?>
+        
         <div class="tez-rating-message" role="alert" aria-live="polite"></div>
         
     </div>
@@ -379,7 +519,7 @@ function tez_rating_render_html($post_id, $data = null) {
 }
 
 // =============================================
-// 10. AJAX HANDLER
+// 11. AJAX HANDLER (Enhanced Response)
 // =============================================
 add_action('wp_ajax_tez_submit_rating', 'tez_rating_ajax_handler');
 add_action('wp_ajax_nopriv_tez_submit_rating', 'tez_rating_ajax_handler');
@@ -426,17 +566,29 @@ function tez_rating_ajax_handler() {
         "SELECT AVG(rating) as avg, COUNT(*) as count FROM $table WHERE post_id = %d",
         $post_id
     ));
+    
+    // Get updated distribution
+    $distribution = tez_rating_get_distribution($post_id);
+    $dist_html = array();
+    foreach ($distribution as $star => $star_count) {
+        $percentage = $stats->count > 0 ? round(($star_count / $stats->count) * 100) : 0;
+        $dist_html[$star] = array(
+            'count' => $star_count,
+            'percentage' => $percentage
+        );
+    }
 
     wp_send_json_success(array(
         'msg' => 'ممنون از امتیاز شما!',
         'avg' => round($stats->avg, 1),
         'count' => intval($stats->count),
-        'user_rating' => $rating
+        'user_rating' => $rating,
+        'distribution' => $dist_html
     ));
 }
 
 // =============================================
-// 11. FRONTEND CSS
+// 12. FRONTEND CSS (Enhanced with Distribution Styles)
 // =============================================
 add_action('wp_head', 'tez_rating_frontend_css', 99);
 function tez_rating_frontend_css() {
@@ -591,6 +743,81 @@ function tez_rating_frontend_css() {
         color: var(--rating-border);
     }
     
+    /* ============================================
+       NEW: DISTRIBUTION STYLES
+       ============================================ */
+    .tez-rating-distribution {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--rating-border);
+    }
+    
+    .tez-dist-item {
+        display: grid;
+        grid-template-columns: 50px 1fr 60px 50px;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .tez-dist-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .tez-dist-star-label {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.375rem;
+        color: var(--rating-text);
+        font-weight: 600;
+    }
+    
+    .tez-dist-star-label i {
+        color: var(--rating-star);
+        font-size: 0.75rem;
+    }
+    
+    .tez-dist-bar-wrapper {
+        height: 10px;
+        background: var(--rating-bg-tertiary);
+        border-radius: 5px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .tez-dist-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--rating-star) 0%, #fbbf24 100%);
+        border-radius: 5px;
+        transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+    
+    .tez-dist-bar-fill:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+        animation: tezDistShine 2s infinite;
+    }
+    
+    .tez-dist-percentage {
+        text-align: center;
+        color: var(--rating-text-secondary);
+        font-weight: 600;
+    }
+    
+    .tez-dist-count-value {
+        text-align: left;
+        color: var(--rating-text-muted);
+        font-size: 0.8125rem;
+    }
+    
     /* Message */
     .tez-rating-message {
         font-size: 0.9375rem;
@@ -700,6 +927,30 @@ function tez_rating_frontend_css() {
     }
     
     /* ============================================
+       NEW STYLE: DETAILED
+       ============================================ */
+    .tez-rating-detailed {
+        background: var(--rating-bg);
+        border: 2px solid var(--rating-border);
+        box-shadow: var(--rating-shadow);
+        padding: 2.5rem;
+    }
+    
+    .tez-rating-detailed .tez-rating-icon {
+        width: 4rem;
+        height: 4rem;
+        font-size: 1.75rem;
+    }
+    
+    .tez-rating-detailed .tez-rating-distribution {
+        background: var(--rating-bg-secondary);
+        padding: 1.5rem;
+        border-radius: var(--tez-radius-lg, 0.75rem);
+        margin-top: 1.5rem;
+        border: none;
+    }
+    
+    /* ============================================
        DARK MODE
        ============================================ */
     [data-theme="dark"] .tez-rating-container {
@@ -801,8 +1052,31 @@ function tez_rating_frontend_css() {
         75% { transform: scale(1.1); }
     }
     
+    @keyframes tezDistShine {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(200%); }
+    }
+    
+    @keyframes tezDistBarGrow {
+        from { width: 0; }
+    }
+    
     .tez-rating-container {
         animation: tezRatingFadeIn 0.5s ease-out;
+    }
+    
+    .tez-dist-item {
+        animation: tezRatingFadeIn 0.4s ease-out backwards;
+    }
+    
+    .tez-dist-item:nth-child(1) { animation-delay: 0.1s; }
+    .tez-dist-item:nth-child(2) { animation-delay: 0.15s; }
+    .tez-dist-item:nth-child(3) { animation-delay: 0.2s; }
+    .tez-dist-item:nth-child(4) { animation-delay: 0.25s; }
+    .tez-dist-item:nth-child(5) { animation-delay: 0.3s; }
+    
+    .tez-dist-bar-fill {
+        animation: tezDistBarGrow 0.8s ease-out;
     }
     
     /* Success animation for voted stars */
@@ -814,11 +1088,13 @@ function tez_rating_frontend_css() {
        REDUCED MOTION
        ============================================ */
     @media (prefers-reduced-motion: reduce) {
-        .tez-rating-container {
+        .tez-rating-container,
+        .tez-dist-item {
             animation: none;
         }
         
         .tez-star-btn,
+        .tez-dist-bar-fill,
         .tez-rating-container.just-voted .tez-star-btn.is-active {
             animation: none;
             transition: none;
@@ -860,6 +1136,16 @@ function tez_rating_frontend_css() {
             flex-wrap: wrap;
             gap: 0.5rem;
         }
+        
+        .tez-dist-item {
+            grid-template-columns: 45px 1fr 50px;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
+        }
+        
+        .tez-dist-count-value {
+            display: none;
+        }
     }
     
     @media (max-width: 479px) {
@@ -879,6 +1165,15 @@ function tez_rating_frontend_css() {
         
         .tez-rating-title {
             font-size: 0.9375rem;
+        }
+        
+        .tez-dist-item {
+            grid-template-columns: 40px 1fr;
+            gap: 0.5rem;
+        }
+        
+        .tez-dist-percentage {
+            display: none;
         }
     }
     
@@ -902,13 +1197,17 @@ function tez_rating_frontend_css() {
         .tez-star-btn:not(.is-active) {
             color: #ddd !important;
         }
+        
+        .tez-dist-bar-fill:after {
+            display: none;
+        }
     }
     </style>
     <?php
 }
 
 // =============================================
-// 12. FRONTEND JS
+// 13. FRONTEND JS (Enhanced with Distribution Update)
 // =============================================
 add_action('wp_footer', 'tez_rating_frontend_js', 99);
 function tez_rating_frontend_js() {
@@ -925,6 +1224,7 @@ function tez_rating_frontend_js() {
                 var titleEl = container.querySelector('.tez-rating-title');
                 var avgEl = container.querySelector('.avg-value');
                 var countEl = container.querySelector('.count-value');
+                var distributionEl = container.querySelector('.tez-rating-distribution');
                 var postId = container.dataset.id;
                 var headingAfter = container.dataset.headingAfter;
                 
@@ -973,6 +1273,28 @@ function tez_rating_frontend_js() {
                                 avgEl.textContent = data.data.avg;
                                 countEl.textContent = data.data.count;
                                 
+                                // Update distribution if exists
+                                if (distributionEl && data.data.distribution) {
+                                    for (var star = 5; star >= 1; star--) {
+                                        var distData = data.data.distribution[star];
+                                        if (distData) {
+                                            var distItem = distributionEl.querySelector('.tez-dist-item:nth-child(' + (6 - star) + ')');
+                                            if (distItem) {
+                                                var barFill = distItem.querySelector('.tez-dist-bar-fill');
+                                                var percentage = distItem.querySelector('.tez-dist-percentage');
+                                                var countValue = distItem.querySelector('.tez-dist-count-value');
+                                                
+                                                if (barFill) {
+                                                    barFill.style.width = distData.percentage + '%';
+                                                    barFill.setAttribute('data-percentage', distData.percentage);
+                                                }
+                                                if (percentage) percentage.textContent = distData.percentage + '%';
+                                                if (countValue) countValue.textContent = '(' + distData.count + ')';
+                                            }
+                                        }
+                                    }
+                                }
+                                
                                 // Remove animation class after animation completes
                                 setTimeout(function() {
                                     container.classList.remove('just-voted');
@@ -1010,7 +1332,7 @@ function tez_rating_frontend_js() {
 }
 
 // =============================================
-// 13. ADD SCHEMA.ORG TO HEAD
+// 14. ADD SCHEMA.ORG TO HEAD (Enhanced)
 // =============================================
 add_action('wp_head', 'tez_rating_schema_head', 5);
 function tez_rating_schema_head() {
@@ -1040,7 +1362,8 @@ function tez_rating_schema_head() {
             'ratingValue' => round($stats->avg, 1),
             'bestRating' => '5',
             'worstRating' => '1',
-            'ratingCount' => intval($stats->count)
+            'ratingCount' => intval($stats->count),
+            'reviewCount' => intval($stats->count)
         )
     );
     
