@@ -507,22 +507,22 @@ function tez_key_takeaways_shortcode($atts) {
     if ($enable_schema === 'yes') {
         $output .= ' itemprop="name"';
     }
-    $output .= '><i class="fas ' . esc_attr($icon_class) . '" aria-hidden="true"></i> ' . esc_html($heading) . '</h3>';
+    $output .= '><i class="tez-icon fas ' . esc_attr($icon_class) . '" aria-hidden="true"></i> ' . esc_html($heading) . '</h3>';
     
     // Controls
     if ($collapsible === 'yes' || $show_copy_btn === 'yes' || $show_reading_time === 'yes') {
         $output .= '<div class="tez-takeaways-controls">';
         
         if ($show_reading_time === 'yes') {
-            $output .= '<span class="tez-reading-time"><i class="fas fa-clock" aria-hidden="true"></i> ' . sprintf("%d دقیقه", $reading_minutes) . '</span>';
+            $output .= '<span class="tez-reading-time"><i class="tez-icon fas fa-clock" aria-hidden="true"></i> ' . sprintf("%d دقیقه", $reading_minutes) . '</span>';
         }
         
         if ($show_copy_btn === 'yes') {
-            $output .= '<button type="button" class="tez-copy-btn" aria-label="کپی متن" title="کپی همه نکات"><i class="fas fa-copy"></i> <span class="tez-copy-text">کپی</span></button>';
+            $output .= '<button type="button" class="tez-copy-btn" aria-label="کپی متن" title="کپی همه نکات"><i class="tez-icon fas fa-copy"></i> <span class="tez-copy-text">کپی</span></button>';
         }
         
         if ($collapsible === 'yes') {
-            $output .= '<button type="button" class="tez-toggle-btn" aria-expanded="true" aria-controls="' . $unique_id . '-content" aria-label="جمع/باز کردن"><i class="fas fa-chevron-up"></i></button>';
+            $output .= '<button type="button" class="tez-toggle-btn" aria-expanded="true" aria-controls="' . $unique_id . '-content" aria-label="جمع/باز کردن"><i class="tez-icon fas fa-chevron-up"></i></button>';
         }
         
         $output .= '</div>';
@@ -1291,7 +1291,7 @@ function tez_key_takeaways_js() {
                 var originalHtml = btn.innerHTML;
                 
                 btn.classList.add('copied');
-                btn.innerHTML = '<i class="fas fa-check"></i> ' + (originalText ? '<span class="tez-copy-text">کپی شد!</span>' : '');
+                btn.innerHTML = '<i class="tez-icon fas fa-check"></i> ' + (originalText ? '<span class="tez-copy-text">کپی شد!</span>' : '');
                 
                 setTimeout(function() {
                     btn.classList.remove('copied');

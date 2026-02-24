@@ -1,7 +1,13 @@
 /**
  * Teznevisan Complete JavaScript
- * Version: 3.1.0
+ * Version: 3.2.0 - CodeRabbit Critical Fixes Applied
  * Jannah Child Theme - Full interactive layer
+ *
+ * CodeRabbit Fixes:
+ * - Focus trap in mobile menu (WCAG 2.1 AA)
+ * - Screen reader announcements
+ * - Fixed accessibility toolbar data attributes
+ * - Enhanced RTL support
  *
  * Modules:
  * - Theme management (light / dark / sepia)
@@ -34,6 +40,22 @@
             clearTimeout(timeout);
             timeout = setTimeout(() => fn(...args), wait);
         };
+    };
+
+    /**
+     * Screen reader announcement helper
+     * Creates temporary ARIA live region for announcements
+     */
+    const announceToScreenReader = (message, priority = 'polite') => {
+        const announcement = document.createElement('div');
+        announcement.setAttribute('role', 'status');
+        announcement.setAttribute('aria-live', priority);
+        announcement.setAttribute('aria-atomic', 'true');
+        announcement.className = 'screen-reader-text';
+        announcement.style.cssText = 'position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;';
+        announcement.textContent = message;
+        document.body.appendChild(announcement);
+        setTimeout(() => announcement.remove(), 1000);
     };
 
     // Read PHP-passed context (set by wp_localize_script)
@@ -69,6 +91,14 @@
                     b.classList.toggle('active', isActive);
                     b.setAttribute('aria-pressed', isActive);
                 });
+
+                // Announce theme change to screen readers
+                const themeNames = {
+                    'light': 'حالت روشن',
+                    'dark': 'حالت تاریک',
+                    'sepia': 'حالت سپیا'
+                };
+                announceToScreenReader(themeNames[theme] + ' فعال شد');
             });
         });
     }
@@ -91,25 +121,34 @@
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 const action = this.dataset.action;
+                let announcement = '';
 
                 switch (action) {
-                    case 'increase-font':
+                    case 'font-size-increase':
                         if (fontSize < 24) {
                             fontSize += 2;
                             html.style.fontSize = fontSize + 'px';
                             localStorage.setItem('tez-fontSize', fontSize);
+                            announcement = 'اندازه فونت افزایش یافت';
+                        } else {
+                            announcement = 'حداکثر اندازه فونت';
                         }
                         break;
-                    case 'decrease-font':
+                    case 'font-size-decrease':
                         if (fontSize > 12) {
                             fontSize -= 2;
                             html.style.fontSize = fontSize + 'px';
                             localStorage.setItem('tez-fontSize', fontSize);
+                            announcement = 'اندازه فونت کاهش یافت';
+                        } else {
+                            announcement = 'حداقل اندازه فونت';
                         }
                         break;
-                    case 'high-contrast':
+                    case 'contrast-toggle':
                         body.classList.toggle('tez-high-contrast');
-                        localStorage.setItem('tez-highContrast', body.classList.contains('tez-high-contrast'));
+                        const isHighContrast = body.classList.contains('tez-high-contrast');
+                        localStorage.setItem('tez-highContrast', isHighContrast);
+                        announcement = isHighContrast ? 'کنتراست بالا فعال شد' : 'کنتراست عادی فعال شد';
                         break;
                     case 'reset':
                         fontSize = 16;
@@ -117,14 +156,17 @@
                         body.classList.remove('tez-high-contrast');
                         localStorage.removeItem('tez-fontSize');
                         localStorage.removeItem('tez-highContrast');
+                        announcement = 'تنظیمات دسترسی بازنشانی شد';
                         break;
                 }
+
+                if (announcement) announceToScreenReader(announcement);
             });
         });
     }
 
     // =============================================
-    // MOBILE MENU
+    // MOBILE MENU (with Focus Trap - WCAG 2.1 AA)
     // =============================================
     function initMobileMenu() {
         const toggle  = $('#tez-mobile-toggle');
@@ -136,42 +178,145 @@
 
         let isOpen = false;
         let lastFocused = null;
+        let focusableElements = [];
+        let firstFocusable = null;
+        let lastFocusable = null;
 
+        /**
+         * Open mobile menu with focus trap
+         * CodeRabbit Critical Fix: Proper focus management
+         */
         function openMenu() {
             if (isOpen) return;
+            
+            // Store last focused element to restore later
             lastFocused = document.activeElement;
             isOpen = true;
+            
+            // Update DOM and ARIA states
             menu.classList.add('is-open');
             menu.setAttribute('aria-hidden', 'false');
             toggle.setAttribute('aria-expanded', 'true');
             toggle.classList.add('is-active');
-            if (overlay) { overlay.classList.add('is-visible'); overlay.setAttribute('aria-hidden', 'false'); }
+            
+            if (overlay) {
+                overlay.classList.add('is-visible');
+                overlay.setAttribute('aria-hidden', 'false');
+            }
+            
             document.body.classList.add('tez-menu-open');
             document.body.style.overflow = 'hidden';
+            
+            // Setup focus trap after menu is visible
             setTimeout(() => {
-                const firstFocusable = menu.querySelector('button, a, input');
-                if (firstFocusable) firstFocusable.focus();
+                // Get all focusable elements inside menu
+                focusableElements = Array.from(menu.querySelectorAll(
+                    'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                ));
+                
+                firstFocusable = focusableElements[0];
+                lastFocusable = focusableElements[focusableElements.length - 1];
+                
+                // Move focus to first focusable element
+                if (firstFocusable) {
+                    firstFocusable.focus();
+                }
             }, 100);
+
+            // Announce to screen readers
+            announceToScreenReader('منوی موبایل باز شد');
         }
 
+        /**
+         * Close mobile menu and restore focus
+         */
         function closeMenu() {
             if (!isOpen) return;
+            
             isOpen = false;
             menu.classList.remove('is-open');
             menu.setAttribute('aria-hidden', 'true');
             toggle.setAttribute('aria-expanded', 'false');
             toggle.classList.remove('is-active');
-            if (overlay) { overlay.classList.remove('is-visible'); overlay.setAttribute('aria-hidden', 'true'); }
+            
+            if (overlay) {
+                overlay.classList.remove('is-visible');
+                overlay.setAttribute('aria-hidden', 'true');
+            }
+            
             document.body.classList.remove('tez-menu-open');
             document.body.style.overflow = '';
-            if (lastFocused) { lastFocused.focus(); lastFocused = null; }
+            
+            // Restore focus to element that opened menu
+            if (lastFocused) {
+                lastFocused.focus();
+                lastFocused = null;
+            }
+
+            // Announce to screen readers
+            announceToScreenReader('منوی موبایل بسته شد');
         }
 
-        toggle.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); isOpen ? closeMenu() : openMenu(); });
-        if (closeBtn) closeBtn.addEventListener('click', function(e) { e.preventDefault(); closeMenu(); });
-        if (overlay) overlay.addEventListener('click', function(e) { e.preventDefault(); closeMenu(); });
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && isOpen) closeMenu(); });
-        menu.querySelectorAll('.tez-mobile-link').forEach(link => link.addEventListener('click', closeMenu));
+        /**
+         * Focus trap: Handle Tab and Shift+Tab
+         * CodeRabbit Critical Fix: Prevent focus escape
+         */
+        function handleFocusTrap(e) {
+            if (e.key !== 'Tab' || !isOpen) return;
+
+            // Get currently focused element
+            const activeElement = document.activeElement;
+
+            if (e.shiftKey) {
+                // Shift + Tab (backwards)
+                if (activeElement === firstFocusable) {
+                    e.preventDefault();
+                    if (lastFocusable) lastFocusable.focus();
+                }
+            } else {
+                // Tab (forwards)
+                if (activeElement === lastFocusable) {
+                    e.preventDefault();
+                    if (firstFocusable) firstFocusable.focus();
+                }
+            }
+        }
+
+        // Event listeners
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            isOpen ? closeMenu() : openMenu();
+        });
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeMenu();
+            });
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeMenu();
+            });
+        }
+
+        // Global keyboard handlers
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isOpen) {
+                closeMenu();
+            }
+        });
+
+        // Focus trap listener
+        menu.addEventListener('keydown', handleFocusTrap);
+
+        // Close menu when clicking on menu links
+        menu.querySelectorAll('.tez-mobile-link').forEach(link => {
+            link.addEventListener('click', closeMenu);
+        });
 
         // Submenu toggles
         menu.querySelectorAll('.tez-submenu-toggle').forEach(btn => {
@@ -183,6 +328,7 @@
 
                 const isExpanded = parent.classList.contains('is-expanded');
 
+                // Close other open submenus
                 menu.querySelectorAll('.tez-has-submenu.is-expanded').forEach(item => {
                     if (item !== parent) {
                         item.classList.remove('is-expanded');
@@ -193,6 +339,7 @@
                     }
                 });
 
+                // Toggle current submenu
                 if (isExpanded) {
                     parent.classList.remove('is-expanded');
                     submenu.style.maxHeight = null;
@@ -202,11 +349,25 @@
                     submenu.style.maxHeight = submenu.scrollHeight + 'px';
                     this.setAttribute('aria-expanded', 'true');
                 }
+
+                // Update focusable elements after submenu toggle
+                if (isOpen) {
+                    setTimeout(() => {
+                        focusableElements = Array.from(menu.querySelectorAll(
+                            'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                        ));
+                        firstFocusable = focusableElements[0];
+                        lastFocusable = focusableElements[focusableElements.length - 1];
+                    }, 50);
+                }
             });
         });
 
+        // Close menu on viewport resize (desktop breakpoint)
         window.addEventListener('resize', debounce(() => {
-            if (window.innerWidth >= 992 && isOpen) closeMenu();
+            if (window.innerWidth >= 1024 && isOpen) {
+                closeMenu();
+            }
         }, 250));
     }
 
@@ -229,7 +390,10 @@
             overlay.setAttribute('aria-hidden', 'false');
             toggle.setAttribute('aria-expanded', 'true');
             document.body.style.overflow = 'hidden';
-            setTimeout(() => { if (input) input.focus(); }, 300);
+            setTimeout(() => {
+                if (input) input.focus();
+            }, 300);
+            announceToScreenReader('جستجو باز شد');
         }
 
         function closeSearch() {
@@ -238,19 +402,35 @@
             overlay.setAttribute('aria-hidden', 'true');
             toggle.setAttribute('aria-expanded', 'false');
             document.body.style.overflow = '';
+            announceToScreenReader('جستجو بسته شد');
         }
 
-        toggle.addEventListener('click', function(e) { e.preventDefault(); openSearch(); });
-        if (closeBtn) closeBtn.addEventListener('click', function(e) { e.preventDefault(); closeSearch(); });
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) closeSearch(); });
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && isOpen) closeSearch(); });
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            openSearch();
+        });
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeSearch();
+            });
+        }
+
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) closeSearch();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isOpen) closeSearch();
+        });
     }
 
     // =============================================
     // HEADER SCROLL (hide on scroll down, show on up)
     // =============================================
     function initHeaderScroll() {
-        const header = $('#tez-masthead');
+        const header = $('#tez-site-header');
         if (!header) return;
 
         let lastScroll = 0;
@@ -269,7 +449,10 @@
         }
 
         window.addEventListener('scroll', function() {
-            if (!ticking) { requestAnimationFrame(updateHeader); ticking = true; }
+            if (!ticking) {
+                requestAnimationFrame(updateHeader);
+                ticking = true;
+            }
         });
     }
 
@@ -287,12 +470,17 @@
 
         function toggleChaty() {
             isOpen = !isOpen;
-            container.classList.toggle('is-open', isOpen);
+            if (container) container.classList.toggle('is-open', isOpen);
             toggle.setAttribute('aria-expanded', isOpen);
             channels.setAttribute('aria-hidden', !isOpen);
         }
 
-        toggle.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); toggleChaty(); });
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleChaty();
+        });
+
         document.addEventListener('click', function(e) {
             if (isOpen && container && !container.contains(e.target)) {
                 isOpen = false;
@@ -310,12 +498,18 @@
         const btn = $('#tez-scroll-top');
         if (!btn) return;
 
-        function updateVisibility() { btn.classList.toggle('is-visible', window.pageYOffset > 300); }
+        function updateVisibility() {
+            btn.classList.toggle('is-visible', window.pageYOffset > 300);
+        }
 
         window.addEventListener('scroll', debounce(updateVisibility, 100));
         updateVisibility();
 
-        btn.addEventListener('click', function(e) { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            announceToScreenReader('برگشت به بالای صفحه');
+        });
     }
 
     // =============================================
@@ -353,7 +547,7 @@
                 if (!target) return;
 
                 e.preventDefault();
-                const header = $('#tez-masthead');
+                const header = $('#tez-site-header');
                 const headerHeight = header ? header.offsetHeight : 0;
                 const targetPos = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
                 window.scrollTo({ top: Math.max(0, targetPos), behavior: 'smooth' });
@@ -439,7 +633,7 @@
             : '#contact-form, #order-form, .lead-form-box, .tez-inquiry-form');
         const form = document.querySelector(query);
         if (form) {
-            const header = $('#tez-masthead');
+            const header = $('#tez-site-header');
             const headerHeight = header ? header.offsetHeight : 0;
             const formPos = form.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
             window.scrollTo({ top: Math.max(0, formPos), behavior: 'smooth' });

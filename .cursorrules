@@ -1,0 +1,220 @@
+# Cursor AI Rules — Teznevisan Child Theme
+# This file is read by Cursor IDE's AI assistant.
+# Apply ALL rules below when generating, editing, or reviewing code.
+
+## Project Context
+
+This is the **Teznevisan** WordPress child theme for the **Jannah** parent theme.
+- Language: Persian (Farsi), RTL layout, `fa_IR` locale
+- Audience: Iranian mobile users
+- Parent prefix: `tie-` (Jannah — DO NOT conflict)
+- Child prefix: `tez-` (ALL CSS classes, JS IDs)
+- PHP prefix: `tez_` (ALL functions, hooks, constants)
+- Current version: 3.2.0
+
+## 🔔 MANDATORY: Tag @coderabbitai
+
+In every code review, PR comment, or analysis response:
+ALWAYS end the message with:
+
+```
+---
+> 🤖 @coderabbitai — Please review the above and verify.
+```
+
+## File Map
+
+- `header.php` — Mobile menu, search overlay, theme/a11y widgets, skip link
+- `footer.php` — Footer with schema markup
+- `css/main.css` — ENTIRE design system (tokens, themes, components)
+- `js/scripts.js` — ALL modules: theme, a11y toolbar, mobile menu, search, etc.
+- `js/single-post.js` — Single post features: ToC, sharing
+- `functions.php` — Bootstrapper: loads all `inc/` files
+- `inc/core-setup.php` — Theme support, enqueue scripts
+- `inc/key-takeaways.php` — Key Takeaways (posts only, NOT pages)
+- `inc/toc.php` — Table of Contents
+- `inc/faq-schema.php` — FAQ accordion + FAQPage schema
+- `inc/star-rating.php` — AJAX star rating
+- `inc/polls.php` — AJAX polls
+- `inc/seo-redirects.php` — SEO redirects
+- `inc/typography.php` — Persian typography
+- `inc/icon-mapping.php` — Icon name to FA class mapping
+- `template-dynamic-content.php` — Custom page template
+
+## CSS Rules
+
+### 1. Design Tokens
+All values use CSS custom properties. Token names: `--tez-[property]`.
+Tokens defined in `:root` in `css/main.css`.
+```css
+color: var(--tez-primary);
+font-family: var(--tez-font);
+z-index: var(--tez-z-modal);
+```
+
+### 2. ALWAYS Mobile-First
+```css
+/* ✅ */
+.component { /* mobile base */ }
+@media (min-width: 576px) { /* tablet+ */ }
+@media (min-width: 1024px) { /* desktop+ */ }
+
+/* ❌ NEVER */
+@media (max-width: 1023px) { }
+```
+
+### 3. ALWAYS GPU Animations
+```css
+/* ✅ */
+transform: translateX(100%);
+transition: transform 350ms ease;
+
+/* ❌ */
+right: -100%;
+transition: right 350ms;
+```
+
+### 4. Font Awesome Scoping
+```html
+<!-- ✅ -->
+<i class="tez-icon fa-solid fa-home" aria-hidden="true"></i>
+
+<!-- ❌ -->
+<i class="fa-solid fa-home"></i>
+```
+
+### 5. RTL Support Required
+```css
+/* Always add RTL variant */
+[dir="rtl"] .component {
+    transform: translateX(-100%);
+}
+```
+
+### 6. Three Themes
+```css
+:root              { /* light */ }
+[data-theme="dark"]  { /* dark  */ }
+[data-theme="sepia"] { /* sepia */ }
+```
+
+## PHP Rules
+
+### Always Escape Output
+```php
+echo esc_html($text);
+echo esc_url($url);
+echo esc_attr($attr);
+echo wp_kses_post($html);
+```
+
+### Always Guard Files
+```php
+<?php
+if (!defined('ABSPATH')) exit;
+```
+
+### Function Prefix
+```php
+function tez_my_function() {}
+add_action('wp_enqueue_scripts', 'tez_enqueue_assets');
+```
+
+### Key Takeaways: Posts Only
+```php
+// ONLY on single posts
+if (!is_single() || !is_singular('post')) {
+    return $content;
+}
+// Also check:
+if (!in_the_loop() || !is_main_query()) {
+    return $content;
+}
+```
+
+### AJAX Security
+```php
+check_ajax_referer('tez_nonce', 'nonce');
+current_user_can('capability');
+sanitize_text_field($_POST['value']);
+```
+
+## JavaScript Rules
+
+### IIFE Module Pattern
+```javascript
+(function() {
+    'use strict';
+    const $ = (sel, ctx = document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx = document) => [...ctx.querySelectorAll(sel)];
+    
+    function init() { /* ... */ }
+    
+    document.readyState === 'loading'
+        ? document.addEventListener('DOMContentLoaded', init)
+        : init();
+})();
+```
+
+### No jQuery — Vanilla JS Only
+
+### Debounce Scroll/Resize
+```javascript
+window.addEventListener('scroll', debounce(handler, 100));
+```
+
+### RTL Detection
+```javascript
+const isRTL = (tez.isRTL === 'true') || (document.documentElement.dir === 'rtl');
+```
+
+### Screen Reader Announcements
+```javascript
+announceToScreenReader('منوی موبایل باز شد');
+```
+
+## Accessibility Rules (WCAG 2.1 AA)
+
+- All modals: `role="dialog"` + `aria-label` + focus trap
+- All buttons: `aria-label` OR visible text
+- Expanded toggles: `aria-expanded` + `aria-controls`
+- Decorative icons: `aria-hidden="true"`
+- Touch targets: minimum 44x44px
+- Skip link: `<a href="#tez-main-content">`
+- All ARIA state changes: announce to screen reader
+
+## Z-Index Reference
+```
+--tez-z-dropdown: 1000
+--tez-z-sticky:   1020
+--tez-z-fixed:    1030  ← floating widgets
+--tez-z-overlay:  1040  ← menu overlay backdrop
+--tez-z-modal:    1050  ← mobile menu panel
+--tez-z-tooltip:  1070
+```
+
+## Key IDs
+```
+#tez-site-header      ← main header
+#tez-mobile-menu      ← slide-in menu panel
+#tez-mobile-toggle    ← hamburger button
+#tez-mobile-overlay   ← backdrop
+#tez-mobile-close     ← close button inside menu
+#tez-search-overlay   ← fullscreen search
+#tez-search-toggle    ← search button
+#tez-main-content     ← skip link target
+#tez-scroll-top       ← scroll-to-top button
+#tez-chaty            ← floating contact widget
+```
+
+## State Classes
+```
+.is-open     ← menu/overlay open
+.is-visible  ← overlay visible
+.is-active   ← toggle active state
+.is-scrolled ← header after scroll
+.is-hidden   ← header hidden on scroll
+.is-expanded ← submenu expanded
+tez-loaded   ← body class after JS init
+tez-menu-open ← body class when menu open
+```
