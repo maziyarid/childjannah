@@ -1,15 +1,25 @@
 /*
-	Theme Name:   Jannah Child - Teznevisan
-	Theme URI:    https://teznevisan3.com/
-	Description:  Jannah News Child Theme for Teznevisan - Custom design system with dark/sepia modes, RTL support, accessibility toolbar, and service-oriented layouts.
-	Author:       Teznevisan
-	Author URI:   https://teznevisan3.com
-	Template:     jannah
-	Version:      2.4.0
-	License:      license purchased
-	License URI:  http://themeforest.net/licenses/regular_extended
-	Tags:         two-columns, rtl-language-support, custom-menu, featured-images, full-width-template, threaded-comments, translation-ready
-	Text Domain:  jannah-child
+Theme Name:   Jannah Child Theme (New)
+Theme URI:    https://teznevisan3.com
+Description:  Customized Jannah child theme with enhanced features, self-healing mechanisms, and optimized performance.
+Author:       Tez Nevisan
+Author URI:   https://teznevisan3.com
+Template:     jannah
+Version:      3.1.0
+License:      GNU General Public License v2 or later
+License URI:  http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain:  jannah-child
 */
 
-/* Child theme CSS is enqueued via functions.php - see css/main.css */
+/* 
+ * Main styles are loaded via wp_enqueue_style() in functions.php
+ * This file serves as the theme header and version identifier
+ * 
+ * CSS Files:
+ * - css/main.css (44KB) - Global styles, header, footer, navigation
+ * - css/page-templates.css (35KB) - Template layouts, heroes, grids
+ * - css/post-elements.css (6KB) - Key takeaways, polls, ratings
+ * - css/single-post.css (15KB) - Single post layout, TOC, meta
+ * 
+ * Total CSS: ~100KB minified
+ */

@@ -4,7 +4,7 @@
  * Replaces default 404 with a rich content discovery page.
  *
  * @package JannahChild
- * @version 2.4.0
+ * @version 3.1.0
  */
 
 if (!defined('ABSPATH')) exit;
@@ -28,7 +28,7 @@ function jannah_custom_404_template($template) {
         </div>
         <div class="search-section">
             <h3><i class="fas fa-search"></i> جستجو در سایت</h3>
-            <form role="search" method="get" action="<?php echo home_url('/'); ?>">
+            <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
                 <input type="search" name="s" placeholder="دنبال چه چیزی می‌گردید؟" />
                 <button type="submit">جستجو <i class="fas fa-arrow-left"></i></button>
             </form>
@@ -38,8 +38,19 @@ function jannah_custom_404_template($template) {
                 <h3><i class="fas fa-fire"></i> محبوب‌ترین مطالب</h3>
                 <div class="posts-grid">
                     <?php
-                    $popular = new WP_Query(array('posts_per_page' => 6, 'meta_key' => 'post_views_count', 'orderby' => 'meta_value_num', 'order' => 'DESC'));
-                    if(!$popular->have_posts()) $popular = new WP_Query(array('posts_per_page' => 6));
+                    $popular = new WP_Query(array(
+                        'posts_per_page' => 6,
+                        'meta_key' => 'post_views_count',
+                        'orderby' => 'meta_value_num',
+                        'order' => 'DESC',
+                        'no_found_rows' => true,
+                    ));
+                    if(!$popular->have_posts()) {
+                        $popular = new WP_Query(array(
+                            'posts_per_page' => 6,
+                            'no_found_rows' => true,
+                        ));
+                    }
                     while($popular->have_posts()): $popular->the_post(); ?>
                         <a href="<?php the_permalink(); ?>" class="post-card">
                             <?php if(has_post_thumbnail()): the_post_thumbnail('medium'); else: ?>
@@ -56,7 +67,9 @@ function jannah_custom_404_template($template) {
                     <?php
                     $categories = get_categories(array('orderby' => 'count', 'order' => 'DESC', 'number' => 15));
                     foreach($categories as $cat) {
-                        echo '<a href="' . get_category_link($cat->term_id) . '" class="cat-tag"><i class="fas fa-folder"></i> ' . $cat->name . ' <span>(' . $cat->count . ')</span></a>';
+                        echo '<a href="' . esc_url(get_category_link($cat->term_id)) . '" class="cat-tag">';
+                        echo '<i class="fas fa-folder"></i> ' . esc_html($cat->name);
+                        echo ' <span>(' . intval($cat->count) . ')</span></a>';
                     }
                     ?>
                 </div>
@@ -67,7 +80,8 @@ function jannah_custom_404_template($template) {
                     <?php
                     $tags = get_tags(array('number' => 20, 'orderby' => 'count', 'order' => 'DESC'));
                     foreach($tags as $tag) {
-                        echo '<a href="' . get_tag_link($tag->term_id) . '" class="tag-item">' . $tag->name . '</a>';
+                        echo '<a href="' . esc_url(get_tag_link($tag->term_id)) . '" class="tag-item">';
+                        echo esc_html($tag->name) . '</a>';
                     }
                     ?>
                 </div>
@@ -75,10 +89,10 @@ function jannah_custom_404_template($template) {
             <div class="hub-section">
                 <h3><i class="fas fa-link"></i> دسترسی سریع</h3>
                 <div class="quick-links">
-                    <a href="<?php echo home_url('/'); ?>"><i class="fas fa-home"></i> صفحه اصلی</a>
-                    <a href="<?php echo home_url('/sitemap'); ?>"><i class="fas fa-sitemap"></i> نقشه سایت</a>
-                    <a href="<?php echo home_url('/contact'); ?>"><i class="fas fa-envelope"></i> تماس با ما</a>
-                    <a href="<?php echo home_url('/about'); ?>"><i class="fas fa-info-circle"></i> درباره ما</a>
+                    <a href="<?php echo esc_url(home_url('/')); ?>"><i class="fas fa-home"></i> صفحه اصلی</a>
+                    <a href="<?php echo esc_url(home_url('/sitemap')); ?>"><i class="fas fa-sitemap"></i> نقشه سایت</a>
+                    <a href="<?php echo esc_url(home_url('/contact')); ?>"><i class="fas fa-envelope"></i> تماس با ما</a>
+                    <a href="<?php echo esc_url(home_url('/about')); ?>"><i class="fas fa-info-circle"></i> درباره ما</a>
                 </div>
             </div>
         </div>
