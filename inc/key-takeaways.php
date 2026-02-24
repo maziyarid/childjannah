@@ -5,6 +5,7 @@
  * 
  * @package JannahChild
  * @version 3.2.0
+ * @since Phase 2.0 - CodeRabbit FA scoping fix applied
  */
 
 if (!defined('ABSPATH')) exit;
@@ -49,24 +50,24 @@ function tez_add_key_takeaways($content) {
         
         <div class="tez-takeaways-header">
             <h2 class="tez-takeaways-heading">
-                <i class="fa-solid fa-lightbulb" aria-hidden="true"></i>
+                <i class="tez-icon fa-solid fa-lightbulb" aria-hidden="true"></i>
                 <span>نکات کلیدی</span>
             </h2>
             
             <div class="tez-takeaways-controls">
                 <span class="tez-reading-time" aria-label="زمان مطالعه">
-                    <i class="fa-solid fa-clock" aria-hidden="true"></i>
+                    <i class="tez-icon fa-solid fa-clock" aria-hidden="true"></i>
                     <span><?php echo esc_html($reading_time); ?> دقیقه</span>
                 </span>
                 
                 <button type="button" class="tez-copy-btn" aria-label="کپی نکات کلیدی">
-                    <i class="fa-solid fa-copy" aria-hidden="true"></i>
+                    <i class="tez-icon fa-solid fa-copy" aria-hidden="true"></i>
                     <span class="tez-copy-text">کپی</span>
                 </button>
                 
                 <?php if ($is_collapsible): ?>
                 <button type="button" class="tez-toggle-btn" aria-label="نمایش/مخفی کردن نکات" aria-expanded="<?php echo $collapsed_default ? 'false' : 'true'; ?>">
-                    <i class="fa-solid fa-chevron-up" aria-hidden="true"></i>
+                    <i class="tez-icon fa-solid fa-chevron-up" aria-hidden="true"></i>
                 </button>
                 <?php endif; ?>
             </div>

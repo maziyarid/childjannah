@@ -1,22 +1,12 @@
 /**
  * Teznevisan Complete JavaScript
- * Version: 3.1.0
- * Jannah Child Theme - Full interactive layer
+ * Version: 3.2.0
+ * Focus Trap + Screen Reader + Performance Optimizations
  *
- * Modules:
- * - Theme management (light / dark / sepia)
- * - Accessibility toolbar (font size, high contrast, reset)
- * - Mobile menu (open/close, submenu, focus trap, keyboard)
- * - Fullscreen search overlay
- * - Header scroll (hide on scroll down, reveal on scroll up)
- * - Chaty floating contact widget
- * - Scroll to top button
- * - Desktop dropdown menus (keyboard + hover)
- * - Smooth scroll (anchor links with header offset)
- * - FAQ accordion
- * - Scroll animations (IntersectionObserver)
- * - Form enhancements (phone input sanitizer)
- * - Global helpers (scrollToForm)
+ * Changes from 3.1.0:
+ * - Added focus trap to mobile menu (WCAG 2.1 AA)
+ * - Added screen reader announcements (Persian)
+ * - Improved keyboard navigation
  */
 
 (function() {
@@ -35,6 +25,23 @@
             timeout = setTimeout(() => fn(...args), wait);
         };
     };
+
+    /**
+     * Announce message to screen readers
+     * Uses aria-live region for non-intrusive announcements
+     * @param {string} message - Message to announce (in Persian/user language)
+     */
+    function announceToScreenReader(message) {
+        const announcement = document.createElement('div');
+        announcement.setAttribute('role', 'status');
+        announcement.setAttribute('aria-live', 'polite');
+        announcement.className = 'screen-reader-text';
+        announcement.textContent = message;
+        document.body.appendChild(announcement);
+        
+        // Auto-remove after 1 second to keep DOM clean
+        setTimeout(() => announcement.remove(), 1000);
+    }
 
     // Read PHP-passed context (set by wp_localize_script)
     const tez = (typeof tezData !== 'undefined') ? tezData : {};
@@ -93,21 +100,21 @@
                 const action = this.dataset.action;
 
                 switch (action) {
-                    case 'increase-font':
+                    case 'font-size-increase':
                         if (fontSize < 24) {
                             fontSize += 2;
                             html.style.fontSize = fontSize + 'px';
                             localStorage.setItem('tez-fontSize', fontSize);
                         }
                         break;
-                    case 'decrease-font':
+                    case 'font-size-decrease':
                         if (fontSize > 12) {
                             fontSize -= 2;
                             html.style.fontSize = fontSize + 'px';
                             localStorage.setItem('tez-fontSize', fontSize);
                         }
                         break;
-                    case 'high-contrast':
+                    case 'contrast-toggle':
                         body.classList.toggle('tez-high-contrast');
                         localStorage.setItem('tez-highContrast', body.classList.contains('tez-high-contrast'));
                         break;
@@ -124,7 +131,7 @@
     }
 
     // =============================================
-    // MOBILE MENU
+    // MOBILE MENU WITH FOCUS TRAP
     // =============================================
     function initMobileMenu() {
         const toggle  = $('#tez-mobile-toggle');
@@ -136,42 +143,138 @@
 
         let isOpen = false;
         let lastFocused = null;
+        let focusableElements = [];
+        let firstFocusable = null;
+        let lastFocusable = null;
 
+        /**
+         * Open mobile menu with focus trap
+         * WCAG 2.1 Level AA: Focus must stay within modal dialog
+         */
         function openMenu() {
             if (isOpen) return;
+            
+            // Remember what had focus before opening
             lastFocused = document.activeElement;
+            
             isOpen = true;
             menu.classList.add('is-open');
             menu.setAttribute('aria-hidden', 'false');
             toggle.setAttribute('aria-expanded', 'true');
             toggle.classList.add('is-active');
-            if (overlay) { overlay.classList.add('is-visible'); overlay.setAttribute('aria-hidden', 'false'); }
+            
+            if (overlay) { 
+                overlay.classList.add('is-visible'); 
+                overlay.setAttribute('aria-hidden', 'false'); 
+            }
+            
             document.body.classList.add('tez-menu-open');
             document.body.style.overflow = 'hidden';
+            
+            // Announce to screen readers (Persian)
+            announceToScreenReader('منوی موبایل باز شد');
+            
+            // Setup focus trap after menu is visible
             setTimeout(() => {
-                const firstFocusable = menu.querySelector('button, a, input');
+                // Get all focusable elements within the menu
+                focusableElements = menu.querySelectorAll(
+                    'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                );
+                
+                if (focusableElements.length === 0) return;
+                
+                firstFocusable = focusableElements[0];
+                lastFocusable = focusableElements[focusableElements.length - 1];
+                
+                // Move focus to first focusable element (usually close button)
                 if (firstFocusable) firstFocusable.focus();
             }, 100);
         }
 
+        /**
+         * Close mobile menu and return focus
+         */
         function closeMenu() {
             if (!isOpen) return;
+            
             isOpen = false;
             menu.classList.remove('is-open');
             menu.setAttribute('aria-hidden', 'true');
             toggle.setAttribute('aria-expanded', 'false');
             toggle.classList.remove('is-active');
-            if (overlay) { overlay.classList.remove('is-visible'); overlay.setAttribute('aria-hidden', 'true'); }
+            
+            if (overlay) { 
+                overlay.classList.remove('is-visible'); 
+                overlay.setAttribute('aria-hidden', 'true'); 
+            }
+            
             document.body.classList.remove('tez-menu-open');
             document.body.style.overflow = '';
-            if (lastFocused) { lastFocused.focus(); lastFocused = null; }
+            
+            // Announce to screen readers (Persian)
+            announceToScreenReader('منوی موبایل بسته شد');
+            
+            // Return focus to element that opened the menu
+            if (lastFocused) { 
+                lastFocused.focus(); 
+                lastFocused = null; 
+            }
         }
 
-        toggle.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); isOpen ? closeMenu() : openMenu(); });
-        if (closeBtn) closeBtn.addEventListener('click', function(e) { e.preventDefault(); closeMenu(); });
-        if (overlay) overlay.addEventListener('click', function(e) { e.preventDefault(); closeMenu(); });
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && isOpen) closeMenu(); });
-        menu.querySelectorAll('.tez-mobile-link').forEach(link => link.addEventListener('click', closeMenu));
+        /**
+         * Focus trap: Tab key handler
+         * Prevents focus from escaping the menu
+         */
+        menu.addEventListener('keydown', function(e) {
+            // Only trap Tab key when menu is open
+            if (e.key !== 'Tab' || !isOpen) return;
+            
+            // No focusable elements? Don't trap
+            if (focusableElements.length === 0) return;
+
+            if (e.shiftKey) {
+                // Shift + Tab: Moving backward
+                if (document.activeElement === firstFocusable) {
+                    lastFocusable.focus();
+                    e.preventDefault();
+                }
+            } else {
+                // Tab: Moving forward
+                if (document.activeElement === lastFocusable) {
+                    firstFocusable.focus();
+                    e.preventDefault();
+                }
+            }
+        });
+
+        // Toggle menu on hamburger click
+        toggle.addEventListener('click', function(e) { 
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            isOpen ? closeMenu() : openMenu(); 
+        });
+        
+        // Close button
+        if (closeBtn) closeBtn.addEventListener('click', function(e) { 
+            e.preventDefault(); 
+            closeMenu(); 
+        });
+        
+        // Click overlay to close
+        if (overlay) overlay.addEventListener('click', function(e) { 
+            e.preventDefault(); 
+            closeMenu(); 
+        });
+        
+        // Escape key to close
+        document.addEventListener('keydown', function(e) { 
+            if (e.key === 'Escape' && isOpen) closeMenu(); 
+        });
+        
+        // Close menu when clicking menu links (for single-page navigation)
+        menu.querySelectorAll('.tez-mobile-link').forEach(link => 
+            link.addEventListener('click', closeMenu)
+        );
 
         // Submenu toggles
         menu.querySelectorAll('.tez-submenu-toggle').forEach(btn => {
@@ -183,6 +286,7 @@
 
                 const isExpanded = parent.classList.contains('is-expanded');
 
+                // Close other submenus
                 menu.querySelectorAll('.tez-has-submenu.is-expanded').forEach(item => {
                     if (item !== parent) {
                         item.classList.remove('is-expanded');
@@ -193,6 +297,7 @@
                     }
                 });
 
+                // Toggle current submenu
                 if (isExpanded) {
                     parent.classList.remove('is-expanded');
                     submenu.style.maxHeight = null;
@@ -205,6 +310,7 @@
             });
         });
 
+        // Auto-close on window resize to desktop width
         window.addEventListener('resize', debounce(() => {
             if (window.innerWidth >= 992 && isOpen) closeMenu();
         }, 250));
@@ -250,7 +356,7 @@
     // HEADER SCROLL (hide on scroll down, show on up)
     // =============================================
     function initHeaderScroll() {
-        const header = $('#tez-masthead');
+        const header = $('#tez-site-header');
         if (!header) return;
 
         let lastScroll = 0;
@@ -353,7 +459,7 @@
                 if (!target) return;
 
                 e.preventDefault();
-                const header = $('#tez-masthead');
+                const header = $('#tez-site-header');
                 const headerHeight = header ? header.offsetHeight : 0;
                 const targetPos = target.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
                 window.scrollTo({ top: Math.max(0, targetPos), behavior: 'smooth' });
@@ -439,7 +545,7 @@
             : '#contact-form, #order-form, .lead-form-box, .tez-inquiry-form');
         const form = document.querySelector(query);
         if (form) {
-            const header = $('#tez-masthead');
+            const header = $('#tez-site-header');
             const headerHeight = header ? header.offsetHeight : 0;
             const formPos = form.getBoundingClientRect().top + window.pageYOffset - headerHeight - 20;
             window.scrollTo({ top: Math.max(0, formPos), behavior: 'smooth' });
