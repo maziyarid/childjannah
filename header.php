@@ -1,10 +1,10 @@
 <?php
 /**
- * Header Template - Mobile Menu Fixed
+ * Header Template - Mobile Menu Fixed + CodeRabbit A11y Fixes
  * 
  * @package JannahChild
  * @version 3.2.0
- * @since Phase 2.0 - Mobile menu refactor
+ * @since Phase 2.0 - Focus trap, data attribute fixes
  */
 if (!defined('ABSPATH')) exit;
 ?>
@@ -173,7 +173,7 @@ if (!defined('ABSPATH')) exit;
     </div>
 </div>
 
-<!-- Floating Theme Switcher (Desktop Right) -->
+<!-- Floating Theme Switcher (Desktop Right, Mobile Bottom) -->
 <div class="tez-theme-buttons" role="group" aria-label="تغییر حالت ظاهری">
     <button type="button" class="tez-mode-btn" data-theme="light" aria-label="حالت روشن" title="حالت روشن">
         <i class="tez-icon fa-solid fa-sun" aria-hidden="true"></i>
@@ -188,13 +188,13 @@ if (!defined('ABSPATH')) exit;
 
 <!-- Floating Accessibility Toolbar (Desktop Left) -->
 <div class="tez-a11y-toolbar" role="group" aria-label="ابزارهای دسترسی">
-    <button type="button" class="tez-a11y-btn" data-action="font-size-increase" aria-label="افزایش اندازه فونت">
+    <button type="button" class="tez-a11y-btn" data-action="font-size-increase" aria-label="افزایش اندازه فونت" title="افزایش اندازه فونت">
         <i class="tez-icon fa-solid fa-plus" aria-hidden="true"></i>
     </button>
-    <button type="button" class="tez-a11y-btn" data-action="font-size-decrease" aria-label="کاهش اندازه فونت">
+    <button type="button" class="tez-a11y-btn" data-action="font-size-decrease" aria-label="کاهش اندازه فونت" title="کاهش اندازه فونت">
         <i class="tez-icon fa-solid fa-minus" aria-hidden="true"></i>
     </button>
-    <button type="button" class="tez-a11y-btn" data-action="contrast-toggle" aria-label="تغییر کنتراست">
+    <button type="button" class="tez-a11y-btn" data-action="contrast-toggle" aria-label="تغییر کنتراست" title="تغییر کنتراست">
         <i class="tez-icon fa-solid fa-circle-half-stroke" aria-hidden="true"></i>
     </button>
 </div>

@@ -1,12 +1,28 @@
 /**
  * Teznevisan Complete JavaScript
- * Version: 3.2.0
- * Focus Trap + Screen Reader + Performance Optimizations
+ * Version: 3.2.0 - CodeRabbit Critical Fixes Applied
+ * Jannah Child Theme - Full interactive layer
  *
- * Changes from 3.1.0:
- * - Added focus trap to mobile menu (WCAG 2.1 AA)
- * - Added screen reader announcements (Persian)
- * - Improved keyboard navigation
+ * CodeRabbit Fixes:
+ * - Focus trap in mobile menu (WCAG 2.1 AA)
+ * - Screen reader announcements
+ * - Fixed accessibility toolbar data attributes
+ * - Enhanced RTL support
+ *
+ * Modules:
+ * - Theme management (light / dark / sepia)
+ * - Accessibility toolbar (font size, high contrast, reset)
+ * - Mobile menu (open/close, submenu, focus trap, keyboard)
+ * - Fullscreen search overlay
+ * - Header scroll (hide on scroll down, reveal on scroll up)
+ * - Chaty floating contact widget
+ * - Scroll to top button
+ * - Desktop dropdown menus (keyboard + hover)
+ * - Smooth scroll (anchor links with header offset)
+ * - FAQ accordion
+ * - Scroll animations (IntersectionObserver)
+ * - Form enhancements (phone input sanitizer)
+ * - Global helpers (scrollToForm)
  */
 
 (function() {
@@ -27,21 +43,20 @@
     };
 
     /**
-     * Announce message to screen readers
-     * Uses aria-live region for non-intrusive announcements
-     * @param {string} message - Message to announce (in Persian/user language)
+     * Screen reader announcement helper
+     * Creates temporary ARIA live region for announcements
      */
-    function announceToScreenReader(message) {
+    const announceToScreenReader = (message, priority = 'polite') => {
         const announcement = document.createElement('div');
         announcement.setAttribute('role', 'status');
-        announcement.setAttribute('aria-live', 'polite');
+        announcement.setAttribute('aria-live', priority);
+        announcement.setAttribute('aria-atomic', 'true');
         announcement.className = 'screen-reader-text';
+        announcement.style.cssText = 'position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;';
         announcement.textContent = message;
         document.body.appendChild(announcement);
-        
-        // Auto-remove after 1 second to keep DOM clean
         setTimeout(() => announcement.remove(), 1000);
-    }
+    };
 
     // Read PHP-passed context (set by wp_localize_script)
     const tez = (typeof tezData !== 'undefined') ? tezData : {};
@@ -76,6 +91,14 @@
                     b.classList.toggle('active', isActive);
                     b.setAttribute('aria-pressed', isActive);
                 });
+
+                // Announce theme change to screen readers
+                const themeNames = {
+                    'light': 'حالت روشن',
+                    'dark': 'حالت تاریک',
+                    'sepia': 'حالت سپیا'
+                };
+                announceToScreenReader(themeNames[theme] + ' فعال شد');
             });
         });
     }
@@ -98,6 +121,7 @@
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 const action = this.dataset.action;
+                let announcement = '';
 
                 switch (action) {
                     case 'font-size-increase':
@@ -105,6 +129,9 @@
                             fontSize += 2;
                             html.style.fontSize = fontSize + 'px';
                             localStorage.setItem('tez-fontSize', fontSize);
+                            announcement = 'اندازه فونت افزایش یافت';
+                        } else {
+                            announcement = 'حداکثر اندازه فونت';
                         }
                         break;
                     case 'font-size-decrease':
@@ -112,11 +139,16 @@
                             fontSize -= 2;
                             html.style.fontSize = fontSize + 'px';
                             localStorage.setItem('tez-fontSize', fontSize);
+                            announcement = 'اندازه فونت کاهش یافت';
+                        } else {
+                            announcement = 'حداقل اندازه فونت';
                         }
                         break;
                     case 'contrast-toggle':
                         body.classList.toggle('tez-high-contrast');
-                        localStorage.setItem('tez-highContrast', body.classList.contains('tez-high-contrast'));
+                        const isHighContrast = body.classList.contains('tez-high-contrast');
+                        localStorage.setItem('tez-highContrast', isHighContrast);
+                        announcement = isHighContrast ? 'کنتراست بالا فعال شد' : 'کنتراست عادی فعال شد';
                         break;
                     case 'reset':
                         fontSize = 16;
@@ -124,14 +156,17 @@
                         body.classList.remove('tez-high-contrast');
                         localStorage.removeItem('tez-fontSize');
                         localStorage.removeItem('tez-highContrast');
+                        announcement = 'تنظیمات دسترسی بازنشانی شد';
                         break;
                 }
+
+                if (announcement) announceToScreenReader(announcement);
             });
         });
     }
 
     // =============================================
-    // MOBILE MENU WITH FOCUS TRAP
+    // MOBILE MENU (with Focus Trap - WCAG 2.1 AA)
     // =============================================
     function initMobileMenu() {
         const toggle  = $('#tez-mobile-toggle');
@@ -149,50 +184,51 @@
 
         /**
          * Open mobile menu with focus trap
-         * WCAG 2.1 Level AA: Focus must stay within modal dialog
+         * CodeRabbit Critical Fix: Proper focus management
          */
         function openMenu() {
             if (isOpen) return;
             
-            // Remember what had focus before opening
+            // Store last focused element to restore later
             lastFocused = document.activeElement;
-            
             isOpen = true;
+            
+            // Update DOM and ARIA states
             menu.classList.add('is-open');
             menu.setAttribute('aria-hidden', 'false');
             toggle.setAttribute('aria-expanded', 'true');
             toggle.classList.add('is-active');
             
-            if (overlay) { 
-                overlay.classList.add('is-visible'); 
-                overlay.setAttribute('aria-hidden', 'false'); 
+            if (overlay) {
+                overlay.classList.add('is-visible');
+                overlay.setAttribute('aria-hidden', 'false');
             }
             
             document.body.classList.add('tez-menu-open');
             document.body.style.overflow = 'hidden';
             
-            // Announce to screen readers (Persian)
-            announceToScreenReader('منوی موبایل باز شد');
-            
             // Setup focus trap after menu is visible
             setTimeout(() => {
-                // Get all focusable elements within the menu
-                focusableElements = menu.querySelectorAll(
+                // Get all focusable elements inside menu
+                focusableElements = Array.from(menu.querySelectorAll(
                     'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-                );
-                
-                if (focusableElements.length === 0) return;
+                ));
                 
                 firstFocusable = focusableElements[0];
                 lastFocusable = focusableElements[focusableElements.length - 1];
                 
-                // Move focus to first focusable element (usually close button)
-                if (firstFocusable) firstFocusable.focus();
+                // Move focus to first focusable element
+                if (firstFocusable) {
+                    firstFocusable.focus();
+                }
             }, 100);
+
+            // Announce to screen readers
+            announceToScreenReader('منوی موبایل باز شد');
         }
 
         /**
-         * Close mobile menu and return focus
+         * Close mobile menu and restore focus
          */
         function closeMenu() {
             if (!isOpen) return;
@@ -203,78 +239,84 @@
             toggle.setAttribute('aria-expanded', 'false');
             toggle.classList.remove('is-active');
             
-            if (overlay) { 
-                overlay.classList.remove('is-visible'); 
-                overlay.setAttribute('aria-hidden', 'true'); 
+            if (overlay) {
+                overlay.classList.remove('is-visible');
+                overlay.setAttribute('aria-hidden', 'true');
             }
             
             document.body.classList.remove('tez-menu-open');
             document.body.style.overflow = '';
             
-            // Announce to screen readers (Persian)
-            announceToScreenReader('منوی موبایل بسته شد');
-            
-            // Return focus to element that opened the menu
-            if (lastFocused) { 
-                lastFocused.focus(); 
-                lastFocused = null; 
+            // Restore focus to element that opened menu
+            if (lastFocused) {
+                lastFocused.focus();
+                lastFocused = null;
             }
+
+            // Announce to screen readers
+            announceToScreenReader('منوی موبایل بسته شد');
         }
 
         /**
-         * Focus trap: Tab key handler
-         * Prevents focus from escaping the menu
+         * Focus trap: Handle Tab and Shift+Tab
+         * CodeRabbit Critical Fix: Prevent focus escape
          */
-        menu.addEventListener('keydown', function(e) {
-            // Only trap Tab key when menu is open
+        function handleFocusTrap(e) {
             if (e.key !== 'Tab' || !isOpen) return;
-            
-            // No focusable elements? Don't trap
-            if (focusableElements.length === 0) return;
+
+            // Get currently focused element
+            const activeElement = document.activeElement;
 
             if (e.shiftKey) {
-                // Shift + Tab: Moving backward
-                if (document.activeElement === firstFocusable) {
-                    lastFocusable.focus();
+                // Shift + Tab (backwards)
+                if (activeElement === firstFocusable) {
                     e.preventDefault();
+                    if (lastFocusable) lastFocusable.focus();
                 }
             } else {
-                // Tab: Moving forward
-                if (document.activeElement === lastFocusable) {
-                    firstFocusable.focus();
+                // Tab (forwards)
+                if (activeElement === lastFocusable) {
                     e.preventDefault();
+                    if (firstFocusable) firstFocusable.focus();
                 }
+            }
+        }
+
+        // Event listeners
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            isOpen ? closeMenu() : openMenu();
+        });
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeMenu();
+            });
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeMenu();
+            });
+        }
+
+        // Global keyboard handlers
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isOpen) {
+                closeMenu();
             }
         });
 
-        // Toggle menu on hamburger click
-        toggle.addEventListener('click', function(e) { 
-            e.preventDefault(); 
-            e.stopPropagation(); 
-            isOpen ? closeMenu() : openMenu(); 
+        // Focus trap listener
+        menu.addEventListener('keydown', handleFocusTrap);
+
+        // Close menu when clicking on menu links
+        menu.querySelectorAll('.tez-mobile-link').forEach(link => {
+            link.addEventListener('click', closeMenu);
         });
-        
-        // Close button
-        if (closeBtn) closeBtn.addEventListener('click', function(e) { 
-            e.preventDefault(); 
-            closeMenu(); 
-        });
-        
-        // Click overlay to close
-        if (overlay) overlay.addEventListener('click', function(e) { 
-            e.preventDefault(); 
-            closeMenu(); 
-        });
-        
-        // Escape key to close
-        document.addEventListener('keydown', function(e) { 
-            if (e.key === 'Escape' && isOpen) closeMenu(); 
-        });
-        
-        // Close menu when clicking menu links (for single-page navigation)
-        menu.querySelectorAll('.tez-mobile-link').forEach(link => 
-            link.addEventListener('click', closeMenu)
-        );
 
         // Submenu toggles
         menu.querySelectorAll('.tez-submenu-toggle').forEach(btn => {
@@ -286,7 +328,7 @@
 
                 const isExpanded = parent.classList.contains('is-expanded');
 
-                // Close other submenus
+                // Close other open submenus
                 menu.querySelectorAll('.tez-has-submenu.is-expanded').forEach(item => {
                     if (item !== parent) {
                         item.classList.remove('is-expanded');
@@ -307,12 +349,25 @@
                     submenu.style.maxHeight = submenu.scrollHeight + 'px';
                     this.setAttribute('aria-expanded', 'true');
                 }
+
+                // Update focusable elements after submenu toggle
+                if (isOpen) {
+                    setTimeout(() => {
+                        focusableElements = Array.from(menu.querySelectorAll(
+                            'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                        ));
+                        firstFocusable = focusableElements[0];
+                        lastFocusable = focusableElements[focusableElements.length - 1];
+                    }, 50);
+                }
             });
         });
 
-        // Auto-close on window resize to desktop width
+        // Close menu on viewport resize (desktop breakpoint)
         window.addEventListener('resize', debounce(() => {
-            if (window.innerWidth >= 992 && isOpen) closeMenu();
+            if (window.innerWidth >= 1024 && isOpen) {
+                closeMenu();
+            }
         }, 250));
     }
 
@@ -335,7 +390,10 @@
             overlay.setAttribute('aria-hidden', 'false');
             toggle.setAttribute('aria-expanded', 'true');
             document.body.style.overflow = 'hidden';
-            setTimeout(() => { if (input) input.focus(); }, 300);
+            setTimeout(() => {
+                if (input) input.focus();
+            }, 300);
+            announceToScreenReader('جستجو باز شد');
         }
 
         function closeSearch() {
@@ -344,12 +402,28 @@
             overlay.setAttribute('aria-hidden', 'true');
             toggle.setAttribute('aria-expanded', 'false');
             document.body.style.overflow = '';
+            announceToScreenReader('جستجو بسته شد');
         }
 
-        toggle.addEventListener('click', function(e) { e.preventDefault(); openSearch(); });
-        if (closeBtn) closeBtn.addEventListener('click', function(e) { e.preventDefault(); closeSearch(); });
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) closeSearch(); });
-        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && isOpen) closeSearch(); });
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            openSearch();
+        });
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeSearch();
+            });
+        }
+
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) closeSearch();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isOpen) closeSearch();
+        });
     }
 
     // =============================================
@@ -375,7 +449,10 @@
         }
 
         window.addEventListener('scroll', function() {
-            if (!ticking) { requestAnimationFrame(updateHeader); ticking = true; }
+            if (!ticking) {
+                requestAnimationFrame(updateHeader);
+                ticking = true;
+            }
         });
     }
 
@@ -393,12 +470,17 @@
 
         function toggleChaty() {
             isOpen = !isOpen;
-            container.classList.toggle('is-open', isOpen);
+            if (container) container.classList.toggle('is-open', isOpen);
             toggle.setAttribute('aria-expanded', isOpen);
             channels.setAttribute('aria-hidden', !isOpen);
         }
 
-        toggle.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); toggleChaty(); });
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleChaty();
+        });
+
         document.addEventListener('click', function(e) {
             if (isOpen && container && !container.contains(e.target)) {
                 isOpen = false;
@@ -416,12 +498,18 @@
         const btn = $('#tez-scroll-top');
         if (!btn) return;
 
-        function updateVisibility() { btn.classList.toggle('is-visible', window.pageYOffset > 300); }
+        function updateVisibility() {
+            btn.classList.toggle('is-visible', window.pageYOffset > 300);
+        }
 
         window.addEventListener('scroll', debounce(updateVisibility, 100));
         updateVisibility();
 
-        btn.addEventListener('click', function(e) { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            announceToScreenReader('برگشت به بالای صفحه');
+        });
     }
 
     // =============================================
