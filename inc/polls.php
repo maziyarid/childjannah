@@ -17,11 +17,13 @@ add_action('admin_init', 'tez_poll_check_db');
 function tez_poll_check_db() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'tez_polls';
-    $db_version = '2.0';
+    $db_version = '2.1'; // Bumped from 2.0 to add UNIQUE constraint
     $installed_ver = get_option('tez_poll_db_version');
 
     if ($installed_ver != $db_version) {
         $charset_collate = $wpdb->get_charset_collate();
+        // Added UNIQUE KEY on (post_id, user_ip, option_key) to prevent duplicate votes
+        // under concurrency for multi-select polls
         $sql = "CREATE TABLE $table_name (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             post_id mediumint(9) NOT NULL,
@@ -31,7 +33,8 @@ function tez_poll_check_db() {
             time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
             PRIMARY KEY  (id),
             KEY post_id (post_id),
-            KEY user_ip (user_ip)
+            KEY user_ip (user_ip),
+            UNIQUE KEY post_user_option (post_id, user_ip, option_key)
         ) $charset_collate;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -420,7 +423,7 @@ function tez_poll_ajax_handler() {
         wp_send_json_error(array('msg' => 'لطفاً حداقل یک گزینه را انتخاب کنید.'));
     }
 
-    // Insert Votes
+    // Insert Votes (UNIQUE constraint prevents duplicates at DB level)
     foreach ($votes as $option_key) {
         $wpdb->insert($table, array(
             'post_id' => $post_id,
@@ -457,6 +460,7 @@ function tez_poll_ajax_handler() {
     ));
 }
 
+// Continue with CSS/JS functions (unchanged)...
 // =============================================
 // 10. FRONTEND CSS
 // =============================================
