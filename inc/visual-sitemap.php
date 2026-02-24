@@ -23,7 +23,7 @@ function jannah_visual_sitemap_content($content) {
             <p>تمامی محتویات سایت در یک نگاه</p>
         </div>
         <div class="sitemap-search">
-            <form role="search" method="get" action="<?php echo home_url('/'); ?>">
+            <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
                 <input type="search" placeholder="جستجو در سایت..." name="s" />
                 <button type="submit"><i class="fas fa-search"></i></button>
             </form>
@@ -32,29 +32,45 @@ function jannah_visual_sitemap_content($content) {
             <div class="sitemap-section">
                 <div class="section-header" style="background:var(--tez-primary,#22BE49)"><i class="fas fa-file"></i><h3>صفحات</h3></div>
                 <ul class="sitemap-list">
-                    <?php $pages = get_pages(array('sort_column' => 'menu_order', 'number' => 20));
-                    foreach($pages as $page) echo '<li><a href="' . get_page_link($page->ID) . '"><i class="fas fa-angle-left"></i> ' . $page->post_title . '</a></li>'; ?>
+                    <?php 
+                    $pages = get_pages(array('sort_column' => 'menu_order', 'number' => 20));
+                    foreach($pages as $page) {
+                        echo '<li><a href="' . esc_url(get_page_link($page->ID)) . '"><i class="fas fa-angle-left"></i> ' . esc_html($page->post_title) . '</a></li>';
+                    }
+                    ?>
                 </ul>
             </div>
             <div class="sitemap-section">
                 <div class="section-header" style="background:#3498db"><i class="fas fa-newspaper"></i><h3>آخرین مطالب</h3></div>
                 <ul class="sitemap-list">
-                    <?php $recent_posts = wp_get_recent_posts(array('numberposts' => 15, 'post_status' => 'publish'));
-                    foreach($recent_posts as $post) echo '<li><a href="' . get_permalink($post['ID']) . '"><i class="fas fa-angle-left"></i> ' . $post['post_title'] . '</a></li>'; ?>
+                    <?php 
+                    $recent_posts = wp_get_recent_posts(array('numberposts' => 15, 'post_status' => 'publish'));
+                    foreach($recent_posts as $post) {
+                        echo '<li><a href="' . esc_url(get_permalink($post['ID'])) . '"><i class="fas fa-angle-left"></i> ' . esc_html($post['post_title']) . '</a></li>';
+                    }
+                    ?>
                 </ul>
             </div>
             <div class="sitemap-section">
                 <div class="section-header" style="background:#e74c3c"><i class="fas fa-folder"></i><h3>دسته‌بندی‌ها</h3></div>
                 <div class="category-grid">
-                    <?php $categories = get_categories(array('orderby' => 'count', 'order' => 'DESC', 'number' => 20));
-                    foreach($categories as $cat) echo '<a href="' . get_category_link($cat->term_id) . '" class="category-card"><i class="fas fa-folder-open"></i><span>' . $cat->name . '</span><small>' . $cat->count . ' مطلب</small></a>'; ?>
+                    <?php 
+                    $categories = get_categories(array('orderby' => 'count', 'order' => 'DESC', 'number' => 20));
+                    foreach($categories as $cat) {
+                        echo '<a href="' . esc_url(get_category_link($cat->term_id)) . '" class="category-card"><i class="fas fa-folder-open"></i><span>' . esc_html($cat->name) . '</span><small>' . esc_html($cat->count) . ' مطلب</small></a>';
+                    }
+                    ?>
                 </div>
             </div>
             <div class="sitemap-section">
                 <div class="section-header" style="background:#9b59b6"><i class="fas fa-tags"></i><h3>برچسب‌ها</h3></div>
                 <div class="tags-cloud">
-                    <?php $tags = get_tags(array('number' => 30));
-                    foreach($tags as $tag) echo '<a href="' . get_tag_link($tag->term_id) . '">' . $tag->name . '</a>'; ?>
+                    <?php 
+                    $tags = get_tags(array('number' => 30));
+                    foreach($tags as $tag) {
+                        echo '<a href="' . esc_url(get_tag_link($tag->term_id)) . '">' . esc_html($tag->name) . '</a>';
+                    }
+                    ?>
                 </div>
             </div>
             <div class="sitemap-section">

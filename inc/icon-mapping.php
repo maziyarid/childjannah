@@ -147,8 +147,21 @@ if ( ! function_exists('tez_icon_end_buffer') ) {
 }
 
 if ( ! function_exists('tez_icon_replace_buffer') ) {
+    /**
+     * Replace tie-icon-* classes with Font Awesome equivalents
+     * 
+     * @since 3.1.0
+     * @param string $html Buffered HTML output
+     * @return string Modified HTML
+     */
     function tez_icon_replace_buffer( $html ) {
         if ( empty($html) ) return $html;
+        
+        // Fast-bail: Skip processing if no tie-icon-* classes present
+        // This avoids expensive str_replace loops on pages without icons
+        if ( strpos($html, 'tie-icon-') === false ) {
+            return $html;
+        }
 
         $mapping = tez_get_icon_mapping();
 
