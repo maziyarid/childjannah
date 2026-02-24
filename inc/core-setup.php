@@ -150,7 +150,19 @@ if (!function_exists('tez_add_menu_icon_field')) {
 }
 
 if (!function_exists('tez_save_menu_icon_field')) {
+    /**
+     * Save menu item icon field
+     * 
+     * @since 3.1.0
+     * @param int $menu_id Menu ID (not used but required by hook)
+     * @param int $menu_item_db_id Menu item ID
+     */
     function tez_save_menu_icon_field($menu_id, $menu_item_db_id) {
+        // Check user capability for menu editing
+        if (!current_user_can('edit_theme_options')) {
+            return;
+        }
+        
         if (isset($_POST['menu-item-icon'][$menu_item_db_id])) {
             $icon = sanitize_text_field($_POST['menu-item-icon'][$menu_item_db_id]);
             update_post_meta($menu_item_db_id, '_menu_item_icon', $icon);

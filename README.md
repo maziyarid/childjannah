@@ -322,6 +322,11 @@
 
 ### 9.2 Merge \& release
 
+
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/maziyarid/childjannah?utm_source=oss&utm_medium=github&utm_campaign=maziyarid%2Fchildjannah&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
+@coderabbitai Diagnose and find all issues to fix. No mobile hamburger menu, no design improvemensts, no responsiveness...
+The pages have no stylings as it supposed to have. Please redesign and improve it also provide me a complete HTML template that I can paste into wordpress pages as HTML and modify manually it should have everything a service page needs. Rhe previous hero section and all other parts is broken
 - [ ] When staging passes all checks, merge `fix/final-child-theme-rewrite` into `New`.
 - [ ] Optionally tag a release `v3.1.0-final-child` after deployment and smoke tests on live.
 

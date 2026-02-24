@@ -1,124 +1,142 @@
 <?php
 /**
- * Custom 404 Content Hub
- * Replaces default 404 with a rich content discovery page.
+ * 404 Hub - Beautiful Error Page
+ * Shows recent posts, popular posts, categories, search on 404 errors.
  *
  * @package JannahChild
- * @version 2.4.0
+ * @version 3.1.0
  */
 
 if (!defined('ABSPATH')) exit;
 
-// Source: Snippets/Beautiful 404 Page Hub.php
+add_filter('404_template', 'tez_custom_404_template');
+function tez_custom_404_template($template) {
+    $custom_404 = locate_template('404.php');
+    return $custom_404 ? $custom_404 : $template;
+}
 
-add_filter('404_template', 'jannah_custom_404_template');
-function jannah_custom_404_template($template) {
-    ob_start();
-    get_header();
+add_action('tie_404_after_header', 'tez_404_hub_content');
+function tez_404_hub_content() {
     ?>
-    <div class="jannah-404-container">
-        <div class="error-hero">
-            <div class="error-animation">
-                <span class="error-num">4</span>
-                <i class="fas fa-cog"></i>
-                <span class="error-num">4</span>
-            </div>
-            <h1>صفحه مورد نظر یافت نشد!</h1>
-            <p>متاسفانه صفحه‌ای که دنبالش می‌گردید وجود ندارد</p>
+    <div class="tez-404-hub">
+        <div class="hub-header">
+            <div class="error-code">404</div>
+            <h1>صفحه یافت نشد</h1>
+            <p>متأسفانه، صفحه موردنظر شما حذف شده یا منتقل گردیده است.</p>
         </div>
-        <div class="search-section">
-            <h3><i class="fas fa-search"></i> جستجو در سایت</h3>
-            <form role="search" method="get" action="<?php echo home_url('/'); ?>">
-                <input type="search" name="s" placeholder="دنبال چه چیزی می‌گردید؟" />
-                <button type="submit">جستجو <i class="fas fa-arrow-left"></i></button>
+
+        <div class="hub-search">
+            <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
+                <input type="search" placeholder="جستجو در سایت..." name="s" required />
+                <button type="submit"><i class="fas fa-search"></i> جستجو</button>
             </form>
         </div>
-        <div class="content-hub">
+
+        <div class="hub-grid">
+            <div class="hub-section">
+                <h3><i class="fas fa-newspaper"></i> آخرین مطالب</h3>
+                <ul class="hub-list">
+                    <?php
+                    $recent = new WP_Query(array(
+                        'posts_per_page' => 5,
+                        'post_status' => 'publish',
+                        'no_found_rows' => true,
+                        'update_post_meta_cache' => false,
+                        'update_post_term_cache' => false
+                    ));
+                    if ($recent->have_posts()) {
+                        while ($recent->have_posts()) {
+                            $recent->the_post();
+                            echo '<li><a href="' . esc_url(get_permalink()) . '"><i class="fas fa-angle-left"></i> ' . esc_html(get_the_title()) . '</a></li>';
+                        }
+                    }
+                    wp_reset_postdata();
+                    ?>
+                </ul>
+            </div>
+
             <div class="hub-section">
                 <h3><i class="fas fa-fire"></i> محبوب‌ترین مطالب</h3>
-                <div class="posts-grid">
+                <ul class="hub-list">
                     <?php
-                    $popular = new WP_Query(array('posts_per_page' => 6, 'meta_key' => 'post_views_count', 'orderby' => 'meta_value_num', 'order' => 'DESC'));
-                    if(!$popular->have_posts()) $popular = new WP_Query(array('posts_per_page' => 6));
-                    while($popular->have_posts()): $popular->the_post(); ?>
-                        <a href="<?php the_permalink(); ?>" class="post-card">
-                            <?php if(has_post_thumbnail()): the_post_thumbnail('medium'); else: ?>
-                                <div class="no-thumb"><i class="fas fa-image"></i></div>
-                            <?php endif; ?>
-                            <h4><?php the_title(); ?></h4>
-                        </a>
-                    <?php endwhile; wp_reset_postdata(); ?>
-                </div>
+                    $popular = new WP_Query(array(
+                        'posts_per_page' => 5,
+                        'meta_key' => 'tie_views',
+                        'orderby' => 'meta_value_num',
+                        'order' => 'DESC',
+                        'no_found_rows' => true,
+                        'update_post_meta_cache' => false,
+                        'update_post_term_cache' => false
+                    ));
+                    if ($popular->have_posts()) {
+                        while ($popular->have_posts()) {
+                            $popular->the_post();
+                            echo '<li><a href="' . esc_url(get_permalink()) . '"><i class="fas fa-angle-left"></i> ' . esc_html(get_the_title()) . '</a></li>';
+                        }
+                    }
+                    wp_reset_postdata();
+                    ?>
+                </ul>
             </div>
+
             <div class="hub-section">
                 <h3><i class="fas fa-folder"></i> دسته‌بندی‌ها</h3>
-                <div class="categories-cloud">
+                <div class="category-list">
                     <?php
-                    $categories = get_categories(array('orderby' => 'count', 'order' => 'DESC', 'number' => 15));
+                    $categories = get_categories(array('number' => 8, 'orderby' => 'count', 'order' => 'DESC'));
                     foreach($categories as $cat) {
-                        echo '<a href="' . get_category_link($cat->term_id) . '" class="cat-tag"><i class="fas fa-folder"></i> ' . $cat->name . ' <span>(' . $cat->count . ')</span></a>';
+                        echo '<a href="' . esc_url(get_category_link($cat->term_id)) . '" class="cat-badge"><i class="fas fa-folder-open"></i> ' . esc_html($cat->name) . ' <span>(' . esc_html($cat->count) . ')</span></a>';
                     }
                     ?>
-                </div>
-            </div>
-            <div class="hub-section">
-                <h3><i class="fas fa-tags"></i> برچسب‌های پرکاربرد</h3>
-                <div class="tags-cloud">
-                    <?php
-                    $tags = get_tags(array('number' => 20, 'orderby' => 'count', 'order' => 'DESC'));
-                    foreach($tags as $tag) {
-                        echo '<a href="' . get_tag_link($tag->term_id) . '" class="tag-item">' . $tag->name . '</a>';
-                    }
-                    ?>
-                </div>
-            </div>
-            <div class="hub-section">
-                <h3><i class="fas fa-link"></i> دسترسی سریع</h3>
-                <div class="quick-links">
-                    <a href="<?php echo home_url('/'); ?>"><i class="fas fa-home"></i> صفحه اصلی</a>
-                    <a href="<?php echo home_url('/sitemap'); ?>"><i class="fas fa-sitemap"></i> نقشه سایت</a>
-                    <a href="<?php echo home_url('/contact'); ?>"><i class="fas fa-envelope"></i> تماس با ما</a>
-                    <a href="<?php echo home_url('/about'); ?>"><i class="fas fa-info-circle"></i> درباره ما</a>
                 </div>
             </div>
         </div>
+
+        <div class="hub-actions">
+            <a href="<?php echo esc_url(home_url('/')); ?>" class="btn-home"><i class="fas fa-home"></i> بازگشت به صفحه اصلی</a>
+            <a href="<?php echo esc_url(home_url('/sitemap')); ?>" class="btn-sitemap"><i class="fas fa-sitemap"></i> نقشه سایت</a>
+        </div>
     </div>
+
     <style>
-    .jannah-404-container{max-width:1200px;margin:40px auto;padding:20px}
-    .error-hero{text-align:center;padding:60px 20px;background:linear-gradient(135deg,var(--tez-primary,#22BE49) 0%,#1a9e3a 100%);color:#fff;border-radius:20px;margin-bottom:40px}
-    .error-animation{font-size:120px;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:20px}
-    .error-animation i{animation:spin 2s infinite}
-    @keyframes spin{0%,100%{transform:rotate(0)}50%{transform:rotate(180deg)}}
-    .error-hero h1{font-size:32px;margin:0 0 10px}
-    .search-section{max-width:600px;margin:-30px auto 40px;background:#fff;padding:30px;border-radius:15px;box-shadow:0 10px 40px rgba(0,0,0,.1)}
-    .search-section h3{margin:0 0 20px;color:#333}
-    .search-section form{display:flex;gap:10px}
-    .search-section input{flex:1;padding:12px 20px;border:2px solid #e0e0e0;border-radius:50px;font-size:16px}
-    .search-section button{padding:12px 30px;background:var(--tez-primary,#22BE49);color:#fff;border:none;border-radius:50px;cursor:pointer;font-weight:bold}
-    .content-hub{display:grid;gap:30px}
-    .hub-section{background:#fff;padding:25px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,.08)}
-    .hub-section h3{margin:0 0 20px;color:#333;display:flex;align-items:center;gap:10px}
-    .hub-section h3 i{color:var(--tez-primary,#22BE49)}
-    .posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px}
-    .post-card{text-decoration:none;color:#333;transition:.3s}.post-card:hover{transform:translateY(-5px)}
-    .post-card img,.post-card .no-thumb{width:100%;height:120px;object-fit:cover;border-radius:10px;margin-bottom:10px}
-    .post-card .no-thumb{background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:40px}
-    .post-card h4{margin:0;font-size:14px;line-height:1.4}
-    .categories-cloud,.tags-cloud{display:flex;flex-wrap:wrap;gap:10px}
-    .cat-tag{display:inline-flex;align-items:center;gap:5px;padding:8px 15px;background:var(--tez-primary,#22BE49);color:#fff;border-radius:20px;text-decoration:none;transition:.3s}
-    .cat-tag:hover{transform:scale(1.05)}
-    .tag-item{padding:6px 15px;background:#f0f0f0;color:#333;border-radius:15px;text-decoration:none;transition:.3s}
-    .tag-item:hover{background:var(--tez-primary,#22BE49);color:#fff}
-    .quick-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px}
-    .quick-links a{padding:15px;background:#f8f9fa;border-radius:10px;text-decoration:none;color:#333;display:flex;align-items:center;gap:10px;transition:.3s}
-    .quick-links a:hover{background:var(--tez-primary,#22BE49);color:#fff}
-    @media(max-width:768px){.error-animation{font-size:80px}.posts-grid{grid-template-columns:repeat(2,1fr)}.search-section form{flex-direction:column}}
-    [data-theme="dark"] .search-section,[data-theme="dark"] .hub-section{background:var(--tez-bg-secondary,#1e293b);color:var(--tez-text,#f1f5f9)}
-    [data-theme="dark"] .search-section h3,[data-theme="dark"] .hub-section h3,[data-theme="dark"] .post-card,[data-theme="dark"] .quick-links a{color:var(--tez-text,#f1f5f9)}
-    [data-theme="dark"] .tag-item{background:var(--tez-bg-tertiary,#334155);color:var(--tez-text,#f1f5f9)}
-    [data-theme="dark"] .quick-links a{background:var(--tez-bg-tertiary,#334155)}
+    .tez-404-hub{max-width:1200px;margin:60px auto;padding:20px;font-family:var(--tez-font,"Vazirmatn",system-ui,sans-serif)}
+    .hub-header{text-align:center;margin-bottom:50px}
+    .error-code{font-size:120px;font-weight:900;background:linear-gradient(135deg,var(--tez-primary,#22BE49) 0%,#1a9e3a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:20px}
+    .hub-header h1{font-size:36px;color:var(--tez-text,#111827);margin:0 0 15px}
+    .hub-header p{font-size:18px;color:var(--tez-text-muted,#6b7280)}
+    .hub-search{max-width:600px;margin:0 auto 50px}
+    .hub-search form{display:flex;gap:10px;background:var(--tez-bg,#fff);border:2px solid var(--tez-border,#e5e7eb);border-radius:50px;padding:8px;box-shadow:0 10px 40px rgba(0,0,0,.05)}
+    .hub-search input{flex:1;border:none;padding:12px 20px;font-size:16px;background:transparent;color:var(--tez-text,#111827)}
+    .hub-search input:focus{outline:none}
+    .hub-search button{background:var(--tez-primary,#22BE49);border:none;color:#fff;padding:12px 30px;border-radius:50px;font-weight:600;cursor:pointer;transition:.3s}
+    .hub-search button:hover{transform:scale(1.05);opacity:.9}
+    .hub-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:30px;margin-bottom:40px}
+    .hub-section{background:var(--tez-bg,#fff);border:1px solid var(--tez-border,#e5e7eb);border-radius:15px;padding:25px;transition:.3s}
+    .hub-section:hover{box-shadow:0 8px 30px rgba(0,0,0,.08)}
+    .hub-section h3{color:var(--tez-text,#111827);font-size:20px;margin:0 0 20px;display:flex;align-items:center;gap:10px}
+    .hub-section h3 i{color:var(--tez-primary,#22BE49);font-size:22px}
+    .hub-list{list-style:none;padding:0;margin:0}
+    .hub-list li{margin-bottom:12px}
+    .hub-list a{color:var(--tez-text-secondary,#374151);text-decoration:none;display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;transition:.3s}
+    .hub-list a:hover{background:var(--tez-bg-secondary,#f9fafb);color:var(--tez-primary,#22BE49);padding-right:15px}
+    .hub-list i{color:var(--tez-primary,#22BE49);font-size:14px}
+    .category-list{display:flex;flex-wrap:wrap;gap:10px}
+    .cat-badge{display:inline-flex;align-items:center;gap:6px;background:var(--tez-bg-secondary,#f9fafb);color:var(--tez-text-secondary,#374151);padding:8px 15px;border-radius:20px;text-decoration:none;font-size:14px;transition:.3s}
+    .cat-badge:hover{background:var(--tez-primary,#22BE49);color:#fff}
+    .cat-badge i{font-size:12px}
+    .cat-badge span{opacity:.7}
+    .hub-actions{text-align:center;margin-top:40px;display:flex;gap:15px;justify-content:center;flex-wrap:wrap}
+    .hub-actions a{display:inline-flex;align-items:center;gap:10px;padding:14px 30px;border-radius:50px;text-decoration:none;font-weight:600;font-size:16px;transition:.3s}
+    .btn-home{background:var(--tez-primary,#22BE49);color:#fff}
+    .btn-home:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(34,190,73,.3)}
+    .btn-sitemap{background:var(--tez-bg-secondary,#f9fafb);color:var(--tez-text,#111827);border:2px solid var(--tez-border,#e5e7eb)}
+    .btn-sitemap:hover{border-color:var(--tez-primary,#22BE49);color:var(--tez-primary,#22BE49)}
+    @media(max-width:768px){.error-code{font-size:80px}.hub-header h1{font-size:28px}.hub-header p{font-size:16px}.hub-grid{grid-template-columns:1fr}.hub-actions{flex-direction:column}.hub-actions a{width:100%;justify-content:center}}
+    [data-theme="dark"] .hub-section{background:var(--tez-bg-secondary,#1e293b);border-color:var(--tez-border,#334155)}
+    [data-theme="dark"] .hub-search form{background:var(--tez-bg-secondary,#1e293b);border-color:var(--tez-border,#334155)}
+    [data-theme="dark"] .hub-list a:hover{background:var(--tez-bg-tertiary,#334155)}
+    [data-theme="dark"] .cat-badge{background:var(--tez-bg-tertiary,#334155)}
+    [data-theme="dark"] .btn-sitemap{background:var(--tez-bg-tertiary,#334155);border-color:var(--tez-border,#334155)}
     </style>
     <?php
-    get_footer();
-    return ob_get_clean();
 }
