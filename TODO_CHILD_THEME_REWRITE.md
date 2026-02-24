@@ -2,8 +2,8 @@
 
 **Branch:** `New` (working branch)  
 **Goal:** Stable, bug‑free Jannah child theme  
-**Status:** 🟢 **~85% Complete** — Only Phase 8 QA + Phase 9 merge remain  
-**Last Updated:** 2026-02-23 17:30
+**Status:** 🟢 **~88% Complete** — Phase 8 QA + cleanup remains  
+**Last Updated:** 2026-02-24 10:32
 
 ---
 
@@ -93,11 +93,18 @@ Verified in `functions.php` — `tez_enqueue_child_assets()`:
 - [x] `templates/tag-hub.php` — upgraded: hero + dynamic tag cloud (top 50) + per-tag post grids (`55b2fb5`)
 - [x] `inc/misc-tweaks.php` — `tez_auto_hero_on_pages()` for non-templated pages (priority 1)
 - [x] `inc/misc-tweaks.php` — `tez_hide_page_title_on_templates()` hardened (null guard, templates/* check)
+- [x] `css/page-templates.css` — global static hero CSS added for rare manual blocks (`7d5bd8a`)
+
+**How it works:**
+- **Templated pages** (homepage, services, inquiry, about, contact, faq, tag-hub) use built-in Tez hero in template PHP.
+- **Standard pages** (no template selected) use `tez_auto_hero_on_pages()` which automatically builds a hero from title + excerpt + featured image.
+- **Manual blocks** (only if needed) can use `.tez-hero-container`, `.tez-features-grid`, `.tez-process-steps` classes (styled in `page-templates.css`).
 
 **Verification (staging):**
 - [ ] Each of 7 templates visible in Page Editor dropdown
 - [ ] Templated pages: hero renders, no duplicate H1
 - [ ] Standard pages: auto-hero from title + excerpt + featured image
+- [ ] No broken PHP code visible on page (e.g., `<?php the_title(); ?>` as text)
 
 ---
 
@@ -143,10 +150,31 @@ Verified in `functions.php` — `tez_enqueue_child_assets()`:
 
 ## Phase 8 – QA: Performance, Accessibility, RTL 🔴
 
+### 8.0 Cleanup broken manual content (PRIORITY)
+
+**Problem:** On some pages (especially homepage), there may be duplicate hero blocks with raw PHP code rendered as text (e.g., `<?php the_title(); ?>`).
+
+**Fix:**
+1. Edit each affected page in Classic Editor.
+2. Switch to **Text** (HTML) mode.
+3. Find and **delete** the entire injected block:
+   ```html
+   <!-- Tez Global Hero (drop this at top of every page) -->
+   <section class="tez-page-hero tez-page-hero--injected">
+   ...
+   </section>
+   ...
+   </div><!-- .tez-page-content-wrap tez-page-content-wrap--injected -->
+   ```
+4. Also delete any stray `.tez-page-hero` block above it.
+5. Save/update the page.
+6. Rely on **auto-hero** (`tez_auto_hero_on_pages()`) instead—just set featured image + excerpt.
+
 ### 8.1 Performance
 - [ ] Lighthouse on home, service, single post → score > 90
 - [ ] No duplicate CSS/JS bundles (check Network tab)
 - [ ] Fonts + FA not requested twice
+- [ ] No inline CSS conflicts (check Inspect Element)
 
 ### 8.2 Accessibility & RTL
 - [ ] Skip link → jumps to `#tez-main-content`
@@ -159,7 +187,14 @@ Verified in `functions.php` — `tez_enqueue_child_assets()`:
 - [ ] DevTools Console — zero JS errors on all page types
 - [ ] PHP `error_log` clean after navigating 10+ pages
 
-**Status:** 🔴 Not started — **requires staging deployment**
+### 8.4 Visual checks
+- [ ] Hero on homepage: single hero, correct title, no PHP code visible
+- [ ] Hero on services page: green gradient, breadcrumb, quick inquiry form
+- [ ] Hero on standard page (e.g., Privacy): auto-hero from featured image + excerpt
+- [ ] Footer: 4 columns, Chaty widget, scroll-top visible
+- [ ] Mobile: menu toggle, responsive hero, readable text
+
+**Status:** 🔴 Not started — **requires staging deployment + cleanup**
 
 ---
 
@@ -180,14 +215,14 @@ Verified in `functions.php` — `tez_enqueue_child_assets()`:
 ✅ Phase 1: 100%  Header/footer architecture
 ✅ Phase 2: 100%  Icons & Irancell fonts
 ✅ Phase 3: 100%  Conditional CSS/JS loading
-✅ Phase 4: 100%  7 page templates complete
+✅ Phase 4: 100%  7 templates + static hero CSS
 ✅ Phase 5: 100%  Blog modules v3.0.0
 ✅ Phase 6:  95%  Footer done; menu assign = manual
 ✅ Phase 7: 100%  SEO/redirects verified
-🔴 Phase 8:   0%  QA — needs staging
+🔴 Phase 8:   0%  QA + cleanup — needs staging
 🟡 Phase 9:  50%  Docs ongoing
 
- Total: ~85% complete
+ Total: ~88% complete
 ```
 
 ---
@@ -195,10 +230,11 @@ Verified in `functions.php` — `tez_enqueue_child_assets()`:
 ## 🎯 Immediate Next Steps
 
 1. **Deploy `New` branch to staging**
-2. **Phase 8 QA:** Lighthouse, console errors, RTL, a11y
-3. **Manual:** Assign footer menus in WP Admin
-4. **Fix any staging bugs** found in Phase 8
-5. **Phase 9:** Merge, tag v3.1.0, deploy to production
+2. **Clean broken content** on pages (delete manual hero blocks with PHP code)
+3. **Phase 8 QA:** Lighthouse, console errors, RTL, a11y, visual checks
+4. **Manual:** Assign footer menus in WP Admin
+5. **Fix any staging bugs** found in Phase 8
+6. **Phase 9:** Merge, tag v3.1.0, deploy to production
 
 ---
 
@@ -215,6 +251,7 @@ Verified in `functions.php` — `tez_enqueue_child_assets()`:
 | Auto-hero | `the_content` filter (priority 1) for non-templated pages |
 | No dup H1 | `the_title` filter skips when template starts with `templates/` |
 | SEO | Date/author archives removed; author links replaced |
+| Static blocks | CSS in `page-templates.css` for `.tez-hero-container`, `.tez-features-grid`, etc. |
 
 ---
 
@@ -230,4 +267,6 @@ Verified in `functions.php` — `tez_enqueue_child_assets()`:
 | `f9f1fc5` | `footer.php` template | 1.2 |
 | `2934c44` | TODO Phase 1 update | docs |
 | `55b2fb5` | 4 stub templates upgraded | 4.2 |
-| `current` | TODO Phases 2-7 update | docs |
+| `e71cd6f` | TODO Phases 2-7 complete | docs |
+| `7d5bd8a` | Global static hero CSS | 4.3 |
+| `current` | TODO Phase 4.3 + cleanup instructions | docs |
