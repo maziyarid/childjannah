@@ -1,16 +1,15 @@
 /*
-	Theme Name:   Jannah Child
-	Theme URI:    http://jannah.tielabs.com/
-	Description:  Jannh Child Theme
-	Author:       TieLabs
-	Author URI:   https://tielabs.com
+	Theme Name:   Jannah Child - Teznevisan
+	Theme URI:    https://teznevisan3.com/
+	Description:  Jannah News Child Theme for Teznevisan - Custom design system with dark/sepia modes, RTL support, accessibility toolbar, and service-oriented layouts.
+	Author:       Teznevisan
+	Author URI:   https://teznevisan3.com
 	Template:     jannah
-	Version:      1.0.2
+	Version:      2.4.0
 	License:      license purchased
 	License URI:  http://themeforest.net/licenses/regular_extended
-	Tags:         Tags: two-columns, buddypress, left-sidebar, right-sidebar, custom-menu, editor-style, featured-images, full-width-template, microformats, rtl-language-support, sticky-post, threaded-comments, translation-ready
+	Tags:         two-columns, rtl-language-support, custom-menu, featured-images, full-width-template, threaded-comments, translation-ready
 	Text Domain:  jannah-child
 */
 
-
-/* write custom css after this line */
+/* Child theme CSS is enqueued via functions.php - see css/main.css */

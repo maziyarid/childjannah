@@ -1,0 +1,233 @@
+/**
+ * Post Content Element Containment
+ * Fixes full-width post elements in Jannah Theme.
+ * Adds dark/sepia/high-contrast support for all overridden elements.
+ *
+ * @package JannahChild
+ * @version 3.1.0
+ */
+
+/* =============================================
+   GENERAL CONTAINMENT
+   ============================================= */
+.single-post .post-components,
+.single-post .author-box,
+.single-post .share-buttons,
+.single-post .post-share,
+.single-post .post-meta,
+.single-post .related-posts,
+.single-post .comments-area,
+.single-post .entry-footer {
+    max-width: 100%;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+    float: none !important;
+}
+
+.single-post .container .entry-content + *,
+.single-post .content-wrap > * {
+    max-width: inherit;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* =============================================
+   TEZ WIDGET CONTAINMENT
+   ============================================= */
+.single-post .entry-content .tez-toc,
+.single-post .entry-content .tez-faq-section,
+.single-post .entry-content .tez-poll-container,
+.single-post .entry-content .tez-key-takeaways,
+.single-post .entry-content .tez-star-rating {
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* =============================================
+   SIDEBAR SUPPRESSION (tez-no-sidebar class)
+   ============================================= */
+.tez-no-sidebar .content-area,
+.tez-no-sidebar .site-content,
+.tez-no-sidebar #content {
+    width: 100% !important;
+    max-width: 100% !important;
+    float: none !important;
+}
+
+.tez-no-sidebar .sidebar,
+.tez-no-sidebar #sidebar,
+.tez-no-sidebar .side-aside {
+    display: none !important;
+}
+
+/* =============================================
+   IMAGES
+   ============================================= */
+.entry-content img,
+.post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+/* Dark mode: soften bright images */
+[data-theme="dark"] .entry-content img,
+[data-theme="dark"] .post-content img {
+    opacity: 0.9;
+    filter: brightness(0.92) contrast(1.02);
+}
+
+/* Sepia mode: warm tint on images */
+[data-theme="sepia"] .entry-content img,
+[data-theme="sepia"] .post-content img {
+    filter: sepia(0.1) brightness(0.95);
+}
+
+/* =============================================
+   TABLES
+   ============================================= */
+.entry-content table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .entry-content table {
+        display: table;
+    }
+}
+
+/* Table cells — base */
+.entry-content table th,
+.entry-content table td {
+    padding: 10px 14px;
+    border: 1px solid var(--tez-border, #e5e7eb);
+    text-align: right;  /* RTL default */
+    vertical-align: top;
+    line-height: 1.6;
+}
+
+.entry-content table th {
+    background-color: var(--tez-bg-alt, #f3f4f6);
+    font-weight: 700;
+}
+
+/* Dark mode tables */
+[data-theme="dark"] .entry-content table th,
+[data-theme="dark"] .entry-content table td {
+    border-color: var(--tez-border, #374151);
+    color: var(--tez-text, #d1d5db);
+}
+
+[data-theme="dark"] .entry-content table th {
+    background-color: var(--tez-bg-alt, #1f2937);
+    color: var(--tez-text, #f9fafb);
+}
+
+[data-theme="dark"] .entry-content table tr:nth-child(even) td {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Sepia mode tables */
+[data-theme="sepia"] .entry-content table th,
+[data-theme="sepia"] .entry-content table td {
+    border-color: var(--tez-border, #c9b99a);
+    color: var(--tez-text, #433422);
+}
+
+[data-theme="sepia"] .entry-content table th {
+    background-color: var(--tez-bg-alt, #e8dcc8);
+}
+
+/* =============================================
+   BLOCKQUOTES
+   ============================================= */
+.entry-content blockquote {
+    border-right: 4px solid var(--tez-primary, #0ea5e9);
+    border-left: none;
+    background-color: var(--tez-bg-alt, #f8fafc);
+    padding: 16px 20px;
+    margin: 24px 0;
+    border-radius: 0 6px 6px 0;
+    font-style: italic;
+    color: var(--tez-text-muted, #6b7280);
+}
+
+[data-theme="dark"] .entry-content blockquote {
+    background-color: var(--tez-bg-alt, #1e2937);
+    color: var(--tez-text-muted, #9ca3af);
+}
+
+[data-theme="sepia"] .entry-content blockquote {
+    background-color: var(--tez-bg-alt, #ede3d0);
+    color: var(--tez-text-muted, #6b5340);
+}
+
+/* =============================================
+   HIGH CONTRAST MODE
+   ============================================= */
+body.tez-high-contrast .entry-content table th,
+body.tez-high-contrast .entry-content table td {
+    border-color: #000 !important;
+    color: #000 !important;
+}
+
+body.tez-high-contrast .entry-content table th {
+    background-color: #ffff00 !important;
+    color: #000 !important;
+}
+
+body.tez-high-contrast .entry-content blockquote {
+    border-color: #000 !important;
+    background-color: #ffffcc !important;
+    color: #000 !important;
+}
+
+body.tez-high-contrast .entry-content img {
+    outline: 2px solid #000;
+}
+
+/* =============================================
+   CODE BLOCKS
+   ============================================= */
+.entry-content pre,
+.entry-content code {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 6px;
+    font-size: 0.875em;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.entry-content pre {
+    padding: 16px;
+    background-color: var(--tez-bg-alt, #1e2937);
+    color: #e2e8f0;
+    line-height: 1.6;
+}
+
+[data-theme="sepia"] .entry-content pre {
+    background-color: #2d2010;
+    color: #e8d5b7;
+}
+
+/* =============================================
+   LTR OVERRIDE (non-RTL sites)
+   ============================================= */
+[dir="ltr"] .entry-content table th,
+[dir="ltr"] .entry-content table td {
+    text-align: left;
+}
+
+[dir="ltr"] .entry-content blockquote {
+    border-right: none;
+    border-left: 4px solid var(--tez-primary, #0ea5e9);
+    border-radius: 6px 0 0 6px;
+}
