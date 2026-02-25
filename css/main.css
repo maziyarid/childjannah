@@ -474,3 +474,50 @@ body.tez-menu-open{overflow:hidden!important;position:fixed;width:100%;height:10
 
 /* ===================== PERF ===================== */
 .tez-site-footer,.related-posts,#comments{content-visibility:auto;contain-intrinsic-size:auto 500px}
+
+/* ===================== PHASE 4: SNIPPETS AUDIT — 2026-02-25 (v3 FINAL) ===================== */
+/* Source: Snippets/CSS Styles.css (archived after this audit — no further changes needed).  */
+/* Brand: green #22BE49 preserved throughout. Blue #2563eb from Snippets NOT adopted.       */
+/* NOTE on @layer: Existing component styles above are intentionally UNLAYERED (highest      */
+/* cascade priority). Wrapping only this block in @layer utilities would make these rules    */
+/* weaker than unlayered styles, breaking logo sizing and focus overrides. Full file-wide    */
+/* @layer migration scoped to Phase 9 to avoid cascade regression.                           */
+
+/* 1. Logo responsive sizing — token-based (single source of truth, CLS-safe) */
+/* Covers both .tez-logo (HTML template class) and .tez-logo-img (explicit img class) */
+:root{--logo-h:28px;--logo-ar:154/40}
+@media(min-width:375px){:root{--logo-h:31px}}
+@media(min-width:768px){:root{--logo-h:36px}}
+@media(min-width:1024px){:root{--logo-h:40px}}
+.tez-logo,.tez-logo-img{display:block;height:var(--logo-h);width:auto;aspect-ratio:var(--logo-ar);max-width:160px;object-fit:contain}
+.tez-mobile-logo-img,.tez-mobile-menu-header .tez-logo{height:32px;width:auto;max-width:120px;object-fit:contain}
+
+/* 2. Site title responsive sizing */
+.tez-site-title{font-size:var(--tez-text-lg);font-weight:700;color:var(--tez-primary)}
+@media(min-width:768px){.tez-site-title{font-size:var(--tez-text-xl)}}
+@media(min-width:1024px){.tez-site-title{font-size:var(--tez-text-2xl)}}
+
+/* 3. Nav widescreen gap */
+@media(min-width:1400px){.tez-nav-menu{gap:1.5rem}}
+
+/* 4. WCAG: focus-visible on dropdown, submenu and contact list links */
+/* !important required to override global *:focus-visible rule at line 459 */
+.tez-dropdown-menu li a:focus-visible{outline:none;box-shadow:inset var(--tez-focus-ring)!important}
+.tez-mobile-submenu li a:focus-visible{outline:none;box-shadow:inset var(--tez-focus-ring)!important}
+.tez-contact-list li a:focus-visible{outline:none;box-shadow:var(--tez-focus-ring);border-radius:var(--tez-radius-sm)}
+
+/* 5. Sepia element overrides — :where() keeps specificity at (0,0,0); components can override  */
+/* without needing !important or deeper selectors (per reviewer recommendation)                  */
+:where([data-theme="sepia"]) hr{border-color:var(--tez-border)}
+:where([data-theme="sepia"]) table,:where([data-theme="sepia"]) th,:where([data-theme="sepia"]) td{border-color:var(--tez-border)}
+:where([data-theme="sepia"]) th{background-color:var(--tez-bg-secondary)}
+:where([data-theme="sepia"]) code,:where([data-theme="sepia"]) pre{background-color:var(--tez-bg-tertiary);color:var(--tez-text)}
+:where([data-theme="sepia"]) blockquote{background-color:var(--tez-bg-secondary);border-color:var(--tez-primary)}
+:where([data-theme="sepia"]) ::selection{background-color:rgba(var(--tez-primary-rgb),.2);color:var(--tez-text)}
+
+/* 6. OS-level dark mode: auto-apply brand dark tokens when system prefers dark and no manual    */
+/* theme override is set. :root:not([data-theme]) ensures manual mode always wins.               */
+@media(prefers-color-scheme:dark){:root:not([data-theme]){--tez-primary:#34d45c;--tez-primary-dark:#4ae070;--tez-primary-light:#22BE49;--tez-primary-rgb:52,212,92;--tez-secondary:#4a90ed;--tez-secondary-dark:#6ba8f5;--tez-secondary-light:#1a73e8;--tez-accent:#fbbf24;--tez-accent-dark:#fcd34d;--tez-danger:#f87171;--tez-danger-dark:#fca5a5;--tez-success:#4ae070;--tez-warning:#fbbf24;--tez-info:#38bdf8;--tez-bg:#0f172a;--tez-bg-secondary:#1e293b;--tez-bg-tertiary:#334155;--tez-bg-elevated:#1e293b;--tez-bg-overlay:rgba(0,0,0,.7);--tez-text:#f1f5f9;--tez-text-secondary:#e2e8f0;--tez-text-muted:#94a3b8;--tez-text-disabled:#64748b;--tez-text-inverse:#0f172a;--tez-border:#334155;--tez-border-light:#475569;--tez-border-dark:#1e293b;--tez-card-bg:#1e293b;--tez-card-border:#334155;--tez-card-shadow:rgba(0,0,0,.3);--tez-input-bg:#1e293b;--tez-input-border:#475569;--tez-input-placeholder:#64748b;--tez-gray-50:#1e293b;--tez-gray-100:#334155;--tez-gray-200:#475569;--tez-gray-300:#64748b;--tez-gray-400:#94a3b8;--tez-gray-500:#cbd5e1;--tez-gray-600:#e2e8f0;--tez-gray-700:#f1f5f9;--tez-gray-800:#f8fafc;--tez-gray-900:#fff;--tez-gray-950:#fff;--tez-shadow-sm:0 1px 3px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.2);--tez-shadow-md:0 4px 6px -1px rgba(0,0,0,.3),0 2px 4px -1px rgba(0,0,0,.2);--tez-shadow-lg:0 10px 15px -3px rgba(0,0,0,.3),0 4px 6px -2px rgba(0,0,0,.2);--tez-shadow-xl:0 20px 25px -5px rgba(0,0,0,.4),0 10px 10px -5px rgba(0,0,0,.2);--tez-scrollbar-track:var(--tez-bg-secondary);--tez-scrollbar-thumb:var(--tez-gray-200);--tez-scrollbar-thumb-hover:var(--tez-gray-300);--tez-focus-ring:0 0 0 3px rgba(52,212,92,.5)}}
+
+/* 6b. OS-level dark mode element overrides — mirrors [data-theme="dark"] element rules */
+@media(prefers-color-scheme:dark){:root:not([data-theme]) body,:root:not([data-theme]) #tie-wrapper,:root:not([data-theme]) .tie-wrapper{background-color:var(--tez-bg)!important;color:var(--tez-text)!important}:root:not([data-theme]) input,:root:not([data-theme]) textarea,:root:not([data-theme]) select{background-color:var(--tez-input-bg);border-color:var(--tez-input-border);color:var(--tez-text)}:root:not([data-theme]) input::placeholder,:root:not([data-theme]) textarea::placeholder{color:var(--tez-input-placeholder)}:root:not([data-theme]) hr{border-color:var(--tez-border)}:root:not([data-theme]) table,:root:not([data-theme]) th,:root:not([data-theme]) td{border-color:var(--tez-border)}:root:not([data-theme]) th{background-color:var(--tez-bg-secondary)}:root:not([data-theme]) code,:root:not([data-theme]) pre{background-color:var(--tez-bg-tertiary);color:var(--tez-text)}:root:not([data-theme]) blockquote{background-color:var(--tez-bg-secondary);border-color:var(--tez-primary)}:root:not([data-theme]) ::selection{background-color:rgba(52,212,92,.4);color:var(--tez-text)}}
