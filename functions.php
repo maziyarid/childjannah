@@ -1,7 +1,7 @@
 <?php
 /**
  * Jannah Child Theme - Teznevisan
- * Version: 3.1.0
+ * Version: 3.3.0
  *
  * Main functions file - acts as module loader.
  * All custom functionality is organized in the inc/ directory.
@@ -23,7 +23,7 @@ if ( ! defined('ABSPATH') ) exit;
 // =============================================
 define('TEZ_CHILD_DIR',     get_stylesheet_directory());
 define('TEZ_CHILD_URI',     get_stylesheet_directory_uri());
-define('TEZ_CHILD_VERSION', '3.1.0');
+define('TEZ_CHILD_VERSION', '3.3.0');
 
 // =============================================
 // LOAD MODULES (order matters)
