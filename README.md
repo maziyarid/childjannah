@@ -11,7 +11,7 @@
 
 | Area | Status | Notes |
 |---|---|---|
-| CSS Design System (`css/main.css`) | ✅ Restored + Phase 4 additions | PR #8 open |
+| CSS Design System (`css/main.css`) | ✅ Finalized Phase 4 | PR #8 merge-ready |
 | Mobile hamburger menu | ⚠️ CSS present, JS binding needs verification | See Issue #1 below |
 | Responsive header / footer | ✅ CSS complete | Template integration needed |
 | Dark / Sepia / High Contrast modes | ✅ All three CSS-complete | PR #8 |
@@ -41,7 +41,7 @@
 - `aria-expanded` toggling on the button, `.is-open` on `.tez-mobile-menu`, `.is-visible` on `.tez-mobile-overlay`, and `tez-menu-open` on `body` must all fire together
 
 **Issue 2 — Pages have no / broken styling**  
-History: `css/main.css` was truncated to 449 lines (missing all nav, hamburger, Chaty, responsive CSS). Restored in PR #6. If pages are still unstyled after PR #6/#8 merge, root cause is the enqueue priority — Jannah parent styles may be loading *after* the child, overriding everything. Fix: ensure `tez_enqueue_child_assets` uses `add_action('wp_enqueue_scripts', ..., 20)` (priority 20, after Jannah’s priority 10).
+History: `css/main.css` was truncated from 1,480 lines to 449 lines (missing all nav, hamburger, Chaty, responsive CSS). Restored in PR #6. If pages are still unstyled after PR #6/#8 merge, root cause is the enqueue priority — Jannah parent styles may be loading *after* the child, overriding everything. Fix: ensure `tez_enqueue_child_assets` uses `add_action('wp_enqueue_scripts', ..., 20)` (priority 20, after Jannah's priority 10).
 
 **Issue 3 — Hero section broken on page templates**  
 The CSS in `css/page-templates.css` defines `.tez-hero-*` classes. The PHP templates in `templates/*.php` must output exactly those class names. If the template was written against an older CSS version, class names may have drifted. Inspect element on the homepage or a service page and compare rendered classes vs CSS definitions.
@@ -52,7 +52,7 @@ If `inc/core-setup.php` still has `add_action('wp_body_open', 'tez_output_header
 ### 🟡 Moderate
 
 **Issue 5 — Font Awesome conflict**  
-If `tez_disable_external_fa()` is still registered in `core-setup.php`, it dequeues Jannah’s FA bundle, breaking all native Jannah icons (navigation arrows, breadcrumb separators, widget icons). Fix: comment out or delete `tez_disable_external_fa()` and its `add_action` registration.
+If `tez_disable_external_fa()` is still registered in `core-setup.php`, it dequeues Jannah's FA bundle, breaking all native Jannah icons (navigation arrows, breadcrumb separators, widget icons). Fix: comment out or delete `tez_disable_external_fa()` and its `add_action` registration.
 
 **Issue 6 — Responsiveness on template pages**  
 Page templates may not wrap content in `.tez-container`, causing full-bleed or overflow on mobile. Every section inside a template should use `<div class="tez-container">` to apply the responsive `max-width: 1200px; padding-inline: 1rem` rules.
@@ -169,7 +169,7 @@ childjannah/
 | `.tez-btn` | Base button — variants: `-primary` `-secondary` `-lg` `-white` `-outline-white` |
 | `.tez-skip-link` | Skip-to-main-content link (visible on keyboard focus) |
 | `.scroll-animate` | Intersection observer hook (fades in on scroll) |
-| `.tez-logo-img` | Header logo `<img>` — scales 100→154px across breakpoints *(Phase 4)* |
+| `.tez-logo` `.tez-logo-img` | Header logo — scales 28px→40px across breakpoints *(Phase 4)* |
 
 ### Breakpoints
 
@@ -192,7 +192,7 @@ Please review **PR #8** (`feature/phase4-css-additions`) and diagnose the follow
 
 1. **`css/main.css` — Phase 4 additions block** (bottom of file, marked `PHASE 4: SNIPPETS AUDIT`)
    - Confirm no selector conflicts with the existing rules above
-   - Confirm `.tez-logo-img` sizing doesn’t conflict with `.tez-footer-logo-img` (different class, same `img` element on different elements — should be fine)
+   - Confirm `.tez-logo` / `.tez-logo-img` sizing doesn't conflict with `.tez-footer-logo-img` (different class, same `img` element on different elements — should be fine)
    - Confirm `@media(prefers-color-scheme:dark){:root:not([data-theme]){...}}` only activates when no manual theme is set
 
 2. **`js/scripts.js`** — Verify the mobile hamburger flow:
@@ -210,7 +210,7 @@ Please review **PR #8** (`feature/phase4-css-additions`) and diagnose the follow
 
 4. **`functions.php`** — Confirm:
    - `add_action('wp_enqueue_scripts', 'tez_enqueue_child_assets', 20)` — priority 20 is critical
-   - `wp_enqueue_style('tez-main', ..., ['jannah-style', 'tie-style'], ...)` — dependency array includes parent
+   - `wp_enqueue_style('tez-main', ..., ['jannah-style'], ...)` — dependency array includes parent
    - No duplicate `function` declarations across `functions.php` and `inc/*.php` files
 
 5. **`templates/*.php`** — Confirm all sections use `.tez-container` wrapper and hero classes match `css/page-templates.css`.
@@ -230,8 +230,8 @@ Please perform a code review on PR #8. Specifically check:
 ## 🗓️ Phase Roadmap
 
 ### ✅ Completed
-- **Phase 3** (PR #6) — CSS/JS restored from 449-line truncation incident; full nav, hamburger, Chaty, responsive footer added
-- **Phase 4** (PR #8) — Snippets audit: 6 missing pieces ported; OS dark mode; WCAG focus-visible completed; sepia fixed
+- **Phase 3** (PR #6) — CSS/JS restored from 1,480→449 line truncation incident; full nav, hamburger, Chaty, responsive footer added
+- **Phase 4** (PR #8) — Snippets audit: 6 missing pieces ported; OS dark mode; WCAG focus-visible completed; sepia fixed; logo class mismatch resolved
 
 ### 🔄 In Progress
 - **Phase 4.5** — Verify `js/scripts.js` hamburger logic; fix if not binding (Issue #1)
@@ -296,4 +296,4 @@ This is already present in `css/main.css`.
 
 ---
 
-*Last updated: 2026-02-25 · Phase 4 complete · PR #8 pending review*
+*Last updated: 2026-02-25 · Phase 4 finalized · PR #8 merge-ready*
