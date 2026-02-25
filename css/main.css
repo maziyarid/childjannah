@@ -475,14 +475,21 @@ body.tez-menu-open{overflow:hidden!important;position:fixed;width:100%;height:10
 /* ===================== PERF ===================== */
 .tez-site-footer,.related-posts,#comments{content-visibility:auto;contain-intrinsic-size:auto 500px}
 
-/* ===================== PHASE 4: SNIPPETS AUDIT — 2026-02-25 ===================== */
-/* Extracted from Snippets/CSS Styles.css; brand colors preserved (green #22BE49) */
+/* ===================== PHASE 4: SNIPPETS AUDIT — 2026-02-25 (v2 hardened) ===================== */
+/* Source: Snippets/CSS Styles.css (archived after this audit — no further changes needed).       */
+/* Brand: green #22BE49 preserved throughout. Blue #2563eb from Snippets template NOT adopted.   */
+/*                                                                                               */
+/* NOTE on @layer: Existing component styles above are intentionally UNLAYERED, which gives them */
+/* the highest cascade priority. Wrapping only this block in @layer utilities would make these   */
+/* rules weaker than the unlayered styles above, breaking logo sizing and focus overrides.       */
+/* Full file-wide @layer migration is scoped to Phase 9 to avoid cascade regression.            */
 
-/* 1. Logo responsive sizing */
-.tez-logo-img{display:block;width:100px;height:26px;object-fit:contain}
-@media(min-width:375px){.tez-logo-img{width:120px;height:31px}}
-@media(min-width:768px){.tez-logo-img{width:140px;height:36px}}
-@media(min-width:1024px){.tez-logo-img{width:154px;height:40px}}
+/* 1. Logo responsive sizing — token-based (single source of truth, CLS-safe) */
+:root{--logo-h:28px;--logo-ar:154/40}
+@media(min-width:375px){:root{--logo-h:31px}}
+@media(min-width:768px){:root{--logo-h:36px}}
+@media(min-width:1024px){:root{--logo-h:40px}}
+.tez-logo-img{display:block;height:var(--logo-h);width:auto;aspect-ratio:var(--logo-ar);max-width:160px;object-fit:contain}
 .tez-mobile-logo-img{height:32px;width:auto;max-width:120px;object-fit:contain}
 
 /* 2. Site title responsive sizing */
@@ -498,13 +505,15 @@ body.tez-menu-open{overflow:hidden!important;position:fixed;width:100%;height:10
 .tez-mobile-submenu li a:focus-visible{outline:none;box-shadow:inset var(--tez-focus-ring)}
 .tez-contact-list li a:focus-visible{outline:none;box-shadow:var(--tez-focus-ring);border-radius:var(--tez-radius-sm)}
 
-/* 5. Sepia theme: complete element overrides */
-[data-theme="sepia"] hr{border-color:var(--tez-border)}
-[data-theme="sepia"] table,[data-theme="sepia"] th,[data-theme="sepia"] td{border-color:var(--tez-border)}
-[data-theme="sepia"] th{background-color:var(--tez-bg-secondary)}
-[data-theme="sepia"] code,[data-theme="sepia"] pre{background-color:var(--tez-bg-tertiary);color:var(--tez-text)}
-[data-theme="sepia"] blockquote{background-color:var(--tez-bg-secondary);border-color:var(--tez-primary)}
-[data-theme="sepia"] ::selection{background-color:rgba(var(--tez-primary-rgb),.2);color:var(--tez-text)}
+/* 5. Sepia element overrides — :where() keeps specificity at (0,0,0); components can override  */
+/* without needing !important or deeper selectors (per reviewer recommendation)                  */
+:where([data-theme="sepia"]) hr{border-color:var(--tez-border)}
+:where([data-theme="sepia"]) table,:where([data-theme="sepia"]) th,:where([data-theme="sepia"]) td{border-color:var(--tez-border)}
+:where([data-theme="sepia"]) th{background-color:var(--tez-bg-secondary)}
+:where([data-theme="sepia"]) code,:where([data-theme="sepia"]) pre{background-color:var(--tez-bg-tertiary);color:var(--tez-text)}
+:where([data-theme="sepia"]) blockquote{background-color:var(--tez-bg-secondary);border-color:var(--tez-primary)}
+:where([data-theme="sepia"]) ::selection{background-color:rgba(var(--tez-primary-rgb),.2);color:var(--tez-text)}
 
-/* 6. OS-level dark mode: auto-apply brand dark tokens when system prefers dark */
+/* 6. OS-level dark mode: auto-apply brand dark tokens when system prefers dark and no manual    */
+/* theme override is set. :root:not([data-theme]) ensures manual mode always wins.               */
 @media(prefers-color-scheme:dark){:root:not([data-theme]){--tez-primary:#34d45c;--tez-primary-dark:#4ae070;--tez-primary-light:#22BE49;--tez-primary-rgb:52,212,92;--tez-bg:#0f172a;--tez-bg-secondary:#1e293b;--tez-bg-tertiary:#334155;--tez-bg-elevated:#1e293b;--tez-bg-overlay:rgba(0,0,0,.7);--tez-text:#f1f5f9;--tez-text-secondary:#e2e8f0;--tez-text-muted:#94a3b8;--tez-text-disabled:#64748b;--tez-text-inverse:#0f172a;--tez-border:#334155;--tez-border-light:#475569;--tez-border-dark:#1e293b;--tez-card-bg:#1e293b;--tez-card-border:#334155;--tez-card-shadow:rgba(0,0,0,.3);--tez-input-bg:#1e293b;--tez-input-border:#475569;--tez-input-placeholder:#64748b;--tez-gray-50:#1e293b;--tez-gray-100:#334155;--tez-gray-200:#475569;--tez-gray-300:#64748b;--tez-gray-400:#94a3b8;--tez-gray-500:#cbd5e1;--tez-gray-600:#e2e8f0;--tez-gray-700:#f1f5f9;--tez-gray-800:#f8fafc;--tez-gray-900:#fff;--tez-gray-950:#fff;--tez-scrollbar-track:var(--tez-bg-secondary);--tez-scrollbar-thumb:var(--tez-gray-200);--tez-scrollbar-thumb-hover:var(--tez-gray-300)}}
