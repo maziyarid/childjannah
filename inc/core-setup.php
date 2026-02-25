@@ -1,10 +1,11 @@
 <?php
 /**
  * Core Setup - Constants, Font Awesome, Nav Walkers, Critical CSS
- * Header/footer now live in template overrides (header.php, footer.php)
+ * Header/footer ONLY from template files (header.php, footer.php)
+ * NO HOOKS that output header/footer HTML
  *
  * @package JannahChild
- * @version 3.1.0
+ * @version 3.2.0
  */
 
 if (!defined('ABSPATH')) exit;
@@ -12,7 +13,7 @@ if (!defined('ABSPATH')) exit;
 // =============================================
 // CONSTANTS
 // =============================================
-if (!defined('TEZ_VERSION'))       define('TEZ_VERSION', '3.1.0');
+if (!defined('TEZ_VERSION'))       define('TEZ_VERSION', '3.2.0');
 if (!defined('TEZ_PHONE'))         define('TEZ_PHONE', '09331663849');
 if (!defined('TEZ_PHONE_DISPLAY')) define('TEZ_PHONE_DISPLAY', '۰۹۳۳۱۶۶۳۸۴۹');
 if (!defined('TEZ_WHATSAPP'))      define('TEZ_WHATSAPP', '09331663849');
@@ -27,8 +28,22 @@ if (!defined('TEZ_PRIMARY'))       define('TEZ_PRIMARY', '#22BE49');
 if (!defined('TEZ_PRIMARY_DARK'))  define('TEZ_PRIMARY_DARK', '#1a9e3b');
 
 // =============================================
+// CRITICAL: DO NOT HOOK HEADER/FOOTER OUTPUT
+// =============================================
+// The header.php and footer.php template files are the ONLY source
+// of header/footer HTML. Do NOT add any wp_body_open or get_footer
+// hooks that output additional header/footer HTML.
+//
+// REMOVED:
+// - add_action('wp_body_open', 'tez_output_header_html')
+// - add_action('get_footer', 'tez_output_footer_html')
+// - add_action('wp_footer', 'tez_output_close_main')
+//
+// These were causing DOUBLE NAVIGATION MENUS.
+// =============================================
+
+// =============================================
 // ENQUEUE FONT AWESOME 7 PRO (LOCAL)
-// Loaded as ADDITIONAL stylesheet for Tez UI
 // =============================================
 if (!function_exists('tez_enqueue_fontawesome')) {
     function tez_enqueue_fontawesome() {
@@ -41,8 +56,7 @@ if (!function_exists('tez_enqueue_fontawesome')) {
 
 // =============================================
 // DISABLE EXTERNAL FONT AWESOME
-// COMMENTED OUT to prevent breaking Jannah icons
-// Uncomment ONLY if you confirm Jannah doesn't use FA
+// KEEP COMMENTED OUT - Jannah parent uses FA
 // =============================================
 // if (!function_exists('tez_disable_external_fa')) {
 //     function tez_disable_external_fa() {
@@ -80,26 +94,43 @@ if (!function_exists('tez_register_menus_init')) {
 // =============================================
 if (!class_exists('Tez_Desktop_Nav_Walker')) {
     class Tez_Desktop_Nav_Walker extends Walker_Nav_Menu {
-        public function start_lvl(&$output, $depth = 0, $args = null) { $output .= '<ul class="tez-dropdown-menu">'; }
-        public function end_lvl(&$output, $depth = 0, $args = null)   { $output .= '</ul>'; }
+        public function start_lvl(&$output, $depth = 0, $args = null) { 
+            $output .= '<ul class="tez-dropdown-menu">'; 
+        }
+        
+        public function end_lvl(&$output, $depth = 0, $args = null) { 
+            $output .= '</ul>'; 
+        }
+        
         public function start_el(&$output, $item, $depth = 0, $args = null, $id = 0) {
             $classes = empty($item->classes) ? array() : (array) $item->classes;
             $has_children = in_array('menu-item-has-children', $classes);
             $is_current = in_array('current-menu-item', $classes) || in_array('current-menu-ancestor', $classes);
+            
             $li_class = 'tez-menu-item';
             if ($has_children && $depth === 0) $li_class .= ' tez-has-dropdown';
             if ($is_current) $li_class .= ' current';
+            
             $output .= '<li class="' . esc_attr($li_class) . '">';
+            
             $icon = get_post_meta($item->ID, '_menu_item_icon', true);
             $link_class = 'tez-nav-link';
             if ($is_current) $link_class .= ' active';
+            
             $output .= '<a href="' . esc_url($item->url) . '" class="' . esc_attr($link_class) . '">';
-            if ($icon && $depth > 0) { $output .= '<i class="' . esc_attr($icon) . '"></i>'; }
+            if ($icon && $depth > 0) { 
+                $output .= '<i class="' . esc_attr($icon) . '"></i>'; 
+            }
             $output .= '<span>' . esc_html($item->title) . '</span>';
-            if ($has_children && $depth === 0) { $output .= ' <i class="fa-solid fa-chevron-down tez-dropdown-arrow"></i>'; }
+            if ($has_children && $depth === 0) { 
+                $output .= ' <i class="fa-solid fa-chevron-down tez-dropdown-arrow"></i>'; 
+            }
             $output .= '</a>';
         }
-        public function end_el(&$output, $item, $depth = 0, $args = null) { $output .= '</li>'; }
+        
+        public function end_el(&$output, $item, $depth = 0, $args = null) { 
+            $output .= '</li>'; 
+        }
     }
 }
 
@@ -108,16 +139,25 @@ if (!class_exists('Tez_Desktop_Nav_Walker')) {
 // =============================================
 if (!class_exists('Tez_Mobile_Nav_Walker')) {
     class Tez_Mobile_Nav_Walker extends Walker_Nav_Menu {
-        public function start_lvl(&$output, $depth = 0, $args = null) { $output .= '<ul class="tez-mobile-submenu">'; }
-        public function end_lvl(&$output, $depth = 0, $args = null)   { $output .= '</ul>'; }
+        public function start_lvl(&$output, $depth = 0, $args = null) { 
+            $output .= '<ul class="tez-mobile-submenu">'; 
+        }
+        
+        public function end_lvl(&$output, $depth = 0, $args = null) { 
+            $output .= '</ul>'; 
+        }
+        
         public function start_el(&$output, $item, $depth = 0, $args = null, $id = 0) {
             $classes = empty($item->classes) ? array() : (array) $item->classes;
             $has_children = in_array('menu-item-has-children', $classes);
             $is_current = in_array('current-menu-item', $classes);
+            
             $li_class = 'tez-mobile-menu-item';
             if ($has_children && $depth === 0) $li_class .= ' tez-has-submenu';
             if ($is_current) $li_class .= ' current';
+            
             $output .= '<li class="' . esc_attr($li_class) . '">';
+            
             if ($has_children && $depth === 0) {
                 $output .= '<button type="button" class="tez-submenu-toggle" aria-expanded="false">';
                 $output .= '<span>' . esc_html($item->title) . '</span>';
@@ -130,7 +170,10 @@ if (!class_exists('Tez_Mobile_Nav_Walker')) {
                 $output .= '</a>';
             }
         }
-        public function end_el(&$output, $item, $depth = 0, $args = null) { $output .= '</li>'; }
+        
+        public function end_el(&$output, $item, $depth = 0, $args = null) { 
+            $output .= '</li>'; 
+        }
     }
 }
 
@@ -150,15 +193,7 @@ if (!function_exists('tez_add_menu_icon_field')) {
 }
 
 if (!function_exists('tez_save_menu_icon_field')) {
-    /**
-     * Save menu item icon field
-     * 
-     * @since 3.1.0
-     * @param int $menu_id Menu ID (not used but required by hook)
-     * @param int $menu_item_db_id Menu item ID
-     */
     function tez_save_menu_icon_field($menu_id, $menu_item_db_id) {
-        // Check user capability for menu editing
         if (!current_user_can('edit_theme_options')) {
             return;
         }
@@ -200,17 +235,17 @@ if (!function_exists('tez_preload_fa')) {
 
 // =============================================
 // CRITICAL CSS (inline in <head>)
+// Simplified - main.css handles everything
 // =============================================
 if (!function_exists('tez_output_critical_css')) {
     function tez_output_critical_css() {
         echo '<style id="tez-critical-css">
-:root{--tez-primary:#22BE49;--tez-primary-dark:#1a9e3b;--tez-primary-rgb:34,190,73;--tez-secondary:#1a73e8;--tez-bg:#fff;--tez-text:#111827;--tez-border:#e5e7eb;--tez-font:"Vazirmatn","IRANSans","Tahoma",system-ui,sans-serif}
-[data-theme="dark"]{--tez-primary:#34d45c;--tez-bg:#0f172a;--tez-text:#f1f5f9;--tez-border:#334155}
-[data-theme="sepia"]{--tez-primary:#5d8a3c;--tez-bg:#faf6f1;--tez-text:#44403c;--tez-border:#d6cfc4}
+:root{--tez-primary:#22BE49;--tez-primary-dark:#1a9e3b}
 html{font-size:16px}
-body{font-family:var(--tez-font)!important;background:var(--tez-bg);color:var(--tez-text);direction:rtl;margin:0}
-.tez-site-header{position:sticky;top:0;z-index:9999;background:var(--tez-bg);min-height:70px}
+body{font-family:"Vazirmatn","IRANSans","Tahoma",system-ui,sans-serif!important;background:#fff;color:#111827;direction:rtl;margin:0}
+.tez-site-header{position:sticky;top:0;z-index:9999;background:#fff;min-height:70px}
 </style>';
+        // Load saved theme immediately
         echo '<script>(function(){var t=localStorage.getItem("tez-theme");if(t)document.documentElement.setAttribute("data-theme",t);document.documentElement.classList.add("js-enabled")})();</script>';
     }
     add_action('wp_head', 'tez_output_critical_css', 3);
@@ -244,10 +279,9 @@ if (!function_exists('tez_output_logo_styles')) {
     function tez_output_logo_styles() {
         echo '<style id="tez-logo-styles">
 .tez-logo-link{display:inline-flex;align-items:center;text-decoration:none}
-.tez-logo{display:block;width:220px;height:60px;max-width:100%;object-fit:contain}
-@media(max-width:991px){.tez-logo{width:180px;height:50px}}
-@media(max-width:767px){.tez-logo{width:150px;height:42px}}
-@media(max-width:480px){.tez-logo{width:130px;height:36px}}
+.tez-logo{display:block;width:200px;height:55px;max-width:100%;object-fit:contain}
+@media(max-width:767px){.tez-logo{width:160px;height:44px}}
+@media(max-width:480px){.tez-logo{width:140px;height:38px}}
 .tez-mobile-logo-link .tez-logo{width:160px;height:44px}
 </style>';
     }
@@ -256,20 +290,23 @@ if (!function_exists('tez_output_logo_styles')) {
 
 // =============================================
 // BODY CLASSES
-// Only strip sidebar classes on pages with custom templates
 // =============================================
 if (!function_exists('tez_filter_body_classes')) {
     function tez_filter_body_classes($classes) {
-        // Only remove layout classes on pages with custom templates (from templates/*)
-        if ( is_page() && get_page_template_slug() ) {
+        // Remove Jannah sidebar classes on custom templates
+        if (is_page() && get_page_template_slug()) {
             $template = get_page_template_slug();
-            if ( strpos($template, 'templates/') === 0 ) {
+            if (strpos($template, 'templates/') === 0) {
                 $remove = array('sidebar-right', 'sidebar-left', 'has-sidebar', 'boxed-layout', 'has-sticky-header');
                 $classes = array_diff($classes, $remove);
                 $classes[] = 'tez-no-sidebar';
             }
         }
-        $classes[] = 'tez-theme-active';
+        
+        // Add theme version class for debugging
+        $classes[] = 'tez-theme-v3-2-0';
+        $classes[] = 'tez-ui-overhaul';
+        
         return array_values($classes);
     }
     add_filter('body_class', 'tez_filter_body_classes', 999);
