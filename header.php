@@ -1,10 +1,14 @@
 <?php
 /**
- * Header Template - Mobile Menu Fixed + CodeRabbit A11y Fixes
- * 
+ * Header Template - Phase 3.0 Fixes Applied
+ *
+ * Changes in Phase 3.0 (PR #6, 2026-02-25):
+ * - Fixed menu location: 'primary' → 'tez_primary' (was silently not rendering)
+ * - Added Tez_Desktop_Nav_Walker and Tez_Mobile_Nav_Walker to wp_nav_menu() calls
+ *
  * @package JannahChild
- * @version 3.2.0
- * @since Phase 2.0 - Focus trap, data attribute fixes
+ * @version 3.3.0
+ * @since Phase 3.0 - Navigation + FA7 + Responsive fixes
  */
 if (!defined('ABSPATH')) exit;
 ?>
@@ -27,67 +31,71 @@ if (!defined('ABSPATH')) exit;
 <header class="tez-site-header" id="tez-site-header" role="banner">
     <div class="tez-container">
         <div class="tez-header-inner">
-            
+
             <!-- Logo -->
             <div class="tez-header-logo">
-                <a href="<?php echo esc_url(home_url('/')); ?>" 
-                   class="tez-logo-link" 
-                   rel="home" 
+                <a href="<?php echo esc_url(home_url('/')); ?>"
+                   class="tez-logo-link"
+                   rel="home"
                    aria-label="<?php echo esc_attr(get_bloginfo('name')); ?>">
                     <?php if (defined('TEZ_LOGO')): ?>
-                        <img src="<?php echo esc_url(home_url(TEZ_LOGO)); ?>" 
-                             alt="<?php echo esc_attr(get_bloginfo('name')); ?>" 
-                             class="tez-logo">
+                        <img src="<?php echo esc_url(home_url(TEZ_LOGO)); ?>"
+                             alt="<?php echo esc_attr(get_bloginfo('name')); ?>"
+                             class="tez-logo"
+                             width="160" height="48">
                     <?php else: ?>
                         <span class="tez-site-name"><?php bloginfo('name'); ?></span>
                     <?php endif; ?>
                 </a>
             </div>
-            
-            <!-- Desktop Navigation -->
+
+            <!-- Desktop Navigation
+                 FIX (PR #6): theme_location changed from 'primary' to 'tez_primary'
+                 FIX (PR #6): Added Tez_Desktop_Nav_Walker for proper dropdown HTML -->
             <nav class="tez-header-nav" id="tez-header-nav" role="navigation" aria-label="منوی اصلی">
                 <?php
                 $menu_args = array(
-                    'theme_location'  => has_nav_menu('primary') ? 'primary' : '',
-                    'container'       => false,
-                    'menu_class'      => 'tez-nav-menu',
-                    'fallback_cb'     => false,
-                    'depth'           => 2,
+                    'theme_location' => has_nav_menu('tez_primary') ? 'tez_primary' : '',
+                    'container'      => false,
+                    'menu_class'     => 'tez-nav-menu',
+                    'fallback_cb'    => false,
+                    'depth'          => 2,
+                    'walker'         => new Tez_Desktop_Nav_Walker(),
                 );
-                
-                if (has_nav_menu('primary')) {
+
+                if (has_nav_menu('tez_primary')) {
                     wp_nav_menu($menu_args);
                 }
                 ?>
             </nav>
-            
+
             <!-- Header Actions -->
             <div class="tez-header-actions">
-                
+
                 <!-- Search Button -->
-                <button type="button" 
-                        id="tez-search-toggle" 
-                        class="tez-action-btn tez-search-btn" 
-                        aria-label="جستجو" 
-                        aria-expanded="false" 
+                <button type="button"
+                        id="tez-search-toggle"
+                        class="tez-action-btn tez-search-btn"
+                        aria-label="جستجو"
+                        aria-expanded="false"
                         aria-controls="tez-search-overlay">
                     <i class="tez-icon fa-solid fa-search" aria-hidden="true"></i>
                 </button>
-                
+
                 <!-- Mobile Menu Toggle -->
-                <button type="button" 
-                        id="tez-mobile-toggle" 
-                        class="tez-mobile-toggle" 
-                        aria-label="منوی موبایل" 
-                        aria-expanded="false" 
+                <button type="button"
+                        id="tez-mobile-toggle"
+                        class="tez-mobile-toggle"
+                        aria-label="منوی موبایل"
+                        aria-expanded="false"
                         aria-controls="tez-mobile-menu">
-                    <span class="tez-hamburger">
+                    <span class="tez-hamburger" aria-hidden="true">
                         <span class="tez-hamburger-line"></span>
                         <span class="tez-hamburger-line"></span>
                         <span class="tez-hamburger-line"></span>
                     </span>
                 </button>
-                
+
             </div>
         </div>
     </div>
@@ -96,44 +104,48 @@ if (!defined('ABSPATH')) exit;
 <!-- Mobile Menu Overlay -->
 <div class="tez-mobile-menu-overlay" id="tez-mobile-overlay" aria-hidden="true"></div>
 
-<!-- Mobile Menu -->
+<!-- Mobile Menu
+     FIX (PR #6): theme_location changed from 'primary' to 'tez_primary'
+     FIX (PR #6): Added Tez_Mobile_Nav_Walker for accordion submenus -->
 <div class="tez-mobile-menu" id="tez-mobile-menu" role="dialog" aria-label="منوی موبایل" aria-hidden="true">
     <div class="tez-mobile-header">
         <a href="<?php echo esc_url(home_url('/')); ?>" class="tez-mobile-logo-link" rel="home">
             <?php if (defined('TEZ_LOGO')): ?>
-                <img src="<?php echo esc_url(home_url(TEZ_LOGO)); ?>" 
-                     alt="<?php echo esc_attr(get_bloginfo('name')); ?>" 
-                     class="tez-logo">
+                <img src="<?php echo esc_url(home_url(TEZ_LOGO)); ?>"
+                     alt="<?php echo esc_attr(get_bloginfo('name')); ?>"
+                     class="tez-logo"
+                     width="120" height="36">
             <?php else: ?>
                 <span class="tez-site-name"><?php bloginfo('name'); ?></span>
             <?php endif; ?>
         </a>
-        <button type="button" 
-                id="tez-mobile-close" 
-                class="tez-mobile-close" 
+        <button type="button"
+                id="tez-mobile-close"
+                class="tez-mobile-close"
                 aria-label="بستن منو">
             <i class="tez-icon fa-solid fa-times" aria-hidden="true"></i>
         </button>
     </div>
-    
+
     <div class="tez-mobile-body">
         <nav class="tez-mobile-nav" role="navigation" aria-label="منوی موبایل">
             <?php
             $mobile_menu_args = array(
-                'theme_location'  => 'primary',
-                'container'       => false,
-                'menu_class'      => 'tez-mobile-menu-list',
-                'fallback_cb'     => false,
-                'depth'           => 2,
+                'theme_location' => 'tez_primary',
+                'container'      => false,
+                'menu_class'     => 'tez-mobile-menu-list',
+                'fallback_cb'    => false,
+                'depth'          => 2,
+                'walker'         => new Tez_Mobile_Nav_Walker(),
             );
-            
-            if (has_nav_menu('primary')) {
+
+            if (has_nav_menu('tez_primary')) {
                 wp_nav_menu($mobile_menu_args);
             }
             ?>
         </nav>
     </div>
-    
+
     <?php if (defined('TEZ_PHONE') && defined('TEZ_PHONE_DISPLAY')): ?>
     <div class="tez-mobile-footer">
         <a href="tel:<?php echo esc_attr(TEZ_PHONE); ?>" class="tez-mobile-phone">
@@ -147,22 +159,21 @@ if (!defined('ABSPATH')) exit;
 <!-- Search Overlay -->
 <div class="tez-search-overlay" id="tez-search-overlay" role="dialog" aria-label="جستجو" aria-hidden="true">
     <div class="tez-search-container">
-        <button type="button" 
-                id="tez-search-close" 
-                class="tez-search-close" 
+        <button type="button"
+                id="tez-search-close"
+                class="tez-search-close"
                 aria-label="بستن جستجو">
             <i class="tez-icon fa-solid fa-times" aria-hidden="true"></i>
         </button>
-        
         <div class="tez-search-input-wrap">
             <form role="search" method="get" class="tez-search-form" action="<?php echo esc_url(home_url('/')); ?>">
                 <label for="tez-search-input" class="screen-reader-text">جستجو</label>
-                <input type="search" 
-                       id="tez-search-input" 
-                       class="tez-search-input" 
-                       placeholder="چه چیزی می‌خواهید پیدا کنید؟" 
-                       value="<?php echo esc_attr(get_search_query()); ?>" 
-                       name="s" 
+                <input type="search"
+                       id="tez-search-input"
+                       class="tez-search-input"
+                       placeholder="چه چیزی می‌خواهید پیدا کنید؟"
+                       value="<?php echo esc_attr(get_search_query()); ?>"
+                       name="s"
                        autocomplete="off"
                        required>
                 <button type="submit" class="tez-search-submit" aria-label="جستجو">
@@ -173,7 +184,7 @@ if (!defined('ABSPATH')) exit;
     </div>
 </div>
 
-<!-- Floating Theme Switcher (Desktop Right, Mobile Bottom) -->
+<!-- Floating Theme Switcher -->
 <div class="tez-theme-buttons" role="group" aria-label="تغییر حالت ظاهری">
     <button type="button" class="tez-mode-btn" data-theme="light" aria-label="حالت روشن" title="حالت روشن">
         <i class="tez-icon fa-solid fa-sun" aria-hidden="true"></i>
@@ -186,7 +197,7 @@ if (!defined('ABSPATH')) exit;
     </button>
 </div>
 
-<!-- Floating Accessibility Toolbar (Desktop Left) -->
+<!-- Floating Accessibility Toolbar -->
 <div class="tez-a11y-toolbar" role="group" aria-label="ابزارهای دسترسی">
     <button type="button" class="tez-a11y-btn" data-action="font-size-increase" aria-label="افزایش اندازه فونت" title="افزایش اندازه فونت">
         <i class="tez-icon fa-solid fa-plus" aria-hidden="true"></i>

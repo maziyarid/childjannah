@@ -1,12 +1,33 @@
 /**
- * Teznevisan Main CSS - Design System
- * Version: 3.2.0 - CodeRabbit Performance Optimizations
- * Primary: #22BE49 | Persian RTL-first | Dark/Sepia modes
- * 
- * CodeRabbit Fixes:
- * - Mobile menu: GPU-accelerated transform animation
- * - Mobile-first CSS (min-width queries)
- * - Optimized widget positioning
+ * Teznevisan Main CSS — Design System
+ * Version: 3.3.0 — Phase 3.0 Critical Fixes
+ * Primary: #22BE49 | Persian RTL-first | Dark/Sepia/High-Contrast modes
+ *
+ * ============================================================
+ * PHASE 3.0 CHANGELOG (PR #6, 2026-02-25)
+ * ============================================================
+ * FIX: Font Awesome 7 Pro font-family (was 'Font Awesome 6 Pro' — wrong!)
+ * FIX: FA scoping broadened — walker arrows lack .tez-icon, need global coverage
+ * NEW: Header layout (.tez-site-header, .tez-header-inner, .tez-header-logo)
+ * NEW: Desktop navigation (.tez-nav-menu, .tez-nav-link, dropdown menus)
+ * NEW: Hamburger button + hamburger→X animation
+ * NEW: Header actions (.tez-action-btn, search button)
+ * NEW: Mobile menu list item styles + submenu accordion
+ * NEW: Search overlay (full-screen, backdrop blur)
+ * NEW: Chaty floating widget (all channel brand colours)
+ * NEW: Scroll-to-top button
+ * NEW: Header scroll states (.is-scrolled, .is-hidden)
+ * NEW: Skip link focus styles
+ * NEW: Complete responsive breakpoints (400px, 576px, 640px, 768px, 1024px, 1280px)
+ *
+ * DEBATE RESOLUTIONS (PR #6 — @greptile-apps + @coderabbitai, 2026-02-24):
+ * - Navigation: Flexbox horizontal layout (consensus)
+ * - FA: Self-hosted FA7 Pro, NO CDN Kit (no external dependency)
+ * - Mobile menu: Keep JavaScript — CSS-only cannot implement focus trap (WCAG 2.1 AA)
+ * - CSS architecture: Single main.css — appropriate scope for child theme at 1500 lines
+ * - Breakpoints: Mobile-first min-width, 576px/1024px as primary pivots
+ * - Chaty z-index: var(--tez-z-fixed) = 1030 (NOT 999999 — would cover modals)
+ * ============================================================
  */
 @layer base, theme, components, utilities;
 
@@ -179,8 +200,21 @@ body.tez-high-contrast *,[data-contrast="high"] *{border-color:currentColor!impo
   .screen-reader-text{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
 }
 
-/* ===================== FONT AWESOME SCOPED (NO CONFLICTS) ===================== */
-/* CRITICAL: Only apply FA to elements explicitly marked with .tez-icon class */
+/* ===================== FONT AWESOME 7 PRO — FA7 SCOPING ===================== */
+/*
+ * FIX (PR #6): Changed from 'Font Awesome 6 Pro' to 'Font Awesome 7 Pro'.
+ * User is self-hosting FA7 Pro at /wp-content/uploads/fonts/fontawesome/
+ * FA6 kept as fallback only.
+ *
+ * IMPORTANT: Both .tez-icon-scoped AND global selectors needed.
+ * Reason: inc/core-setup.php nav walker outputs dropdown arrows as:
+ *   <i class="fa-solid fa-chevron-down tez-dropdown-arrow">
+ * WITHOUT .tez-icon class. The inline CSS in core-setup.php handles global FA7,
+ * but main.css must not override it back to FA6.
+ * Jannah's tie-icon-* classes are explicitly NOT targeted.
+ */
+
+/* .tez-icon explicit class — highest priority for theme icons */
 .tez-icon,
 .tez-icon.fa,
 .tez-icon.fas,
@@ -194,7 +228,7 @@ body.tez-high-contrast *,[data-contrast="high"] *{border-color:currentColor!impo
 .tez-icon.fa-thin,
 .tez-icon.fa-duotone,
 .tez-icon.fa-brands {
-  font-family: 'Font Awesome 6 Pro', 'Font Awesome 6 Free', 'Font Awesome 5 Pro', 'Font Awesome 5 Free' !important;
+  font-family: 'Font Awesome 7 Pro', 'Font Awesome 7 Free', 'Font Awesome 6 Pro', 'Font Awesome 6 Free' !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-style: normal;
@@ -204,10 +238,319 @@ body.tez-high-contrast *,[data-contrast="high"] *{border-color:currentColor!impo
   display: inline-block;
 }
 
-/* DO NOT override Jannah's tie-icon-* or WordPress core icons */
+/* Global FA selectors — covers walker-generated icons without .tez-icon */
+/* Lower specificity: do NOT use !important here to avoid overriding Jannah */
+.tez-site-header .fa-solid,
+.tez-site-header .fa-regular,
+.tez-site-header .fa-light,
+.tez-site-header .fa-brands,
+.tez-mobile-menu .fa-solid,
+.tez-mobile-menu .fa-regular,
+.tez-search-overlay .fa-solid,
+#tez-chaty .fa-solid,
+#tez-chaty .fa-brands {
+  font-family: 'Font Awesome 7 Pro', 'Font Awesome 7 Free', 'Font Awesome 6 Pro', 'Font Awesome 6 Free';
+  -webkit-font-smoothing: antialiased;
+  font-style: normal;
+  line-height: 1;
+}
+
+/* Font-weight by style variant — FA7 Pro */
+.fa-solid, .fas, .tez-icon.fa-solid { font-weight: 900; }
+.fa-regular, .far, .tez-icon.fa-regular { font-weight: 400; }
+.fa-light, .fal, .tez-icon.fa-light { font-weight: 300; }
+.fa-thin, .fat, .tez-icon.fa-thin { font-weight: 100; }
+.fa-brands, .fab, .tez-icon.fa-brands { font-weight: 400; }
+
+/* DO NOT override Jannah's tie-icon-* */
+
+/* ===================== SKIP LINK ===================== */
+.tez-skip-link {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: var(--tez-z-max);
+}
+.tez-skip-link:focus {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  height: auto;
+  padding: 0.75rem 1.5rem;
+  background: var(--tez-primary);
+  color: var(--tez-text-inverse);
+  border-radius: var(--tez-radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--tez-shadow-lg);
+  font-size: var(--tez-text-base);
+}
+
+/* ===================== SITE HEADER ===================== */
+.tez-site-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--tez-z-sticky);
+  background: var(--tez-bg);
+  border-bottom: 1px solid var(--tez-border);
+  box-shadow: var(--tez-shadow-sm);
+  min-height: var(--tez-header-height-mobile);
+  transition: background-color var(--tez-transition),
+              box-shadow var(--tez-duration-fast) var(--tez-ease-default),
+              transform var(--tez-duration-normal) var(--tez-ease-default);
+  contain: layout style;
+  will-change: transform;
+}
+@media (min-width: 1024px) {
+  .tez-site-header { min-height: var(--tez-header-height); }
+}
+.tez-site-header.is-scrolled {
+  box-shadow: var(--tez-shadow-md);
+}
+.tez-site-header.is-hidden {
+  transform: translateY(-100%);
+}
+
+.tez-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: var(--tez-header-height-mobile);
+}
+@media (min-width: 1024px) {
+  .tez-header-inner {
+    gap: 2rem;
+    min-height: var(--tez-header-height);
+  }
+}
+
+/* ===================== LOGO ===================== */
+.tez-header-logo { flex-shrink: 0; }
+
+.tez-logo-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+.tez-logo {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+@media (min-width: 1024px) {
+  .tez-logo { height: 48px; }
+}
+.tez-site-name {
+  font-size: var(--tez-text-xl);
+  font-weight: 700;
+  color: var(--tez-text);
+  white-space: nowrap;
+}
+
+/* ===================== DESKTOP NAVIGATION ===================== */
+/*
+ * Mobile-first: hidden by default, shown at ≥1024px
+ * Debate resolution (PR #6): Flexbox wins over Grid for horizontal nav
+ */
+.tez-header-nav {
+  display: none;
+  flex: 1;
+  min-width: 0;
+}
+@media (min-width: 1024px) {
+  .tez-header-nav { display: block; }
+}
+
+.tez-nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: nowrap;
+}
+
+.tez-menu-item {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.tez-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  color: var(--tez-text);
+  text-decoration: none;
+  font-size: var(--tez-text-sm);
+  font-weight: 500;
+  border-radius: var(--tez-radius-md);
+  white-space: nowrap;
+  transition: all var(--tez-duration-fast) var(--tez-ease-default);
+  line-height: 1.4;
+  min-height: 44px;
+}
+.tez-nav-link:hover {
+  background: var(--tez-bg-secondary);
+  color: var(--tez-primary);
+}
+.tez-nav-link:focus-visible {
+  outline: none;
+  box-shadow: var(--tez-focus-ring);
+}
+.tez-nav-link.active,
+.tez-menu-item.current-menu-item > .tez-nav-link,
+.tez-menu-item.current-menu-parent > .tez-nav-link,
+.tez-menu-item.current-menu-ancestor > .tez-nav-link {
+  background: rgba(var(--tez-primary-rgb), 0.1);
+  color: var(--tez-primary);
+  font-weight: 600;
+}
+
+/* Dropdown arrow (generated by Tez_Desktop_Nav_Walker without .tez-icon) */
+.tez-dropdown-arrow {
+  font-size: 0.6rem;
+  transition: transform var(--tez-duration-fast) var(--tez-ease-default);
+  opacity: 0.6;
+}
+.tez-has-dropdown:hover > .tez-nav-link .tez-dropdown-arrow,
+.tez-has-dropdown:focus-within > .tez-nav-link .tez-dropdown-arrow {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+/* Dropdown menu */
+.tez-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 210px;
+  background: var(--tez-bg-elevated);
+  border: 1px solid var(--tez-border);
+  border-radius: var(--tez-radius-lg);
+  box-shadow: var(--tez-shadow-lg);
+  list-style: none;
+  margin: 0;
+  padding: 0.375rem;
+  z-index: var(--tez-z-dropdown);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.98);
+  transition: all var(--tez-duration-fast) var(--tez-ease-default);
+  pointer-events: none;
+}
+.tez-has-dropdown:hover > .tez-dropdown-menu,
+.tez-has-dropdown:focus-within > .tez-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.tez-dropdown-menu .tez-nav-link {
+  padding: 0.5rem 0.875rem;
+  font-size: var(--tez-text-sm);
+  border-radius: var(--tez-radius-md);
+  min-height: 40px;
+}
+.tez-dropdown-menu li + li { margin-top: 1px; }
+
+/* ===================== HEADER ACTIONS ===================== */
+.tez-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.tez-action-btn {
+  width: 40px;
+  height: 40px;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  background: transparent;
+  color: var(--tez-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--tez-radius-md);
+  font-size: var(--tez-text-base);
+  transition: all var(--tez-duration-fast) var(--tez-ease-default);
+  -webkit-tap-highlight-color: transparent;
+}
+.tez-action-btn:hover {
+  background: var(--tez-bg-secondary);
+  color: var(--tez-primary);
+}
+.tez-action-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--tez-focus-ring);
+}
+
+/* ===================== HAMBURGER BUTTON ===================== */
+.tez-mobile-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 44px;
+  min-height: 44px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: var(--tez-radius-md);
+  padding: 0.5rem;
+  transition: background var(--tez-duration-fast) var(--tez-ease-default);
+  -webkit-tap-highlight-color: transparent;
+  z-index: calc(var(--tez-z-modal) + 1);
+}
+.tez-mobile-toggle:hover { background: var(--tez-bg-secondary); }
+.tez-mobile-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--tez-focus-ring);
+}
+@media (min-width: 1024px) {
+  .tez-mobile-toggle { display: none; }
+}
+
+.tez-hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 22px;
+  pointer-events: none;
+}
+.tez-hamburger-line {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--tez-text);
+  border-radius: var(--tez-radius-full);
+  transition: all var(--tez-duration-normal) var(--tez-ease-default);
+  transform-origin: center;
+}
+/* Hamburger → X animation */
+.tez-mobile-toggle.is-active .tez-hamburger-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.tez-mobile-toggle.is-active .tez-hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.tez-mobile-toggle.is-active .tez-hamburger-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
 
 /* ===================== THEME BUTTONS (MOBILE-FIRST) ===================== */
-/* Base: Mobile */
 .tez-theme-buttons {
   position: fixed;
   right: 1rem;
@@ -218,15 +561,9 @@ body.tez-high-contrast *,[data-contrast="high"] *{border-color:currentColor!impo
   gap: 0.375rem;
   contain: layout;
 }
-
-/* Tablet+ */
 @media (min-width: 576px) {
-  .tez-theme-buttons {
-    gap: 0.5rem;
-  }
+  .tez-theme-buttons { gap: 0.5rem; }
 }
-
-/* Desktop */
 @media (min-width: 1024px) {
   .tez-theme-buttons {
     top: 50%;
@@ -253,19 +590,16 @@ body.tez-high-contrast *,[data-contrast="high"] *{border-color:currentColor!impo
   font-size: var(--tez-text-base);
   -webkit-tap-highlight-color: transparent;
 }
-
 .tez-mode-btn:hover {
   background: var(--tez-primary);
   color: var(--tez-text-inverse);
   border-color: var(--tez-primary);
   transform: scale(1.05);
 }
-
 .tez-mode-btn:focus-visible {
   outline: none;
   box-shadow: var(--tez-focus-ring);
 }
-
 .tez-mode-btn.active,
 .tez-mode-btn[aria-pressed="true"] {
   background: var(--tez-primary);
@@ -274,12 +608,7 @@ body.tez-high-contrast *,[data-contrast="high"] *{border-color:currentColor!impo
 }
 
 /* ===================== A11Y TOOLBAR (MOBILE-FIRST) ===================== */
-/* Hidden on very small screens */
-.tez-a11y-toolbar {
-  display: none;
-}
-
-/* Tablet+ */
+.tez-a11y-toolbar { display: none; }
 @media (min-width: 576px) {
   .tez-a11y-toolbar {
     display: flex;
@@ -292,8 +621,6 @@ body.tez-high-contrast *,[data-contrast="high"] *{border-color:currentColor!impo
     contain: layout;
   }
 }
-
-/* Desktop */
 @media (min-width: 1024px) {
   .tez-a11y-toolbar {
     top: 50%;
@@ -320,20 +647,17 @@ body.tez-high-contrast *,[data-contrast="high"] *{border-color:currentColor!impo
   font-size: var(--tez-text-sm);
   -webkit-tap-highlight-color: transparent;
 }
-
 .tez-a11y-btn:hover {
   background: var(--tez-primary);
   color: var(--tez-text-inverse);
   border-color: var(--tez-primary);
 }
-
 .tez-a11y-btn:focus-visible {
   outline: none;
   box-shadow: var(--tez-focus-ring);
 }
 
 /* ===================== MOBILE MENU (GPU-ACCELERATED) ===================== */
-/* CodeRabbit Performance Fix: transform instead of right */
 .tez-mobile-menu-overlay {
   position: fixed;
   inset: 0;
@@ -346,7 +670,6 @@ body.tez-high-contrast *,[data-contrast="high"] *{border-color:currentColor!impo
   -webkit-backdrop-filter: blur(4px);
   pointer-events: none;
 }
-
 .tez-mobile-menu-overlay.is-visible {
   opacity: 1;
   visibility: visible;
@@ -372,24 +695,16 @@ body.tez-high-contrast *,[data-contrast="high"] *{border-color:currentColor!impo
   contain: layout style paint;
   will-change: transform;
 }
-
-/* RTL: Slide from left */
 [dir="rtl"] .tez-mobile-menu {
   right: auto;
   left: 0;
   transform: translateX(-100%);
   box-shadow: 4px 0 30px var(--tez-card-shadow);
 }
-
-.tez-mobile-menu.is-open {
-  transform: translateX(0);
-}
+.tez-mobile-menu.is-open { transform: translateX(0); }
 
 @media (max-width: 400px) {
-  .tez-mobile-menu {
-    width: 100%;
-    max-width: none;
-  }
+  .tez-mobile-menu { width: 100%; max-width: none; }
 }
 
 body.tez-menu-open {
@@ -407,7 +722,6 @@ body.tez-menu-open {
   border-bottom: 1px solid var(--tez-border);
   flex-shrink: 0;
 }
-
 .tez-mobile-close {
   width: 40px;
   height: 40px;
@@ -423,27 +737,331 @@ body.tez-menu-open {
   border-radius: var(--tez-radius-md);
   transition: all var(--tez-duration-fast);
 }
-
 .tez-mobile-close:hover {
   background: var(--tez-bg-secondary);
   color: var(--tez-primary);
 }
-
 .tez-mobile-body {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 0.75rem;
 }
-
 .tez-mobile-footer {
   padding: 1rem;
   border-top: 1px solid var(--tez-border);
   flex-shrink: 0;
 }
 
-/* ... Rest of existing CSS ... */
+/* Mobile menu list items */
+.tez-mobile-menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tez-mobile-menu-list > li {
+  border-bottom: 1px solid var(--tez-border-light);
+}
+.tez-mobile-menu-list > li:last-child { border-bottom: none; }
+
+.tez-mobile-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 0.5rem;
+  color: var(--tez-text);
+  font-size: var(--tez-text-base);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--tez-duration-fast);
+  min-height: 44px;
+}
+.tez-mobile-link:hover { color: var(--tez-primary); }
+.tez-mobile-link.active,
+.tez-mobile-menu-list .current-menu-item > .tez-mobile-link {
+  color: var(--tez-primary);
+  font-weight: 600;
+}
+
+.tez-submenu-toggle {
+  all: unset;
+  width: 32px;
+  height: 32px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tez-text-muted);
+  cursor: pointer;
+  border-radius: var(--tez-radius-md);
+  transition: all var(--tez-duration-fast);
+  flex-shrink: 0;
+}
+.tez-submenu-toggle[aria-expanded="true"] {
+  color: var(--tez-primary);
+  transform: rotate(180deg);
+}
+.tez-mobile-submenu {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.5rem 1.25rem;
+  display: none;
+}
+.tez-mobile-submenu.is-open { display: block; }
+.tez-mobile-submenu .tez-mobile-link {
+  font-size: var(--tez-text-sm);
+  padding: 0.625rem 0.5rem;
+  font-weight: 400;
+}
+
+.tez-mobile-phone {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--tez-text);
+  text-decoration: none;
+  font-size: var(--tez-text-sm);
+  font-weight: 500;
+  min-height: 44px;
+  transition: color var(--tez-duration-fast);
+}
+.tez-mobile-phone:hover { color: var(--tez-primary); }
+
+/* ===================== SEARCH OVERLAY ===================== */
+.tez-search-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--tez-bg-overlay);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: var(--tez-z-overlay);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10vh;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--tez-duration-normal) var(--tez-ease-default);
+}
+.tez-search-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tez-search-container {
+  width: 100%;
+  max-width: 680px;
+  padding: 0 1.5rem;
+  position: relative;
+}
+.tez-search-close {
+  position: absolute;
+  top: -3.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid rgba(255,255,255,.3);
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  border-radius: var(--tez-radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--tez-duration-fast);
+}
+.tez-search-close:hover { background: rgba(255,255,255,.25); }
+
+.tez-search-input-wrap {
+  background: var(--tez-bg);
+  border-radius: var(--tez-radius-xl);
+  box-shadow: var(--tez-shadow-2xl);
+  overflow: hidden;
+}
+.tez-search-form {
+  display: flex;
+  align-items: center;
+}
+.tez-search-input {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: none;
+  background: transparent;
+  font-size: var(--tez-text-lg);
+  color: var(--tez-text);
+  font-family: var(--tez-font);
+  direction: rtl;
+  min-height: 56px;
+}
+.tez-search-input:focus { outline: none; }
+.tez-search-input::placeholder { color: var(--tez-text-muted); }
+.tez-search-submit {
+  padding: 0 1.5rem;
+  border: none;
+  background: var(--tez-primary);
+  color: var(--tez-text-inverse);
+  cursor: pointer;
+  font-size: var(--tez-text-base);
+  min-width: 56px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--tez-duration-fast);
+}
+.tez-search-submit:hover { background: var(--tez-primary-dark); }
+
+/* ===================== CHATY FLOATING WIDGET ===================== */
+/*
+ * Debate resolution (PR #6):
+ * - z-index: var(--tez-z-fixed) = 1030 — visible always, hidden under modals (1050)
+ * - Position: left side (right side reserved for theme-buttons)
+ * - HTML lives in footer.php (confirmed by greptile second analysis)
+ */
+#tez-chaty,
+.tez-chaty {
+  position: fixed;
+  left: 1rem;
+  bottom: 1.5rem;
+  z-index: var(--tez-z-fixed);
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 0.5rem;
+  contain: layout;
+}
+@media (min-width: 1024px) {
+  #tez-chaty, .tez-chaty {
+    bottom: 50%;
+    transform: translateY(50%);
+    flex-direction: column;
+  }
+}
+
+#tez-chaty-toggle,
+.tez-chaty-toggle {
+  width: 56px;
+  height: 56px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--tez-radius-full);
+  background: var(--tez-primary);
+  color: var(--tez-text-inverse);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.375rem;
+  box-shadow: var(--tez-shadow-xl);
+  transition: all var(--tez-duration-fast) var(--tez-ease-default);
+  -webkit-tap-highlight-color: transparent;
+}
+#tez-chaty-toggle:hover, .tez-chaty-toggle:hover {
+  background: var(--tez-primary-dark);
+  transform: scale(1.08);
+}
+#tez-chaty-toggle:focus-visible, .tez-chaty-toggle:focus-visible {
+  outline: none;
+  box-shadow: var(--tez-focus-ring);
+}
+
+#tez-chaty-channels,
+.tez-chaty-channels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px) scale(0.96);
+  transition: all var(--tez-duration-normal) var(--tez-ease-default);
+  pointer-events: none;
+}
+#tez-chaty.is-open #tez-chaty-channels,
+.tez-chaty.is-open .tez-chaty-channels {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.tez-chaty-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 1rem;
+  background: var(--tez-bg-elevated);
+  color: var(--tez-text);
+  border: 1px solid var(--tez-border);
+  border-radius: var(--tez-radius-full);
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: var(--tez-text-sm);
+  font-weight: 500;
+  box-shadow: var(--tez-shadow-md);
+  transition: all var(--tez-duration-fast) var(--tez-ease-default);
+  min-height: 44px;
+}
+.tez-chaty-item:hover {
+  transform: translateX(4px);
+  box-shadow: var(--tez-shadow-lg);
+}
+[dir="rtl"] .tez-chaty-item:hover { transform: translateX(-4px); }
+
+.tez-chaty-phone:hover   { background: var(--tez-primary);   color: var(--tez-text-inverse); border-color: var(--tez-primary); }
+.tez-chaty-whatsapp:hover { background: #25D366;              color: #fff;                    border-color: #25D366; }
+.tez-chaty-telegram:hover { background: #229ED9;              color: #fff;                    border-color: #229ED9; }
+.tez-chaty-email:hover    { background: var(--tez-secondary); color: #fff;                    border-color: var(--tez-secondary); }
+.tez-chaty-sms:hover      { background: var(--tez-accent);    color: #fff;                    border-color: var(--tez-accent); }
+
+/* ===================== SCROLL TO TOP ===================== */
+.tez-scroll-top {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1rem;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  background: var(--tez-primary);
+  color: var(--tez-text-inverse);
+  border: none;
+  border-radius: var(--tez-radius-full);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--tez-text-base);
+  box-shadow: var(--tez-shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px);
+  transition: all var(--tez-duration-normal) var(--tez-ease-default);
+  z-index: var(--tez-z-fixed);
+  -webkit-tap-highlight-color: transparent;
+}
+.tez-scroll-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.tez-scroll-top:hover {
+  background: var(--tez-primary-dark);
+  transform: translateY(-2px);
+}
+.tez-scroll-top:focus-visible {
+  outline: none;
+  box-shadow: var(--tez-focus-ring);
+}
+@media (min-width: 1024px) {
+  .tez-scroll-top { bottom: 2rem; right: 6rem; }
+}
 
 /* ===================== CONTAINER ===================== */
 .tez-container{width:100%;max-width:var(--tez-container-max);margin-inline:auto;padding-inline:1rem}
 @media(min-width:640px){.tez-container{padding-inline:1.5rem}}
 @media(min-width:1024px){.tez-container{padding-inline:2rem}}
+@media(min-width:1280px){.tez-container{padding-inline:2.5rem}}
