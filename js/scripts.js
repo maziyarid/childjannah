@@ -41,8 +41,13 @@
         const buttons = $$('.tez-mode-btn, .tez-theme-btn');
         if (!buttons.length) return;
 
-        // Load saved theme or default to light
-        const savedTheme = localStorage.getItem('tez-theme') || 'light';
+        // Load saved theme or default to light - wrapped for Safari private mode
+        let savedTheme = 'light';
+        try {
+            savedTheme = localStorage.getItem('tez-theme') || 'light';
+        } catch(e) {
+            console.warn('localStorage unavailable:', e);
+        }
         document.documentElement.setAttribute('data-theme', savedTheme);
 
         // Set active state
@@ -62,7 +67,11 @@
 
                 // Apply theme
                 document.documentElement.setAttribute('data-theme', theme);
-                localStorage.setItem('tez-theme', theme);
+                try {
+                    localStorage.setItem('tez-theme', theme);
+                } catch(e) {
+                    console.warn('Could not save theme:', e);
+                }
 
                 // Update button states
                 buttons.forEach(b => {
@@ -89,13 +98,19 @@
         const html = document.documentElement;
         const body = document.body;
 
-        // Load saved settings
-        let fontSize = parseInt(localStorage.getItem('tez-fontSize')) || 16;
+        // Load saved settings - wrapped for Safari private mode
+        let fontSize = 16;
+        let highContrast = false;
+        try {
+            fontSize = parseInt(localStorage.getItem('tez-fontSize')) || 16;
+            highContrast = localStorage.getItem('tez-highContrast') === 'true';
+        } catch(e) {
+            console.warn('localStorage unavailable:', e);
+        }
+        
         if (fontSize !== 16) {
             html.style.fontSize = fontSize + 'px';
         }
-
-        const highContrast = localStorage.getItem('tez-highContrast') === 'true';
         if (highContrast) {
             body.classList.add('tez-high-contrast');
         }
@@ -111,7 +126,9 @@
                         if (fontSize < 24) {
                             fontSize += 2;
                             html.style.fontSize = fontSize + 'px';
-                            localStorage.setItem('tez-fontSize', fontSize);
+                            try {
+                                localStorage.setItem('tez-fontSize', fontSize);
+                            } catch(e) {}
                             announceToScreenReader('اندازه فونت افزایش یافت');
                         }
                         break;
@@ -120,7 +137,9 @@
                         if (fontSize > 12) {
                             fontSize -= 2;
                             html.style.fontSize = fontSize + 'px';
-                            localStorage.setItem('tez-fontSize', fontSize);
+                            try {
+                                localStorage.setItem('tez-fontSize', fontSize);
+                            } catch(e) {}
                             announceToScreenReader('اندازه فونت کاهش یافت');
                         }
                         break;
@@ -128,7 +147,9 @@
                     case 'contrast-toggle':
                         const hasContrast = body.classList.contains('tez-high-contrast');
                         body.classList.toggle('tez-high-contrast');
-                        localStorage.setItem('tez-highContrast', !hasContrast);
+                        try {
+                            localStorage.setItem('tez-highContrast', !hasContrast);
+                        } catch(e) {}
                         announceToScreenReader(hasContrast ? 'کنتراست عادی' : 'کنتراست بالا فعال شد');
                         break;
 
@@ -136,8 +157,10 @@
                         fontSize = 16;
                         html.style.fontSize = '16px';
                         body.classList.remove('tez-high-contrast');
-                        localStorage.removeItem('tez-fontSize');
-                        localStorage.removeItem('tez-highContrast');
+                        try {
+                            localStorage.removeItem('tez-fontSize');
+                            localStorage.removeItem('tez-highContrast');
+                        } catch(e) {}
                         announceToScreenReader('تنظیمات به حالت پیش‌فرض بازگشت');
                         break;
                 }
@@ -391,8 +414,13 @@
 
         let isOpen = false;
 
-        // Restore persisted state
-        const initialOpen = localStorage.getItem('tez-chaty-open') === 'true';
+        // Restore persisted state - wrapped for Safari private mode
+        let initialOpen = false;
+        try {
+            initialOpen = localStorage.getItem('tez-chaty-open') === 'true';
+        } catch(e) {
+            console.warn('localStorage unavailable:', e);
+        }
         setOpen(initialOpen);
 
         // Toggle click
@@ -456,7 +484,7 @@
                 setTimeout(() => channels[0].focus(), 50);
             }
             
-            // Persist state
+            // Persist state - wrapped for Safari private mode
             try {
                 localStorage.setItem('tez-chaty-open', String(open));
             } catch(e) {}
