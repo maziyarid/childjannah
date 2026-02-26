@@ -1,7 +1,7 @@
 /**
  * Teznevisan JavaScript - Complete Rewrite
- * Version: 3.2.0 - UI Overhaul
- * Focus: Fix hamburger menu, clean functionality
+ * Version: 3.3.0 - Critical Accessibility Fixes
+ * Focus: Fix hamburger menu, clean functionality, add Chaty & scroll-to-top
  */
 
 (function() {
@@ -20,6 +20,19 @@
             timeout = setTimeout(() => fn(...args), wait);
         };
     };
+
+    // Screen reader announcements
+    function announceToScreenReader(message) {
+        const announcement = document.createElement('div');
+        announcement.setAttribute('role', 'status');
+        announcement.setAttribute('aria-live', 'polite');
+        announcement.setAttribute('aria-atomic', 'true');
+        announcement.classList.add('screen-reader-text');
+        announcement.textContent = message;
+        
+        document.body.appendChild(announcement);
+        setTimeout(() => announcement.remove(), 1000);
+    }
 
     // =============================================
     // THEME MANAGEMENT
@@ -58,6 +71,10 @@
                     b.classList.toggle('active', isActive);
                     b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
                 });
+
+                // Announce to screen reader
+                const themeNames = { light: 'روشن', dark: 'تاریک', sepia: 'سپیا' };
+                announceToScreenReader('حالت ' + (themeNames[theme] || theme) + ' فعال شد');
             });
         });
     }
@@ -95,6 +112,7 @@
                             fontSize += 2;
                             html.style.fontSize = fontSize + 'px';
                             localStorage.setItem('tez-fontSize', fontSize);
+                            announceToScreenReader('اندازه فونت افزایش یافت');
                         }
                         break;
 
@@ -103,6 +121,7 @@
                             fontSize -= 2;
                             html.style.fontSize = fontSize + 'px';
                             localStorage.setItem('tez-fontSize', fontSize);
+                            announceToScreenReader('اندازه فونت کاهش یافت');
                         }
                         break;
 
@@ -110,6 +129,7 @@
                         const hasContrast = body.classList.contains('tez-high-contrast');
                         body.classList.toggle('tez-high-contrast');
                         localStorage.setItem('tez-highContrast', !hasContrast);
+                        announceToScreenReader(hasContrast ? 'کنتراست عادی' : 'کنتراست بالا فعال شد');
                         break;
 
                     case 'reset':
@@ -118,6 +138,7 @@
                         body.classList.remove('tez-high-contrast');
                         localStorage.removeItem('tez-fontSize');
                         localStorage.removeItem('tez-highContrast');
+                        announceToScreenReader('تنظیمات به حالت پیش‌فرض بازگشت');
                         break;
                 }
             });
@@ -129,7 +150,7 @@
     // =============================================
     function initMobileMenu() {
         const toggle = $('#tez-mobile-toggle');
-        const menu = $('#tez-mobile-menu'); // Changed from .tez-mobile-menu to match HTML
+        const menu = $('#tez-mobile-menu');
         const overlay = $('#tez-mobile-overlay');
         const closeBtn = $('#tez-mobile-close');
 
@@ -159,6 +180,9 @@
             // Lock body scroll
             document.body.classList.add('tez-menu-open');
 
+            // Announce
+            announceToScreenReader('منوی موبایل باز شد');
+
             // Focus first focusable element in menu
             setTimeout(() => {
                 const firstFocusable = menu.querySelector('a, button');
@@ -182,6 +206,9 @@
 
             // Unlock body scroll
             document.body.classList.remove('tez-menu-open');
+
+            // Announce
+            announceToScreenReader('منوی موبایل بسته شد');
 
             // Restore focus
             if (lastFocusedElement) {
@@ -228,7 +255,6 @@
         const mobileLinks = menu.querySelectorAll('.tez-mobile-link');
         mobileLinks.forEach(link => {
             link.addEventListener('click', function() {
-                // Delay close to allow navigation
                 setTimeout(closeMenu, 100);
             });
         });
@@ -248,7 +274,6 @@
                 const isExpanded = this.getAttribute('aria-expanded') === 'true';
 
                 if (isExpanded) {
-                    // Close this submenu
                     this.setAttribute('aria-expanded', 'false');
                     parent.setAttribute('aria-expanded', 'false');
                 } else {
@@ -263,7 +288,6 @@
                         }
                     });
 
-                    // Open this submenu
                     this.setAttribute('aria-expanded', 'true');
                     parent.setAttribute('aria-expanded', 'true');
                 }
@@ -290,14 +314,18 @@
         if (!toggle || !overlay) return;
 
         let isOpen = false;
+        let lastFocusedElement = null;
 
         function openSearch() {
             if (isOpen) return;
             
+            lastFocusedElement = document.activeElement;
             isOpen = true;
             overlay.setAttribute('aria-hidden', 'false');
             toggle.setAttribute('aria-expanded', 'true');
             document.body.style.overflow = 'hidden';
+            
+            announceToScreenReader('جستجو باز شد');
             
             setTimeout(() => {
                 if (input) input.focus();
@@ -311,6 +339,13 @@
             overlay.setAttribute('aria-hidden', 'true');
             toggle.setAttribute('aria-expanded', 'false');
             document.body.style.overflow = '';
+            
+            announceToScreenReader('جستجو بسته شد');
+            
+            if (lastFocusedElement) {
+                lastFocusedElement.focus();
+                lastFocusedElement = null;
+            }
         }
 
         // Toggle button
@@ -334,10 +369,142 @@
             }
         });
 
-        // Escape key
+        // Escape key - CRITICAL FIX for WCAG 2.1.2
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && isOpen) {
+                e.preventDefault();
                 closeSearch();
+            }
+        });
+    }
+
+    // =============================================
+    // CHATY WIDGET - NEW
+    // =============================================
+    function initChaty() {
+        const chaty = $('#tez-chaty');
+        const toggle = $('#tez-chaty-toggle');
+        const panel = $('#tez-chaty-channels');
+        const channels = panel ? $$('.tez-chaty-item', panel) : [];
+
+        if (!chaty || !toggle || !panel) return;
+
+        let isOpen = false;
+
+        // Restore persisted state
+        const initialOpen = localStorage.getItem('tez-chaty-open') === 'true';
+        setOpen(initialOpen);
+
+        // Toggle click
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            setOpen(!isOpen);
+        });
+
+        // ESC closes when open - WCAG 2.1.2
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && isOpen) {
+                e.preventDefault();
+                setOpen(false);
+                toggle.focus();
+            }
+        });
+
+        // Focus trap within panel when open
+        panel.addEventListener('keydown', function(e) {
+            if (e.key !== 'Tab' || !isOpen) return;
+            
+            const focusables = channels.filter(el => !el.hasAttribute('disabled'));
+            if (!focusables.length) return;
+            
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        });
+
+        // Close on outside click
+        document.addEventListener('click', function(e) {
+            if (isOpen && !chaty.contains(e.target)) {
+                setOpen(false);
+            }
+        });
+
+        function setOpen(open) {
+            isOpen = open;
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            panel.toggleAttribute('hidden', !open);
+            panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+            
+            // Icon swap
+            const icon = toggle.querySelector('.tez-chaty-icon');
+            const close = toggle.querySelector('.tez-chaty-close');
+            if (icon && close) {
+                icon.style.display = open ? 'none' : '';
+                close.style.display = open ? '' : 'none';
+            }
+            
+            // Focus first channel on open
+            if (open && channels.length) {
+                setTimeout(() => channels[0].focus(), 50);
+            }
+            
+            // Persist state
+            try {
+                localStorage.setItem('tez-chaty-open', String(open));
+            } catch(e) {}
+            
+            // Announce
+            announceToScreenReader(open ? 'گزینه‌های تماس باز شد' : 'گزینه‌های تماس بسته شد');
+        }
+    }
+
+    // =============================================
+    // SCROLL TO TOP BUTTON - NEW
+    // =============================================
+    function initScrollToTop() {
+        const scrollBtn = $('#tez-scroll-top');
+        if (!scrollBtn) return;
+
+        let lastY = 0;
+        const threshold = 550;
+
+        // Show/hide based on scroll position
+        window.addEventListener('scroll', function() {
+            const y = window.scrollY || document.documentElement.scrollTop;
+            
+            if (y > threshold && lastY <= threshold) {
+                scrollBtn.classList.add('visible');
+            } else if (y <= threshold && lastY > threshold) {
+                scrollBtn.classList.remove('visible');
+            }
+            
+            lastY = y;
+        }, { passive: true });
+
+        // Click handler
+        scrollBtn.addEventListener('click', function() {
+            const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const scrollOptions = reducedMotion 
+                ? { top: 0, left: 0 } 
+                : { top: 0, left: 0, behavior: 'smooth' };
+            
+            window.scrollTo(scrollOptions);
+            announceToScreenReader('بازگشت به بالای صفحه');
+        });
+
+        // Keyboard support
+        scrollBtn.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
             }
         });
     }
@@ -390,7 +557,6 @@
             anchor.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
                 
-                // Skip if empty or just #
                 if (!href || href === '#' || href === '#0') return;
 
                 const target = $(href);
@@ -398,7 +564,6 @@
 
                 e.preventDefault();
 
-                // Calculate position with header offset
                 const header = $('#tez-site-header');
                 const headerHeight = header ? header.offsetHeight : 0;
                 const targetPosition = target.getBoundingClientRect().top + window.pageYOffset;
@@ -465,9 +630,7 @@
         const elements = $$('.scroll-animate');
         if (!elements.length) return;
 
-        // Check for IntersectionObserver support
         if (!('IntersectionObserver' in window)) {
-            // Fallback: just add the class immediately
             elements.forEach(el => el.classList.add('animated'));
             return;
         }
@@ -529,12 +692,14 @@
     // INITIALIZE ALL
     // =============================================
     function init() {
-        console.log('Teznevisan JS initializing...');
+        console.log('Teznevisan JS v3.3.0 initializing...');
 
         initTheme();
         initAccessibility();
         initMobileMenu();
         initSearch();
+        initChaty();
+        initScrollToTop();
         initDropdowns();
         initSmoothScroll();
         initFAQ();
@@ -544,7 +709,7 @@
         document.body.classList.add('tez-loaded');
         document.body.classList.remove('loading');
 
-        console.log('Teznevisan JS loaded');
+        console.log('Teznevisan JS v3.3.0 loaded');
     }
 
     // Run on DOM ready
