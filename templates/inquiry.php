@@ -91,7 +91,7 @@ $email = defined('TEZ_EMAIL') ? TEZ_EMAIL : 'teznevisancompany@gmail.com';
                                         class="tez-form-control" 
                                         required 
                                         aria-required="true"
-                                        autocomplete="organization"
+                                        autocomplete="off"
                                         placeholder="مثلاً: مدیریت بازرگانی">
                                 </div>
                             </div>
