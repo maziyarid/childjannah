@@ -1,7 +1,7 @@
 /**
  * Teznevisan CSS Variables
  * Version: 3.3.0
- * Critical: Z-Index System + Safe Area Support
+ * Critical: Z-Index System + Safe Area Support + Floating Element Positions
  */
 
 :root {
@@ -66,9 +66,9 @@
      FOCUS RING (WCAG 2.4.7)
      ======================================== */
   
-  --tez-focus-ring: 3px solid var(--tez-primary, #2e7d32);
+  --tez-focus-ring: 3px solid var(--tez-primary, #22BE49);
   --tez-focus-offset: 2px;
-  --tez-focus-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
+  --tez-focus-shadow: 0 0 0 4px rgba(34, 190, 73, 0.1);
   
   /* ========================================
      BREAKPOINTS (for JS access)
@@ -151,25 +151,78 @@
 }
 
 /* ========================================
-   SAFE AREA APPLICATION
+   FLOATING ELEMENT POSITIONS
    ======================================== */
 
-/* Bottom FABs with safe area padding */
+/* BOTTOM-RIGHT: Chaty Widget */
 .tez-chaty {
+  position: fixed;
   bottom: calc(var(--tez-space-md) + var(--tez-safe-bottom));
   right: calc(var(--tez-space-md) + var(--tez-safe-right));
+  z-index: var(--tez-z-fab);
 }
 
+/* BOTTOM-LEFT: Scroll to Top */
 .tez-scroll-top {
+  position: fixed;
   bottom: calc(var(--tez-space-md) + var(--tez-safe-bottom));
   left: calc(var(--tez-space-md) + var(--tez-safe-left));
+  z-index: var(--tez-z-fab);
+}
+
+/* MID-RIGHT: Color/Theme Changer */
+.tez-theme-switcher-fixed,
+.tez-color-changer {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  right: calc(var(--tez-space-md) + var(--tez-safe-right));
+  z-index: var(--tez-z-fab);
+}
+
+/* MID-LEFT: Accessibility Panel */
+.tez-a11y-toolbar-fixed,
+.tez-accessibility-panel {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  left: calc(var(--tez-space-md) + var(--tez-safe-left));
+  z-index: var(--tez-z-fab);
 }
 
 /* Compact spacing on small screens to avoid OS bars */
-@media (max-width: 380px) {
+@media (max-width: 480px) {
   .tez-chaty,
   .tez-scroll-top {
     bottom: calc(var(--tez-space-sm) + var(--tez-safe-bottom));
+  }
+  
+  .tez-chaty {
+    right: calc(var(--tez-space-sm) + var(--tez-safe-right));
+  }
+  
+  .tez-scroll-top {
+    left: calc(var(--tez-space-sm) + var(--tez-safe-left));
+  }
+  
+  .tez-theme-switcher-fixed,
+  .tez-color-changer {
+    right: calc(var(--tez-space-sm) + var(--tez-safe-right));
+  }
+  
+  .tez-a11y-toolbar-fixed,
+  .tez-accessibility-panel {
+    left: calc(var(--tez-space-sm) + var(--tez-safe-left));
+  }
+}
+
+/* Very small screens: move mid elements slightly up to avoid overlap with bottom FABs */
+@media (max-height: 600px) {
+  .tez-theme-switcher-fixed,
+  .tez-color-changer,
+  .tez-a11y-toolbar-fixed,
+  .tez-accessibility-panel {
+    top: 45%;
   }
 }
 
@@ -191,7 +244,7 @@ a.tez-cta-button:focus-visible {
 }
 
 nav a:focus-visible {
-  outline: 2px solid var(--tez-primary, #2e7d32);
+  outline: 2px solid var(--tez-primary, #22BE49);
   outline-offset: 4px;
-  background-color: rgba(46, 125, 50, 0.05);
+  background-color: rgba(34, 190, 73, 0.05);
 }
