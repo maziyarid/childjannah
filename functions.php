@@ -118,11 +118,29 @@ function tez_enqueue_child_assets() {
         TEZ_CHILD_VERSION
     );
 
-    // Main design system (layout, header, footer, nav, Chaty, utilities)
+    // Main design system (layout, header, footer, nav, utilities)
     // Loads on ALL pages
     wp_enqueue_style(
         'tez-main-css',
         TEZ_CHILD_URI . '/css/main.css',
+        array('tez-variables-css'),
+        TEZ_CHILD_VERSION
+    );
+
+    // Chaty floating contact widget styling
+    // NEW in 3.3.0 - loads on all pages
+    wp_enqueue_style(
+        'tez-chaty-css',
+        TEZ_CHILD_URI . '/css/chaty.css',
+        array('tez-variables-css'),
+        TEZ_CHILD_VERSION
+    );
+
+    // Scroll to top button styling
+    // NEW in 3.3.0 - loads on all pages
+    wp_enqueue_style(
+        'tez-scroll-top-css',
+        TEZ_CHILD_URI . '/css/scroll-to-top.css',
         array('tez-variables-css'),
         TEZ_CHILD_VERSION
     );
