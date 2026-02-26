@@ -5,7 +5,7 @@ Description:  Customized Jannah child theme with enhanced features, self-healing
 Author:       Tez Nevisan
 Author URI:   https://teznevisan3.com
 Template:     jannah
-Version:      3.1.0
+Version:      3.3.0
 License:      GNU General Public License v2 or later
 License URI:  http://www.gnu.org/licenses/gpl-2.0.html
 Text Domain:  jannah-child
@@ -16,10 +16,19 @@ Text Domain:  jannah-child
  * This file serves as the theme header and version identifier
  * 
  * CSS Files:
+ * - css/variables.css (NEW in 3.3.0) - CSS custom properties, z-index system
  * - css/main.css (44KB) - Global styles, header, footer, navigation
  * - css/page-templates.css (35KB) - Template layouts, heroes, grids
  * - css/post-elements.css (6KB) - Key takeaways, polls, ratings
  * - css/single-post.css (15KB) - Single post layout, TOC, meta
  * 
- * Total CSS: ~100KB minified
+ * Total CSS: ~105KB minified
+ * 
+ * Changelog 3.3.0 (PR #13):
+ * - Added Chaty widget and scroll-to-top JavaScript functionality
+ * - Fixed form labels with proper for/id connections (WCAG 3.3.2)
+ * - Added autocomplete attributes to forms (WCAG 1.3.5)
+ * - Implemented consistent z-index system via CSS variables
+ * - Fixed keyboard trap prevention (ESC key support)
+ * - Enhanced screen reader announcements in Persian
  */
