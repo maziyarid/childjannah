@@ -4,7 +4,7 @@
  * Completes HTML structure started in header.php
  * 
  * @package JannahChild
- * @version 3.1.0
+ * @version 3.3.0
  * @since Phase 1.2
  */
 if (!defined('ABSPATH')) exit;
@@ -200,41 +200,78 @@ if (!defined('ABSPATH')) exit;
 
 <!-- Chaty Floating Contact Widget -->
 <div class="tez-chaty-widget" id="tez-chaty" role="complementary" aria-label="ویجت تماس">
-    <button type="button" class="tez-chaty-toggle" aria-label="باز کردن منوی تماس" aria-expanded="false">
-        <i class="fa-solid fa-comment-dots" aria-hidden="true"></i>
+    <button type="button" 
+            id="tez-chaty-toggle"
+            class="tez-chaty-toggle" 
+            aria-label="باز کردن منوی تماس" 
+            aria-expanded="false" 
+            aria-controls="tez-chaty-channels">
+        <span class="tez-chaty-icon">
+            <i class="fa-solid fa-comment-dots" aria-hidden="true"></i>
+        </span>
+        <span class="tez-chaty-close" style="display:none;">
+            <i class="fa-solid fa-times" aria-hidden="true"></i>
+        </span>
     </button>
     
-    <div class="tez-chaty-channels" role="menu">
+    <div class="tez-chaty-channels" 
+         id="tez-chaty-channels"
+         role="menu" 
+         aria-hidden="true"
+         hidden>
+        <?php 
+        $phone_display = defined('TEZ_PHONE_DISPLAY') ? TEZ_PHONE_DISPLAY : (defined('TEZ_PHONE') ? TEZ_PHONE : '');
+        ?>
+        
         <?php if (defined('TEZ_PHONE')): ?>
-        <a href="tel:<?php echo esc_attr(TEZ_PHONE); ?>" class="tez-chaty-channel tez-chaty-phone" role="menuitem" aria-label="تماس تلفنی">
+        <a href="tel:<?php echo esc_attr(TEZ_PHONE); ?>" 
+           class="tez-chaty-channel tez-chaty-phone tez-chaty-item" 
+           role="menuitem" 
+           aria-label="تماس تلفنی با شماره <?php echo esc_html($phone_display); ?>">
             <i class="fa-solid fa-phone" aria-hidden="true"></i>
-            <span class="tez-chaty-tooltip">تماس تلفنی</span>
+            <span class="tez-chaty-tooltip">تماس: <?php echo esc_html($phone_display); ?></span>
         </a>
         <?php endif; ?>
         
         <?php if (defined('TEZ_PHONE')): ?>
-        <a href="sms:<?php echo esc_attr(TEZ_PHONE); ?>" class="tez-chaty-channel tez-chaty-sms" role="menuitem" aria-label="پیام کوتاه">
+        <a href="sms:<?php echo esc_attr(TEZ_PHONE); ?>" 
+           class="tez-chaty-channel tez-chaty-sms tez-chaty-item" 
+           role="menuitem" 
+           aria-label="ارسال پیام کوتاه به <?php echo esc_html($phone_display); ?>">
             <i class="fa-solid fa-comment-sms" aria-hidden="true"></i>
-            <span class="tez-chaty-tooltip">پیام کوتاه</span>
+            <span class="tez-chaty-tooltip">پیام: <?php echo esc_html($phone_display); ?></span>
         </a>
         <?php endif; ?>
         
         <?php if (defined('TEZ_WHATSAPP')): ?>
-        <a href="https://wa.me/<?php echo esc_attr(TEZ_WHATSAPP); ?>" target="_blank" rel="noopener noreferrer" class="tez-chaty-channel tez-chaty-whatsapp" role="menuitem" aria-label="WhatsApp">
+        <a href="https://wa.me/<?php echo esc_attr(TEZ_WHATSAPP); ?>" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           class="tez-chaty-channel tez-chaty-whatsapp tez-chaty-item" 
+           role="menuitem" 
+           aria-label="ارتباط از طریق واتساپ">
             <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
             <span class="tez-chaty-tooltip">WhatsApp</span>
         </a>
         <?php endif; ?>
         
         <?php if (defined('TEZ_TELEGRAM')): ?>
-        <a href="https://t.me/<?php echo esc_attr(TEZ_TELEGRAM); ?>" target="_blank" rel="noopener noreferrer" class="tez-chaty-channel tez-chaty-telegram" role="menuitem" aria-label="Telegram">
+        <a href="https://t.me/<?php echo esc_attr(TEZ_TELEGRAM); ?>" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           class="tez-chaty-channel tez-chaty-telegram tez-chaty-item" 
+           role="menuitem" 
+           aria-label="ارتباط از طریق تلگرام">
             <i class="fa-brands fa-telegram" aria-hidden="true"></i>
             <span class="tez-chaty-tooltip">Telegram</span>
         </a>
         <?php endif; ?>
         
         <?php if (defined('TEZ_EMAIL')): ?>
-        <a href="mailto:<?php echo esc_attr(TEZ_EMAIL); ?>" class="tez-chaty-channel tez-chaty-email" role="menuitem" aria-label="ایمیل">
+        <a href="mailto:<?php echo esc_attr(TEZ_EMAIL); ?>" 
+           class="tez-chaty-channel tez-chaty-email tez-chaty-item" 
+           role="menuitem" 
+           aria-label="ارسال ایمیل">
             <i class="fa-solid fa-envelope" aria-hidden="true"></i>
             <span class="tez-chaty-tooltip">ایمیل</span>
         </a>

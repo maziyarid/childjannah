@@ -109,12 +109,21 @@ function tez_enqueue_child_assets() {
         TEZ_CHILD_VERSION
     );
 
+    // CSS Variables (z-index system, safe-area-insets, focus styles)
+    // NEW in 3.3.0 - must load before all other child styles
+    wp_enqueue_style(
+        'tez-variables-css',
+        TEZ_CHILD_URI . '/css/variables.css',
+        array('tie-theme-child-css'),
+        TEZ_CHILD_VERSION
+    );
+
     // Main design system (layout, header, footer, nav, Chaty, utilities)
     // Loads on ALL pages
     wp_enqueue_style(
         'tez-main-css',
         TEZ_CHILD_URI . '/css/main.css',
-        array('tie-theme-child-css'),
+        array('tez-variables-css'),
         TEZ_CHILD_VERSION
     );
 
