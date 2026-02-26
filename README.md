@@ -1,9 +1,36 @@
 # Teznevisan — Jannah Child Theme
 
 [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/maziyarid/childjannah?utm_source=oss&utm_medium=github&utm_campaign=maziyarid%2Fchildjannah&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
+[![Claude Opus 4.6](https://img.shields.io/badge/Claude%20Opus%204.6-Automated%20Reviews-5A67D8?logo=anthropic&logoColor=white)](/.github/CLAUDE_OPUS_AI.md)
+[![Powered by Puter.js](https://img.shields.io/badge/Powered%20by-Puter.js-7C3AED?logo=javascript&logoColor=white)](https://puter.com)
+[![AI Auto-Improve](https://img.shields.io/badge/AI-Auto--Improve-10B981?logo=sparkles&logoColor=white)](/.github/workflows/claude-auto-improve.yml)
 
 > **Persian RTL · Jannah Parent Theme · WordPress 6.x · PHP 8.x**  
-> Primary brand: `#22BE49` (green) · Fonts: Vazirmatn / IRANSans · Direction: RTL-first
+> Primary brand: `#22BE49` (green) · Fonts: Vazirmatn / IRANSans · Direction: RTL-first  
+> **🤖 AI-Powered:** Free unlimited code reviews & auto-improvements via Claude Opus 4.6
+
+---
+
+## 🤖 AI-Powered Development
+
+**This repository uses Claude Opus 4.6 (Anthropic's most advanced model) for:**
+
+✅ **Automatic code reviews** on every PR  
+✅ **Auto-fix** accessibility, security & performance issues  
+✅ **Zero cost** - Powered by [Puter.js](https://puter.com) (no API keys needed)  
+✅ **24/7 availability** - Instant feedback on all changes
+
+### Quick Commands
+
+```bash
+# Get AI code review
+Comment "/review" on any PR
+
+# Auto-improve code with fixes
+Comment "/improve" on any PR
+```
+
+**📚 Full Documentation:** [Claude Opus AI Workflows](/.github/CLAUDE_OPUS_AI.md)
 
 ---
 
@@ -20,6 +47,8 @@
 | WCAG focus-visible (all elements) | ✅ Completed Phase 4 | PR #8 |
 | Sepia element overrides (code/table/blockquote) | ✅ Fixed Phase 4 | PR #8 |
 | `Snippets/` directory audit | ✅ Complete — 6 pieces ported | PR #8 |
+| **AI Code Review** | ✅ **Active — Claude Opus 4.6** | **All PRs auto-reviewed** |
+| **AI Auto-Improvement** | ✅ **Active — On-demand** | **Comment /improve** |
 | Page templates hero section | ❌ Broken — class mismatch suspected | Phase 5 |
 | `functions.php` duplicate-function audit | ⚠️ Not yet performed | Phase 5 |
 | `inc/core-setup.php` hook audit | ⚠️ Double header risk present | Phase 5 |
@@ -71,6 +100,12 @@ All CSS must use RTL-aware values. Check for `padding-left` / `margin-left` / `t
 
 ```
 childjannah/
+│
+├── .github/
+│   ├── workflows/
+│   │   ├── claude-opus-reviewer.yml    # 🤖 Automated PR review
+│   │   └── claude-auto-improve.yml     # 🤖 Auto-fix on /improve command
+│   └── CLAUDE_OPUS_AI.md               # 📚 AI workflows documentation
 │
 ├── css/
 │   ├── main.css              # Design system: CSS tokens, header, nav, mobile menu,
@@ -184,6 +219,45 @@ childjannah/
 
 ---
 
+## 🤖 AI-Assisted Development
+
+### Automated Code Review (Every PR)
+
+Claude Opus 4.6 automatically reviews:
+- 🔒 **Security:** XSS, SQL injection, CSRF
+- ♿ **Accessibility:** WCAG 2.1 AA compliance
+- ⚡ **Performance:** CSS optimization, DOM efficiency
+- 🌐 **Persian/RTL:** Text direction, font support
+- 📝 **Best Practices:** WordPress coding standards
+
+**Example output:**
+```markdown
+## 🎯 Executive Summary
+3 security issues, 2 accessibility warnings, 5 suggestions
+
+## 🔴 Critical Issues
+1. Line 45: User input not sanitized (XSS risk)
+2. Line 67: Missing aria-label on button
+
+## 🟡 Warnings  
+1. Line 23: Focus trap not implemented
+2. Line 89: RTL text-align issue
+```
+
+### Auto-Improvement (On-Demand)
+
+Comment `/improve` on any PR to:
+1. Analyze all code issues
+2. Generate fixes automatically
+3. Create new commit with improvements
+4. Push to your PR branch
+
+**Safety:** All changes require human review before merge.
+
+**Learn more:** [AI Workflows Documentation](/.github/CLAUDE_OPUS_AI.md)
+
+---
+
 ## 🤖 Bot Review Instructions
 
 ### For @coderabbitai
@@ -225,6 +299,18 @@ Please perform a code review on PR #8. Specifically check:
 - Missing vendor prefixes (particularly `-webkit-` for `backdrop-filter`)
 - Potential `@layer` ordering issues (base/theme/components/utilities are declared at the top)
 
+### For Claude Opus 4.6 (Automated)
+
+Auto-review is active! Every PR automatically gets:
+- Security vulnerability scan
+- Accessibility compliance check (WCAG 2.1 AA)
+- Performance optimization suggestions
+- Persian/RTL validation
+- WordPress best practices verification
+
+**Trigger manual review:** Comment `/review` on any PR  
+**Apply auto-fixes:** Comment `/improve` on any PR
+
 ---
 
 ## 🗓️ Phase Roadmap
@@ -232,6 +318,7 @@ Please perform a code review on PR #8. Specifically check:
 ### ✅ Completed
 - **Phase 3** (PR #6) — CSS/JS restored from 1,480→449 line truncation incident; full nav, hamburger, Chaty, responsive footer added
 - **Phase 4** (PR #8) — Snippets audit: 6 missing pieces ported; OS dark mode; WCAG focus-visible completed; sepia fixed; logo class mismatch resolved
+- **🤖 AI Integration** — Claude Opus 4.6 automated reviews & auto-improvements deployed
 
 ### 🔄 In Progress
 - **Phase 4.5** — Verify `js/scripts.js` hamburger logic; fix if not binding (Issue #1)
@@ -296,4 +383,4 @@ This is already present in `css/main.css`.
 
 ---
 
-*Last updated: 2026-02-25 · Phase 4 finalized · PR #8 merge-ready*
+*Last updated: 2026-02-26 · Claude Opus 4.6 AI integration active · Phase 4 finalized · PR #8 merge-ready*
