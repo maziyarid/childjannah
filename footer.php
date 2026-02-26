@@ -219,14 +219,17 @@ if (!defined('ABSPATH')) exit;
          role="menu" 
          aria-hidden="true"
          hidden>
+        <?php 
+        $phone_display = defined('TEZ_PHONE_DISPLAY') ? TEZ_PHONE_DISPLAY : (defined('TEZ_PHONE') ? TEZ_PHONE : '');
+        ?>
+        
         <?php if (defined('TEZ_PHONE')): ?>
         <a href="tel:<?php echo esc_attr(TEZ_PHONE); ?>" 
            class="tez-chaty-channel tez-chaty-phone tez-chaty-item" 
            role="menuitem" 
-           tabindex="-1"
-           aria-label="تماس تلفنی">
+           aria-label="تماس تلفنی با شماره <?php echo esc_html($phone_display); ?>">
             <i class="fa-solid fa-phone" aria-hidden="true"></i>
-            <span class="tez-chaty-tooltip">تماس تلفنی</span>
+            <span class="tez-chaty-tooltip">تماس: <?php echo esc_html($phone_display); ?></span>
         </a>
         <?php endif; ?>
         
@@ -234,10 +237,9 @@ if (!defined('ABSPATH')) exit;
         <a href="sms:<?php echo esc_attr(TEZ_PHONE); ?>" 
            class="tez-chaty-channel tez-chaty-sms tez-chaty-item" 
            role="menuitem" 
-           tabindex="-1"
-           aria-label="پیام کوتاه">
+           aria-label="ارسال پیام کوتاه به <?php echo esc_html($phone_display); ?>">
             <i class="fa-solid fa-comment-sms" aria-hidden="true"></i>
-            <span class="tez-chaty-tooltip">پیام کوتاه</span>
+            <span class="tez-chaty-tooltip">پیام: <?php echo esc_html($phone_display); ?></span>
         </a>
         <?php endif; ?>
         
@@ -247,8 +249,7 @@ if (!defined('ABSPATH')) exit;
            rel="noopener noreferrer" 
            class="tez-chaty-channel tez-chaty-whatsapp tez-chaty-item" 
            role="menuitem" 
-           tabindex="-1"
-           aria-label="WhatsApp">
+           aria-label="ارتباط از طریق واتساپ">
             <i class="fa-brands fa-whatsapp" aria-hidden="true"></i>
             <span class="tez-chaty-tooltip">WhatsApp</span>
         </a>
@@ -260,8 +261,7 @@ if (!defined('ABSPATH')) exit;
            rel="noopener noreferrer" 
            class="tez-chaty-channel tez-chaty-telegram tez-chaty-item" 
            role="menuitem" 
-           tabindex="-1"
-           aria-label="Telegram">
+           aria-label="ارتباط از طریق تلگرام">
             <i class="fa-brands fa-telegram" aria-hidden="true"></i>
             <span class="tez-chaty-tooltip">Telegram</span>
         </a>
@@ -271,8 +271,7 @@ if (!defined('ABSPATH')) exit;
         <a href="mailto:<?php echo esc_attr(TEZ_EMAIL); ?>" 
            class="tez-chaty-channel tez-chaty-email tez-chaty-item" 
            role="menuitem" 
-           tabindex="-1"
-           aria-label="ایمیل">
+           aria-label="ارسال ایمیل">
             <i class="fa-solid fa-envelope" aria-hidden="true"></i>
             <span class="tez-chaty-tooltip">ایمیل</span>
         </a>
