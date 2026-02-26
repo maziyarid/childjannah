@@ -1,0 +1,411 @@
+/**
+ * Chaty Floating Contact Widget Styles
+ * Version: 3.3.0
+ * Professional design with glassmorphism and smooth animations
+ */
+
+/* ========================================
+   CHATY WIDGET CONTAINER
+   ======================================== */
+
+.tez-chaty-widget {
+  position: fixed;
+  bottom: calc(20px + var(--tez-safe-bottom, 0px));
+  right: calc(20px + var(--tez-safe-right, 0px));
+  left: calc(20px + var(--tez-safe-left, 0px));
+  z-index: var(--tez-z-fab, 900);
+  font-family: inherit;
+  direction: rtl;
+}
+
+/* ========================================
+   MAIN TOGGLE BUTTON
+   ======================================== */
+
+.tez-chaty-toggle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #22BE49 0%, #1a9639 100%);
+  border: none;
+  box-shadow: 
+    0 4px 12px rgba(34, 190, 73, 0.25),
+    0 8px 24px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tez-chaty-toggle:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 
+    0 6px 16px rgba(34, 190, 73, 0.35),
+    0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.tez-chaty-toggle:active {
+  transform: scale(0.95);
+}
+
+.tez-chaty-toggle:focus-visible {
+  outline: 3px solid rgba(34, 190, 73, 0.5);
+  outline-offset: 4px;
+}
+
+/* Icon styling */
+.tez-chaty-icon,
+.tez-chaty-close {
+  color: #ffffff;
+  font-size: 24px;
+  transition: all 0.3s ease;
+}
+
+/* Pulse animation */
+.tez-chaty-toggle::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(34, 190, 73, 0.4);
+  animation: chaty-pulse 2s infinite;
+}
+
+@keyframes chaty-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Stop pulse when open */
+.tez-chaty-toggle[aria-expanded="true"]::before {
+  animation: none;
+}
+
+/* ========================================
+   CHANNELS PANEL
+   ======================================== */
+
+.tez-chaty-channels {
+  position: absolute;
+  bottom: 75px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  min-width: 240px;
+  opacity: 0;
+  transform: translateY(20px) scale(0.9);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+  z-index: calc(var(--tez-z-fab, 900) + 1);
+}
+
+/* Open state */
+.tez-chaty-channels:not([hidden]) {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .tez-chaty-channels {
+    background: rgba(30, 30, 30, 0.98);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      0 4px 8px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* ========================================
+   CHANNEL ITEMS
+   ======================================== */
+
+.tez-chaty-channel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 2px solid #f0f0f0;
+  text-decoration: none;
+  color: #333333;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.tez-chaty-channel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
+  transition: width 0.3s ease;
+}
+
+.tez-chaty-channel:hover::before {
+  width: 100%;
+}
+
+.tez-chaty-channel:hover {
+  transform: translateX(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tez-chaty-channel:focus-visible {
+  outline: 3px solid rgba(34, 190, 73, 0.5);
+  outline-offset: 2px;
+  transform: translateX(-5px);
+}
+
+.tez-chaty-channel:active {
+  transform: translateX(-2px) scale(0.98);
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .tez-chaty-channel {
+    background: rgba(50, 50, 50, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+}
+
+/* ========================================
+   CHANNEL SPECIFIC COLORS
+   ======================================== */
+
+.tez-chaty-phone {
+  border-color: #22BE49;
+}
+
+.tez-chaty-phone:hover {
+  background: #f0fdf4;
+  border-color: #22BE49;
+}
+
+.tez-chaty-whatsapp {
+  border-color: #25D366;
+}
+
+.tez-chaty-whatsapp:hover {
+  background: #e6f9ee;
+  border-color: #25D366;
+}
+
+.tez-chaty-telegram {
+  border-color: #0088cc;
+}
+
+.tez-chaty-telegram:hover {
+  background: #e5f4fb;
+  border-color: #0088cc;
+}
+
+.tez-chaty-email {
+  border-color: #EA4335;
+}
+
+.tez-chaty-email:hover {
+  background: #fef2f2;
+  border-color: #EA4335;
+}
+
+.tez-chaty-sms {
+  border-color: #8B5CF6;
+}
+
+.tez-chaty-sms:hover {
+  background: #f5f3ff;
+  border-color: #8B5CF6;
+}
+
+/* ========================================
+   CHANNEL ICONS
+   ======================================== */
+
+.tez-chaty-channel i {
+  font-size: 20px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.tez-chaty-phone i { color: #22BE49; }
+.tez-chaty-whatsapp i { color: #25D366; }
+.tez-chaty-telegram i { color: #0088cc; }
+.tez-chaty-email i { color: #EA4335; }
+.tez-chaty-sms i { color: #8B5CF6; }
+
+.tez-chaty-channel:hover i {
+  transform: scale(1.2) rotate(5deg);
+}
+
+/* ========================================
+   TOOLTIPS
+   ======================================== */
+
+.tez-chaty-tooltip {
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%) translateX(10px);
+  background: rgba(0, 0, 0, 0.9);
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.tez-chaty-tooltip::before {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-right-color: rgba(0, 0, 0, 0.9);
+}
+
+.tez-chaty-channel:hover .tez-chaty-tooltip,
+.tez-chaty-channel:focus-visible .tez-chaty-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 480px) {
+  .tez-chaty-widget {
+    bottom: calc(15px + var(--tez-safe-bottom, 0px));
+    right: calc(15px + var(--tez-safe-right, 0px));
+  }
+  
+  .tez-chaty-toggle {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .tez-chaty-icon,
+  .tez-chaty-close {
+    font-size: 22px;
+  }
+  
+  .tez-chaty-channels {
+    min-width: 200px;
+    padding: 12px;
+    gap: 10px;
+  }
+  
+  .tez-chaty-channel {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  
+  /* Hide tooltips on mobile (not needed) */
+  .tez-chaty-tooltip {
+    display: none;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+  .tez-chaty-toggle {
+    width: 52px;
+    height: 52px;
+  }
+  
+  .tez-chaty-channels {
+    min-width: 180px;
+  }
+}
+
+/* Landscape mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .tez-chaty-channels {
+    max-height: 70vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+}
+
+/* ========================================
+   REDUCED MOTION
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .tez-chaty-toggle,
+  .tez-chaty-channels,
+  .tez-chaty-channel,
+  .tez-chaty-tooltip {
+    transition: none;
+    animation: none;
+  }
+  
+  .tez-chaty-toggle::before {
+    animation: none;
+  }
+}
+
+/* ========================================
+   HIGH CONTRAST MODE
+   ======================================== */
+
+@media (prefers-contrast: high) {
+  .tez-chaty-toggle {
+    border: 3px solid currentColor;
+  }
+  
+  .tez-chaty-channel {
+    border-width: 3px;
+  }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+  .tez-chaty-widget {
+    display: none !important;
+  }
+}
