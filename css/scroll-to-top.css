@@ -1,0 +1,151 @@
+/**
+ * Scroll to Top Button Styles
+ * Version: 3.3.0
+ * Professional floating action button
+ */
+
+/* ========================================
+   SCROLL TO TOP BUTTON
+   ======================================== */
+
+.tez-scroll-top {
+  position: fixed;
+  bottom: calc(20px + var(--tez-safe-bottom, 0px));
+  left: calc(20px + var(--tez-safe-left, 0px));
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #333333 0%, #1a1a1a 100%);
+  border: none;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: var(--tez-z-fab, 900);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px) scale(0.8);
+  pointer-events: none;
+}
+
+/* Visible state */
+.tez-scroll-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+/* Hover state */
+.tez-scroll-top:hover {
+  background: linear-gradient(135deg, #22BE49 0%, #1a9639 100%);
+  transform: translateY(-4px) scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(34, 190, 73, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Active state */
+.tez-scroll-top:active {
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* Focus state */
+.tez-scroll-top:focus-visible {
+  outline: 3px solid rgba(34, 190, 73, 0.5);
+  outline-offset: 4px;
+  background: linear-gradient(135deg, #22BE49 0%, #1a9639 100%);
+}
+
+/* Icon */
+.tez-scroll-top i {
+  color: #ffffff;
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+
+.tez-scroll-top:hover i {
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   DARK MODE
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  .tez-scroll-top {
+    background: linear-gradient(135deg, #444444 0%, #2a2a2a 100%);
+  }
+  
+  .tez-scroll-top:hover,
+  .tez-scroll-top:focus-visible {
+    background: linear-gradient(135deg, #22BE49 0%, #1a9639 100%);
+  }
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 480px) {
+  .tez-scroll-top {
+    bottom: calc(15px + var(--tez-safe-bottom, 0px));
+    left: calc(15px + var(--tez-safe-left, 0px));
+    width: 46px;
+    height: 46px;
+  }
+  
+  .tez-scroll-top i {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .tez-scroll-top {
+    width: 42px;
+    height: 42px;
+  }
+  
+  .tez-scroll-top i {
+    font-size: 14px;
+  }
+}
+
+/* ========================================
+   REDUCED MOTION
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .tez-scroll-top,
+  .tez-scroll-top i {
+    transition: opacity 0.1s ease, visibility 0.1s ease;
+  }
+  
+  .tez-scroll-top:hover {
+    transform: none;
+  }
+}
+
+/* ========================================
+   HIGH CONTRAST MODE
+   ======================================== */
+
+@media (prefers-contrast: high) {
+  .tez-scroll-top {
+    border: 3px solid currentColor;
+  }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+  .tez-scroll-top {
+    display: none !important;
+  }
+}
