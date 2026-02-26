@@ -1,0 +1,197 @@
+/**
+ * Teznevisan CSS Variables
+ * Version: 3.3.0
+ * Critical: Z-Index System + Safe Area Support
+ */
+
+:root {
+  /* ========================================
+     Z-INDEX SCALE (Consistent Layering)
+     ======================================== */
+  
+  /* Base Content Layer (0-99) */
+  --tez-z-base: 1;
+  --tez-z-content: 10;
+  
+  /* Navigation Layer (100-199) */
+  --tez-z-header: 100;
+  --tez-z-dropdown: 150;
+  
+  /* Overlay Elements (200-499) */
+  --tez-z-overlay: 200;
+  --tez-z-sidebar: 300;
+  
+  /* Floating Action Buttons (500-999) */
+  --tez-z-fab: 900;          /* Chaty, scroll-to-top, a11y toolbar */
+  --tez-z-fab-panel: 901;    /* Opened panels from FABs */
+  
+  /* Modal/Dialog Layer (1000-4999) */
+  --tez-z-mobile-menu: 1000;
+  --tez-z-search: 2000;
+  --tez-z-modal: 3000;
+  
+  /* Critical Alerts (5000+) */
+  --tez-z-toast: 5000;
+  --tez-z-tooltip: 6000;
+  
+  /* ========================================
+     SAFE AREA INSETS (iOS Notch Support)
+     ======================================== */
+  
+  --tez-safe-top: env(safe-area-inset-top, 0px);
+  --tez-safe-right: env(safe-area-inset-right, 0px);
+  --tez-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tez-safe-left: env(safe-area-inset-left, 0px);
+  
+  /* ========================================
+     SPACING SYSTEM
+     ======================================== */
+  
+  --tez-space-xs: 0.25rem;   /* 4px */
+  --tez-space-sm: 0.5rem;    /* 8px */
+  --tez-space-md: 1rem;      /* 16px */
+  --tez-space-lg: 1.5rem;    /* 24px */
+  --tez-space-xl: 2rem;      /* 32px */
+  --tez-space-2xl: 3rem;     /* 48px */
+  
+  /* ========================================
+     TRANSITIONS (prefers-reduced-motion)
+     ======================================== */
+  
+  --tez-transition-fast: 150ms ease;
+  --tez-transition-base: 250ms ease;
+  --tez-transition-slow: 400ms ease;
+  
+  /* ========================================
+     FOCUS RING (WCAG 2.4.7)
+     ======================================== */
+  
+  --tez-focus-ring: 3px solid var(--tez-primary, #2e7d32);
+  --tez-focus-offset: 2px;
+  --tez-focus-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
+  
+  /* ========================================
+     BREAKPOINTS (for JS access)
+     ======================================== */
+  
+  --tez-bp-mobile: 480px;
+  --tez-bp-tablet: 768px;
+  --tez-bp-desktop: 1024px;
+  --tez-bp-wide: 1280px;
+}
+
+/* ========================================
+   REDUCED MOTION SUPPORT
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --tez-transition-fast: 0.01ms;
+    --tez-transition-base: 0.01ms;
+    --tez-transition-slow: 0.01ms;
+  }
+  
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ========================================
+   Z-INDEX APPLICATION
+   ======================================== */
+
+/* Header */
+.tez-site-header {
+  z-index: var(--tez-z-header);
+}
+
+/* Dropdown Menus */
+.tez-dropdown-menu,
+.tez-mega-menu,
+.sub-menu {
+  z-index: var(--tez-z-dropdown);
+}
+
+/* Mobile Menu */
+.tez-mobile-menu-overlay {
+  z-index: var(--tez-z-mobile-menu);
+}
+
+.tez-mobile-menu-inner {
+  z-index: calc(var(--tez-z-mobile-menu) + 1);
+}
+
+/* Search Overlay */
+.tez-search-overlay {
+  z-index: var(--tez-z-search);
+}
+
+/* Floating Action Buttons */
+.tez-chaty,
+.tez-scroll-top,
+.tez-a11y-toolbar-fixed,
+.tez-theme-switcher-fixed {
+  z-index: var(--tez-z-fab);
+}
+
+/* Chaty Channels Panel */
+.tez-chaty-channels {
+  z-index: var(--tez-z-fab-panel);
+}
+
+/* Tooltips */
+.tez-chaty-tooltip,
+[role="tooltip"] {
+  z-index: var(--tez-z-tooltip);
+}
+
+/* ========================================
+   SAFE AREA APPLICATION
+   ======================================== */
+
+/* Bottom FABs with safe area padding */
+.tez-chaty {
+  bottom: calc(var(--tez-space-md) + var(--tez-safe-bottom));
+  right: calc(var(--tez-space-md) + var(--tez-safe-right));
+}
+
+.tez-scroll-top {
+  bottom: calc(var(--tez-space-md) + var(--tez-safe-bottom));
+  left: calc(var(--tez-space-md) + var(--tez-safe-left));
+}
+
+/* Compact spacing on small screens to avoid OS bars */
+@media (max-width: 380px) {
+  .tez-chaty,
+  .tez-scroll-top {
+    bottom: calc(var(--tez-space-sm) + var(--tez-safe-bottom));
+  }
+}
+
+/* ========================================
+   GLOBAL FOCUS STYLES (WCAG 2.4.7)
+   ======================================== */
+
+*:focus-visible {
+  outline: var(--tez-focus-ring);
+  outline-offset: var(--tez-focus-offset);
+}
+
+button:focus-visible,
+.tez-btn:focus-visible,
+a.tez-cta-button:focus-visible {
+  outline: var(--tez-focus-ring);
+  outline-offset: var(--tez-focus-offset);
+  box-shadow: var(--tez-focus-shadow);
+}
+
+nav a:focus-visible {
+  outline: 2px solid var(--tez-primary, #2e7d32);
+  outline-offset: 4px;
+  background-color: rgba(46, 125, 50, 0.05);
+}
