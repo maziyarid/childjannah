@@ -1,0 +1,276 @@
+name: 🤖 Claude Opus 4.6 Code Reviewer
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  claude-review:
+    name: AI Code Review with Claude Opus 4.6
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'pull_request') ||
+      (github.event_name == 'issue_comment' && 
+       contains(github.event.comment.body, '/review') &&
+       github.event.issue.pull_request)
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Get PR Number
+        id: pr
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          else
+            echo "number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Get Changed Files
+        id: files
+        run: |
+          # Get the PR diff
+          gh pr diff ${{ steps.pr.outputs.number }} > pr_diff.txt
+          
+          # Get list of changed files
+          gh pr view ${{ steps.pr.outputs.number }} --json files --jq '.files[].path' > changed_files.txt
+          
+          # Create a summary
+          echo "## Changed Files" > files_summary.txt
+          cat changed_files.txt >> files_summary.txt
+          echo "" >> files_summary.txt
+          echo "## Full Diff" >> files_summary.txt
+          cat pr_diff.txt >> files_summary.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+      
+      - name: Setup Node.js for Puter.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Create Review with Claude Opus 4.6
+        id: review
+        run: |
+          # Create HTML file with Puter.js integration
+          cat > claude_reviewer.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <script src="https://js.puter.com/v2/"></script>
+          </head>
+          <body>
+            <h1>Claude Opus 4.6 Code Reviewer</h1>
+            <div id="status">Initializing...</div>
+            <div id="output"></div>
+            
+            <script>
+              (async () => {
+                const statusDiv = document.getElementById('status');
+                const outputDiv = document.getElementById('output');
+                
+                try {
+                  statusDiv.textContent = 'Reading diff...';
+                  
+                  // Read the diff file
+                  const diffResponse = await fetch('files_summary.txt');
+                  const diffContent = await diffResponse.text();
+                  
+                  statusDiv.textContent = 'Analyzing with Claude Opus 4.6...';
+                  
+                  // Create comprehensive review prompt
+                  const reviewPrompt = `You are an expert code reviewer specializing in WordPress, PHP, JavaScript, CSS, and accessibility.
+
+**Repository:** maziyarid/childjannah (Jannah Child Theme for Teznevisan.com)
+**Focus Areas:**
+1. WCAG 2.1 Level AA Accessibility Compliance
+2. Security vulnerabilities (SQL injection, XSS, CSRF)
+3. Performance optimization opportunities
+4. Persian/RTL language support
+5. WordPress best practices
+6. Code quality and maintainability
+
+**Changed Files and Diff:**
+${diffContent}
+
+**Review Instructions:**
+- Provide a structured markdown review
+- Start with an executive summary
+- List critical issues (🔴), warnings (🟡), and suggestions (🟢)
+- Include specific line numbers when possible
+- Suggest concrete fixes with code examples
+- Check for accessibility issues (focus management, ARIA, keyboard nav)
+- Verify Persian/RTL support in CSS and HTML
+- Flag any security concerns
+- Note performance bottlenecks
+
+**Format your response as:**
+## 🎯 Executive Summary
+[Brief overview of changes and overall assessment]
+
+## 🔴 Critical Issues
+[Issues that must be fixed before merge]
+
+## 🟡 Warnings
+[Issues that should be addressed]
+
+## 🟢 Suggestions
+[Nice-to-have improvements]
+
+## ✅ Positive Highlights
+[What was done well]
+
+## 📝 Accessibility Checklist
+- [ ] Keyboard navigation
+- [ ] Screen reader support
+- [ ] Focus management
+- [ ] ARIA attributes
+- [ ] Color contrast
+
+## 🔒 Security Checklist
+- [ ] Input sanitization
+- [ ] Output escaping
+- [ ] Nonce verification
+- [ ] SQL injection prevention
+- [ ] XSS prevention`;
+
+                  // Call Claude Opus 4.6
+                  const response = await puter.ai.chat(reviewPrompt, {
+                    model: 'claude-opus-4-6',
+                    stream: true
+                  });
+                  
+                  let fullReview = '';
+                  statusDiv.textContent = 'Streaming review...';
+                  
+                  for await (const part of response) {
+                    const text = part?.text || '';
+                    fullReview += text;
+                    outputDiv.innerHTML = '<pre>' + fullReview + '</pre>';
+                  }
+                  
+                  // Write review to file
+                  const reviewBlob = new Blob([fullReview], { type: 'text/plain' });
+                  const reviewFile = new File([reviewBlob], 'claude_review.md');
+                  
+                  // Save to file system (this won't work in GitHub Actions, but we'll handle it differently)
+                  console.log('REVIEW_START');
+                  console.log(fullReview);
+                  console.log('REVIEW_END');
+                  
+                  statusDiv.textContent = '✅ Review complete!';
+                  
+                } catch (error) {
+                  statusDiv.textContent = '❌ Error: ' + error.message;
+                  console.error(error);
+                  process.exit(1);
+                }
+              })();
+            </script>
+          </body>
+          </html>
+          HTMLEOF
+          
+          # Install Playwright for headless browser
+          npm install -g playwright
+          playwright install chromium
+          
+          # Run the review in headless browser
+          node << 'NODEOF'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          
+          (async () => {
+            const browser = await chromium.launch();
+            const page = await browser.newPage();
+            
+            // Listen for console messages
+            let reviewContent = '';
+            let capturing = false;
+            
+            page.on('console', msg => {
+              const text = msg.text();
+              if (text === 'REVIEW_START') {
+                capturing = true;
+              } else if (text === 'REVIEW_END') {
+                capturing = false;
+              } else if (capturing) {
+                reviewContent += text;
+              }
+            });
+            
+            await page.goto('file://' + process.cwd() + '/claude_reviewer.html');
+            
+            // Wait for review to complete (max 5 minutes)
+            await page.waitForFunction(
+              () => document.getElementById('status').textContent.includes('complete') || 
+                    document.getElementById('status').textContent.includes('Error'),
+              { timeout: 300000 }
+            );
+            
+            // Save review
+            fs.writeFileSync('claude_review.md', reviewContent);
+            
+            await browser.close();
+          })();
+          NODEOF
+      
+      - name: Post Review as PR Comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const review = fs.readFileSync('claude_review.md', 'utf8');
+            
+            const comment = `## 🤖 Claude Opus 4.6 Code Review
+            
+            > **Powered by [Puter.js](https://puter.com)** - Free, unlimited AI code reviews
+            > **Model:** Claude Opus 4.6 (Most Advanced)
+            > **Reviewed at:** ${new Date().toISOString()}
+            
+            ---
+            
+            ${review}
+            
+            ---
+            
+            <details>
+            <summary>💡 About This Review</summary>
+            
+            This automated review was generated by **Claude Opus 4.6** via Puter.js. It analyzes:
+            - 🔒 Security vulnerabilities
+            - ♿ WCAG 2.1 accessibility compliance
+            - ⚡ Performance optimization
+            - 🌐 Persian/RTL support
+            - 📝 WordPress best practices
+            
+            **Note:** AI reviews are helpful but not perfect. Please use human judgment for final decisions.
+            
+            **Need a re-review?** Comment \`/review\` on this PR.
+            </details>`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.pr.outputs.number }},
+              body: comment
+            });
+      
+      - name: Upload Review Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-opus-review
+          path: claude_review.md
+          retention-days: 30
