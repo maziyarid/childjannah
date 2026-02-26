@@ -1,0 +1,320 @@
+name: 🚀 Claude Opus Auto-Improver
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  auto-improve:
+    name: Auto-Improve Code with Claude Opus 4.6
+    runs-on: ubuntu-latest
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/improve')
+    
+    steps:
+      - name: React to Comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: context.payload.comment.id,
+              content: 'rocket'
+            });
+      
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Get PR Details
+        id: pr
+        run: |
+          PR_NUMBER=${{ github.event.issue.number }}
+          echo "number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          
+          # Get PR branch info
+          PR_DATA=$(gh pr view $PR_NUMBER --json headRefName,headRepositoryOwner)
+          BRANCH=$(echo $PR_DATA | jq -r '.headRefName')
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          
+          # Checkout PR branch
+          git fetch origin $BRANCH
+          git checkout $BRANCH
+        env:
+          GH_TOKEN: ${{ github.token }}
+      
+      - name: Get Changed Files
+        id: files
+        run: |
+          # Get files changed in this PR
+          gh pr diff ${{ steps.pr.outputs.number }} > pr_diff.txt
+          gh pr view ${{ steps.pr.outputs.number }} --json files --jq '.files[] | "\(.path)|\(.additions)|\(.deletions)"' > changed_files.txt
+          
+          # Read actual file contents
+          mkdir -p file_contents
+          while IFS='|' read -r filepath additions deletions; do
+            if [ -f "$filepath" ]; then
+              echo "=== FILE: $filepath ===" >> all_files.txt
+              cat "$filepath" >> all_files.txt
+              echo "" >> all_files.txt
+            fi
+          done < changed_files.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Generate Improvements with Claude Opus
+        id: improve
+        run: |
+          # Create improvement generator
+          cat > improve.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <script src="https://js.puter.com/v2/"></script>
+          </head>
+          <body>
+            <h1>Claude Opus Code Improver</h1>
+            <div id="status">Processing...</div>
+            
+            <script>
+              (async () => {  
+                const statusDiv = document.getElementById('status');
+                
+                try {
+                  // Read files
+                  const diffResp = await fetch('pr_diff.txt');
+                  const diff = await diffResp.text();
+                  
+                  const filesResp = await fetch('all_files.txt');
+                  const files = await filesResp.text();
+                  
+                  statusDiv.textContent = 'Analyzing code with Claude Opus 4.6...';
+                  
+                  const improvePrompt = `You are an expert WordPress/PHP/JS/CSS developer.
+
+**Task:** Improve the following code files based on best practices.
+
+**Focus on:**
+1. ♿ **Accessibility (WCAG 2.1 AA):** Add missing ARIA attributes, fix keyboard navigation, improve focus management
+2. 🔒 **Security:** Fix XSS vulnerabilities, add input sanitization, proper escaping
+3. ⚡ **Performance:** Optimize CSS, reduce DOM operations, improve loading
+4. 🌐 **Persian/RTL:** Ensure proper RTL support, fix text direction issues
+5. 📝 **Code Quality:** Follow WordPress Coding Standards, improve maintainability
+
+**Changed Files:**
+${files}
+
+**Diff:**
+${diff}
+
+**Instructions:**
+- Output improved versions of ONLY the files that need changes
+- Use this exact format for each file:
+
+===FILE_START===
+FILENAME: path/to/file.php
+REASON: Brief explanation of what was improved
+===CONTENT_START===
+[full improved file content here]
+===CONTENT_END===
+===FILE_END===
+
+- If a file is already perfect, skip it
+- Make ONLY necessary improvements, don't rewrite unnecessarily
+- Preserve existing functionality
+- Keep comments in place
+- Maintain coding style consistency
+
+**Common improvements to look for:**
+- Missing \`aria-label\`, \`aria-hidden\`, \`role\` attributes
+- Incorrect \`tabindex\` values
+- Missing \`esc_html()\`, \`esc_attr()\`, \`wp_kses()\`
+- Inefficient CSS selectors
+- Missing \`direction: rtl\` support
+- Outdated JavaScript patterns
+- Missing error handling`;
+
+                  const response = await puter.ai.chat(improvePrompt, {
+                    model: 'claude-opus-4-6',
+                    stream: true
+                  });
+                  
+                  let improvements = '';
+                  for await (const part of response) {
+                    improvements += part?.text || '';
+                  }
+                  
+                  console.log('IMPROVEMENTS_START');
+                  console.log(improvements);
+                  console.log('IMPROVEMENTS_END');
+                  
+                  statusDiv.textContent = '✅ Improvements generated!';
+                  
+                } catch (error) {
+                  console.error('ERROR:', error.message);
+                  process.exit(1);
+                }
+              })();
+            </script>
+          </body>
+          </html>
+          HTMLEOF
+          
+          # Install Playwright
+          npm install -g playwright
+          playwright install chromium
+          
+          # Run improvement generator
+          node << 'NODEOF'
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          
+          (async () => {
+            const browser = await chromium.launch();
+            const page = await browser.newPage();
+            
+            let improvements = '';
+            let capturing = false;
+            
+            page.on('console', msg => {
+              const text = msg.text();
+              if (text === 'IMPROVEMENTS_START') {
+                capturing = true;
+              } else if (text === 'IMPROVEMENTS_END') {
+                capturing = false;
+              } else if (capturing) {
+                improvements += text;
+              }
+            });
+            
+            await page.goto('file://' + process.cwd() + '/improve.html');
+            await page.waitForFunction(
+              () => document.getElementById('status').textContent.includes('generated') ||
+                    document.getElementById('status').textContent.includes('Error'),
+              { timeout: 300000 }
+            );
+            
+            fs.writeFileSync('improvements.txt', improvements);
+            await browser.close();
+          })();
+          NODEOF
+      
+      - name: Apply Improvements
+        id: apply
+        run: |
+          # Parse improvements and apply to files
+          python3 << 'PYEOF'
+          import re
+          import os
+          
+          with open('improvements.txt', 'r') as f:
+              content = f.read()
+          
+          # Parse file improvements
+          pattern = r'===FILE_START===\s*FILENAME:\s*(.+?)\s*REASON:\s*(.+?)\s*===CONTENT_START===\s*(.+?)\s*===CONTENT_END===\s*===FILE_END==='
+          matches = re.findall(pattern, content, re.DOTALL)
+          
+          changes_summary = []
+          
+          for filepath, reason, file_content in matches:
+              filepath = filepath.strip()
+              reason = reason.strip()
+              file_content = file_content.strip()
+              
+              # Write improved file
+              os.makedirs(os.path.dirname(filepath), exist_ok=True)
+              with open(filepath, 'w') as f:
+                  f.write(file_content)
+              
+              changes_summary.append(f"- **{filepath}**: {reason}")
+              print(f"Improved: {filepath}")
+          
+          # Save summary
+          with open('changes_summary.txt', 'w') as f:
+              f.write('\n'.join(changes_summary))
+          
+          print(f"Applied {len(matches)} improvements")
+          PYEOF
+      
+      - name: Commit Improvements
+        run: |
+          git config user.name "Claude Opus Bot"
+          git config user.email "claude-bot@teznevisan.com"
+          
+          # Read summary
+          SUMMARY=$(cat changes_summary.txt)
+          
+          git add -A
+          git diff --staged --quiet && echo "No changes to commit" && exit 0
+          
+          git commit -m "improve: Auto-improvements by Claude Opus 4.6
+          
+          **AI-Generated Improvements:**
+          $SUMMARY
+          
+          **Powered by:** Puter.js + Claude Opus 4.6
+          **Triggered by:** @${{ github.event.comment.user.login }}
+          **Command:** /improve
+          
+          These improvements focus on:
+          - ♿ Accessibility (WCAG 2.1 AA)
+          - 🔒 Security (XSS, sanitization)
+          - ⚡ Performance optimization
+          - 🌐 Persian/RTL support
+          - 📝 Code quality
+          
+          **Note:** Please review changes before merging."
+          
+          git push origin ${{ steps.pr.outputs.branch }}
+      
+      - name: Comment Success
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('changes_summary.txt', 'utf8');
+            
+            const comment = `## ✅ Auto-Improvements Applied!
+            
+            **Claude Opus 4.6** has analyzed and improved your code. A new commit has been pushed to this PR.
+            
+            ### 📝 Changes Made:
+            ${summary}
+            
+            ### 🔍 Review Checklist:
+            - [ ] Verify accessibility improvements
+            - [ ] Test security fixes
+            - [ ] Check performance optimizations
+            - [ ] Validate Persian/RTL support
+            - [ ] Ensure no breaking changes
+            
+            ---
+            
+            **🤖 Powered by:** [Puter.js](https://puter.com) + Claude Opus 4.6 (Free, Unlimited)
+            **👤 Requested by:** @${{ github.event.comment.user.login }}
+            
+            *Need more improvements? Comment \`/improve\` again after reviewing.*`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ github.event.issue.number }},
+              body: comment
+            });
